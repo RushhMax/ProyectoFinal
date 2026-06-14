@@ -1,0 +1,21 @@
+{
+  "consistency_spearman": {
+    "LSTM_Transformer": 0.8340395040438793,
+    "LSTM_RandomForest": 0.6800012668296539,
+    "Transformer_RandomForest": 0.603530860023859
+  },
+  "significance": {
+    "LSTM": {
+      "statistic": 539262222.0,
+      "p_value": 1.862378338202764e-38
+    },
+    "Transformer": {
+      "statistic": 539194159.0,
+      "p_value": 2.496371113789262e-38
+    },
+    "RandomForest": {
+      "statistic": 538865622.0,
+      "p_value": 1.0195959109862056e-37
+    }
+  }
+}

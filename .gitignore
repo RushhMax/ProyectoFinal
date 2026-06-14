@@ -1,0 +1,21 @@
+# Entorno virtual
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# Modelos grandes (reentrenar con train.py)
+saved_models/rf.pkl
+
+# Claude Code
+.claude/
+
+# Sistema
+.DS_Store
+Thumbs.db
