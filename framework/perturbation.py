@@ -25,6 +25,9 @@ class TemporalPerturbationEngine:
     def __init__(self,
                  predict_fn: Callable[[np.ndarray], np.ndarray],
                  reference: np.ndarray):
+        reference = np.asarray(reference, dtype=np.float32)
+        assert reference.ndim == 1, f"reference debe ser 1D, recibido shape={reference.shape}"
+        assert np.all(np.isfinite(reference)), "reference contiene NaN o inf"
         self.predict_fn = predict_fn
         self.reference = reference  # (V,)
 

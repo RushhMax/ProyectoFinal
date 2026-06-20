@@ -1,20 +1,20 @@
 {
   "consistency_spearman": {
-    "LSTM_Transformer": 0.6924106231039441,
-    "LSTM_RandomForest": 0.3016419059664031,
-    "Transformer_RandomForest": 0.43810256506350387
+    "LSTM_Transformer": 0.7480652180085918,
+    "LSTM_RandomForest": 0.2549469845075966,
+    "Transformer_RandomForest": 0.38198987547763125
   },
   "significance": {
     "LSTM": {
-      "statistic": 3551184161.0,
+      "statistic": 3552446094.0,
       "p_value": 0.0
     },
     "Transformer": {
-      "statistic": 3362814685.0,
+      "statistic": 3587755650.0,
       "p_value": 0.0
     },
     "RandomForest": {
-      "statistic": 683435548.0,
+      "statistic": 272002869.0,
       "p_value": 0.0
     }
   }

@@ -28,6 +28,7 @@ TARGET = "Close"
 WINDOW_SIZE = 20       # T: pasos de tiempo por ventana (días)
 HORIZON = 1            # pasos hacia adelante a predecir
 TRAIN_RATIO = 0.8
+VAL_RATIO   = 0.10   # fracción de datos para validación (split dentro del train)
 
 # Entrenamiento
 BATCH_SIZE = 64

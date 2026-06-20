@@ -32,6 +32,14 @@ np.random.seed(RANDOM_STATE)
 
 def load_models(X_train_shape):
     """Carga los tres modelos desde disco."""
+    for ckpt in ["lstm_best.pt", "transformer_best.pt"]:
+        path = MODELS_DIR / ckpt
+        if not path.exists():
+            raise FileNotFoundError(
+                f"Checkpoint no encontrado: {path}\n"
+                "Ejecuta primero: python train.py"
+            )
+
     lstm = LSTMModel()
     lstm.load_state_dict(torch.load(MODELS_DIR / "lstm_best.pt",
                                     map_location=DEVICE, weights_only=True))

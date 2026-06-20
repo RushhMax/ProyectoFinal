@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import (BATCH_SIZE, EPOCHS, LR, PATIENCE,
                     MODELS_DIR, RESULTS_DIR, RANDOM_STATE)
 from data.download import download_sp500, save_raw, load_raw
-from data.preprocessing import prepare_data
+from data.preprocessing import prepare_data_with_val
 from models.lstm import LSTMModel
 from models.transformer import TransformerModel
 from models.random_forest import RandomForestModel
@@ -129,19 +129,14 @@ def main():
         df = download_sp500()
         save_raw(df)
 
-    X_train, y_train, X_test, y_test, scaler = prepare_data(df)
-
-    # Split de validación (últimos 10% del train)
-    n_val = int(len(X_train) * 0.1)
-    X_val, y_val = X_train[-n_val:], y_train[-n_val:]
-    X_tr, y_tr = X_train[:-n_val], y_train[:-n_val]
+    X_train, y_train, X_val, y_val, X_test, y_test, scaler = prepare_data_with_val(df)
 
     metrics = {}
 
     # 2. LSTM
     print("\n=== Entrenando LSTM ===")
     lstm = LSTMModel()
-    train_dl, val_dl = make_loaders(X_tr, y_tr, X_val, y_val)
+    train_dl, val_dl = make_loaders(X_train, y_train, X_val, y_val)
     train_pytorch(lstm, train_dl, val_dl, "lstm")
     metrics["lstm"] = evaluate_pytorch(lstm, X_test, y_test)
     print(f"  LSTM test: {metrics['lstm']}")

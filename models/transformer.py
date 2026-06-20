@@ -48,14 +48,17 @@ class TransformerModel(nn.Module):
             batch_first=True,
         )
         self.encoder = nn.TransformerEncoder(encoder_layer, num_layers=num_layers)
+        # Atención temporal: pondera cada paso de tiempo aprendido
+        self.attention = nn.Linear(d_model, 1)
         self.fc = nn.Linear(d_model, output_size)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         # x: (batch, T, V)
-        x = self.input_proj(x)     # (batch, T, d_model)
+        x = self.input_proj(x)                              # (batch, T, d_model)
         x = self.pos_enc(x)
-        x = self.encoder(x)        # (batch, T, d_model)
-        x = x[:, -1]               # último token como representación
+        x = self.encoder(x)                                 # (batch, T, d_model)
+        w = torch.softmax(self.attention(x), dim=1)         # (batch, T, 1)
+        x = (w * x).sum(dim=1)                             # (batch, d_model)
         return self.fc(x).squeeze(-1)
 
 
