@@ -128,3 +128,4 @@ donde x_{-(t,v)} reemplaza la celda (t, v) con la media de entrenamiento de esa 
 - PyTorch ≥ 2.0
 - scikit-learn ≥ 1.3
 - Ver `requirements.txt` para la lista completa
+- 
