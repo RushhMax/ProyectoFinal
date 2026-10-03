@@ -1,0 +1,755 @@
+\documentclass{beamer}
+\usetheme{CambridgeUS}
+\usecolortheme{beaver}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+
+\title{Framework de Explicabilidad Agnóstica al Modelo}
+\subtitle{Para la Predicción de Series Temporales Financieras}
+\author{Rushell Vanessa Zavalaga Orozco}
+\institute{Escuela de Ciencia de la Computación\\
+Universidad Nacional de San Agustín de Arequipa}
+\date{}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Motivación (1/2)}
+    \small
+    \begin{itemize}
+        \item Los modelos de aprendizaje profundo predicen con alta
+        precisión series temporales financieras.
+        \vspace{0.15cm}
+        \item Pero \textbf{no revelan} qué información del historial
+        determinó cada predicción.
+        \vspace{0.15cm}
+        \item En entornos regulados, la transparencia no es opcional:
+        \begin{itemize}
+            \item SR~11-7 (Reserva Federal) exige entender capacidades
+            y límites del modelo antes de usarlo
+            \item El Reglamento de IA de la UE exige transparencia
+            interpretable en usos financieros críticos
+            \item Sin explicabilidad no es posible detectar sesgos
+            ni fallos del modelo
+        \end{itemize}
+        \vspace{0.15cm}
+        \item Un modelo que no puede explicarse no puede auditarse:
+        la opacidad impide distinguir si aprendió una relación
+        económica real o una coincidencia espuria en los datos de
+        entrenamiento.
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Motivación (2/2)}
+    \small
+    \begin{itemize}
+        \item Un modelo entrenado sobre datos financieros históricos
+        hereda los sesgos de ese historial.
+        \vspace{0.2cm}
+        \item Por eso este trabajo reporta también los resultados que
+        \textbf{no favorecen a la propuesta} (persistencia ingenua,
+        referencia por hoja), en vez de omitirlos.
+        \vspace{0.2cm}
+        \item Al no requerir gradientes, además, reduce la barrera de
+        cómputo para auditar modelos, un punto de acceso equitativo
+        para instituciones con menos recursos.
+        \vspace{0.4cm}
+        \item \textbf{Pregunta central:} ¿qué variable fue relevante
+        para una predicción y \textit{cuándo} en el historial lo fue?
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{El Problema}
+    \small
+    \begin{block}{Problema de cómputo}
+        Un mecanismo de explicación agnóstico al modelo (sin
+        gradientes) y de costo fijo por instancia (sin optimizar una
+        máscara para cada predicción).
+    \end{block}
+    \vspace{0.15cm}
+    \begin{alertblock}{Por qué sigue sin resolverse}
+        DynaMask~\cite{crabbe2021} optimiza una máscara por gradiente
+        (hasta 1000 épocas, 5 hiperparámetros), excluye modelos no
+        diferenciables como Random Forest. Sus extensiones directas,
+        ExtrMask~\cite{enguehard2023} (ICML 2023) y
+        ContraLSP~\cite{liu2024contralsp} (ICLR 2024), mejoran la
+        perturbación pero mantienen la dependencia del gradiente.
+    \end{alertblock}
+    \vspace{0.15cm}
+    \begin{center}
+        \footnotesize Cinco años después, ningún método de esta línea
+        funciona sin gradientes ni se ha validado en finanzas.
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Trabajos Relacionados: Dos Ejes}
+    \textbf{Eje 1 — XAI con dimensión temporal (sin agnosticismo total)}
+    \begin{itemize}
+        \small
+        \item Huang et al.\ (2025) — ShapeX: Shapley sobre shapelets;
+        solo clasificación.
+        \item Yadav y Subbian (2025) — diagnostican por qué gradiente,
+        oclusión y permutación fallan en predicción dinámica.
+    \end{itemize}
+    \vspace{0.2cm}
+    \textbf{Eje 2 — Frameworks temporalmente conscientes y agnósticos}
+    \begin{itemize}
+        \small
+        \item Tonekaboni et al.\ (2020) — FIT; Leung et al.\ (2023) —
+        WinIT: pensados para predicción en línea (clínico), no ventana
+        única.
+        \item Crabbé y Van Der Schaar (2021) — DynaMask: salida
+        $T{\times}V$, pero \textbf{requiere gradientes}.
+        \item Bento et al.\ (2021) — TimeSHAP: solo modelos secuenciales.
+        \item Raykar et al.\ (2023) — TsSHAP: features predefinidas,
+        sin resolución por celda.
+        \item Roshinta et al.\ (2026) y Kim y Park (2026, GS-SHAP):
+        agnósticos, pero agregan variables (PCA / grupos) y evalúan un
+        único tipo de modelo.
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{La Brecha}
+    \begin{alertblock}{Ningún trabajo previo satisface simultáneamente}
+        \begin{enumerate}
+            \item Agnosticismo real al modelo (sin gradientes, sin
+            estructura secuencial obligatoria)
+            \item Resolución completa por \textbf{celda}
+            $(t,v)$, sin agrupar variables ni segmentos
+            \item Verificación empírica de que las explicaciones
+            \emph{cambian} entre modelos de distinta naturaleza
+            computacional (Adebayo et al., 2018)
+        \end{enumerate}
+    \end{alertblock}
+    \vspace{0.3cm}
+    \begin{block}{Hipótesis}
+        Es posible construir un método de perturbación temporalmente
+        ordenado, agnóstico al modelo, que produzca explicaciones
+        consistentes con el comportamiento de cualquier arquitectura.
+    \end{block}
+    \begin{center}
+        \textbf{Salida central}: matriz
+        $\hat{\alpha} \in \mathbb{R}^{T \times V}$
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Pregunta de Investigación e Hipótesis}
+    \begin{block}{Pregunta de investigación}
+        ¿Es posible atribuir la importancia de cada variable y cada
+        paso de tiempo dentro de una ventana de entrada, de forma
+        agnóstica al modelo, capturando el comportamiento real de
+        arquitecturas de distinta naturaleza computacional?
+    \end{block}
+    \vspace{0.3cm}
+    \begin{alertblock}{Hipótesis}
+        Es posible construir un método de perturbación temporalmente
+        ordenado, agnóstico al modelo, que produzca explicaciones
+        consistentes con el comportamiento de cualquier arquitectura.
+    \end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Objetivo General}
+    \begin{center}
+        \vspace{0.5cm}
+        \large
+        Proponer un framework de explicabilidad agnóstico al modelo
+        que atribuya importancia por variable y paso de tiempo
+        ($\hat{\alpha} \in \mathbb{R}^{T \times V}$) en la predicción
+        de series temporales financieras, sin depender de la
+        estructura interna del modelo explicado.
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Objetivos Específicos}
+    \small
+    \begin{enumerate}
+        \item Diseñar una interfaz uniforme de predicción, mediante
+        un patrón adaptador de dos niveles, que desacople el motor de
+        perturbaciones de la estructura interna de cualquier modelo.
+        \vspace{0.2cm}
+        \item Formular un motor de perturbaciones temporales que
+        atribuya importancia a nivel de celda $(t,v)$, preservando el
+        orden y la coherencia temporal del resto de la ventana.
+        \vspace{0.2cm}
+        \item Entrenar modelos de distinta naturaleza computacional
+        (LSTM, Transformer, Random Forest) sobre el S\&P 500 como
+        banco de pruebas del framework.
+        \vspace{0.2cm}
+        \item Evaluar el framework frente al estado del arte
+        agnóstico, en precisión de identificación, consistencia
+        entre modelos y velocidad de cómputo.
+    \end{enumerate}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Contribución: Interfaz Uniforme de Predicción}
+    \begin{block}{Patrón adaptador de dos niveles}
+        El \texttt{TemporalPerturbationEngine} nunca accede al modelo
+        directamente; solo conoce una función
+        $f: \mathbb{R}^{N\times T\times V}\to\mathbb{R}^N$.
+    \end{block}
+    \begin{itemize}
+        \item \textbf{Nivel 1 — Adaptación de firma}: cada modelo
+        implementa un \emph{wrapper} propio.
+        \begin{itemize}
+            \small
+            \item Random Forest: aplana $(T,V)\to(T{\cdot}V)$
+            \item LSTM / Transformer: tensor PyTorch, inferencia sin
+            gradientes
+        \end{itemize}
+        \item \textbf{Nivel 2 — Inyección de $f$}: el
+        \texttt{ModelAgnosticExplainer} construye $f$ y la inyecta en
+        el motor; cualquier modelo externo puede conectarse sin tocar
+        el framework.
+    \end{itemize}
+    \vspace{0.2cm}
+    \begin{center}
+        \textit{Inversión de dependencias}: el framework no depende
+        de los modelos, los modelos se adaptan al framework.
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Datos y Modelos}
+    \begin{columns}
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Datos: S\&P 500}
+                \begin{itemize}
+                    \item Período: 2010--2024
+                    \item 3{,}754 días hábiles
+                    \item $V = 15$ variables:\\
+                    5 base + 10 indicadores técnicos
+                    \item Ventanas: $T=20$, $H=1$
+                    \item Split temporal: 80\% desarrollo /
+                    20\% prueba
+                \end{itemize}
+            \end{block}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Modelos heterogéneos}
+                \begin{itemize}
+                    \item \textbf{LSTM}\\
+                    2 capas, hidden=128, dropout 0.2
+                    \item \textbf{Transformer}\\
+                    2 capas, 4 heads,\\
+                    attention pooling aprendido
+                    \item \textbf{Random Forest}\\
+                    200 árboles, sklearn\\
+                    aplana $(T,V) \to (T{\times}V)$
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{center}
+        Interfaz uniforme: $(N, T, V) \rightarrow (N,)$ —
+        compatible con PyTorch y scikit-learn.\\
+        \small MSE prueba (target Close): LSTM 0.00342 \quad
+        Transformer 0.00284 \quad RF 0.12131
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Motor de Perturbaciones Temporales (1/2)}
+    \begin{block}{Idea central}
+        Para cada posición $(t, v)$ de la ventana de entrada,
+        se reemplaza el valor por la referencia $r_v$ (media de
+        entrenamiento) y se mide el cambio en la predicción:
+    \end{block}
+
+    \begin{equation*}
+        \alpha(t, v) = \left| f(x) - f(x_{-(t,v)}) \right|
+    \end{equation*}
+
+    \begin{alertblock}{¿Por qué oclusión?}
+        \small
+        No requiere gradientes (funciona en Random Forest) y
+        perturba una sola celda a la vez, preservando la coherencia
+        temporal del resto de la ventana.
+    \end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Motor de Perturbaciones Temporales (2/2)}
+    \begin{block}{Optimización: batch único}
+        En lugar de $T \times V$ inferencias individuales, se
+        construye un batch de $TV+1 = 301$ ventanas evaluado en una
+        sola llamada al modelo. El costo escala $O(T\cdot V)$, no
+        de forma independiente por dimensión.
+    \end{block}
+
+    \begin{block}{Normalización L1}
+        \begin{equation*}
+            \hat{\alpha}(t, v) = \frac{\alpha(t, v)}
+            {\sum_{t'}\sum_{v'} \alpha(t', v')}
+        \end{equation*}
+    \end{block}
+
+    \begin{center}
+        \small Cada celda de $\hat\alpha$ indica la proporción del
+        cambio total en la predicción atribuible a esa variable en
+        ese paso de tiempo.
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Pipeline del Framework}
+    \begin{center}
+        \includegraphics[width=0.95\linewidth]{PIPELINE.png}
+    \end{center}
+    \begin{center}
+        \scriptsize
+        (1) Datos $\to$ (2) Preparación / ventanas $\to$ (3) Modelo
+        $\to$ (4) Interfaz de predicción $\to$ (5) Motor de
+        perturbaciones $\to$ (6) Matriz $\hat{\alpha}$
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Validación con Ground Truth Sintético}
+    \begin{block}{¿Qué se hizo?}
+        Objetivo de caja blanca $f(\mathbf{X}) = \sum_{(t,v)\in
+        \mathcal{A}} x_{t,v}^2$ con celdas relevantes conocidas
+        ($T{=}20$, $V{=}15$, $n{=}10$ repeticiones, 2 escenarios:
+        \textit{Rare Feature} y \textit{Rare Time}).
+    \end{block}
+    \vspace{0.1cm}
+    \centering
+    \scriptsize
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Método} & \textbf{AUP (RF)} & \textbf{AUR (RF)}
+        & \textbf{AUP (RT)} & \textbf{AUR (RT)}\\
+        \midrule
+        FO (propuesto) & 0.9960 & 0.16 & 0.9960 & 0.16 \\
+        FP             & 0.9960 & 0.18 & 0.9960 & 0.18 \\
+        IG             & 0.9960 & 0.16 & 0.9960 & 0.16 \\
+        SVS            & 0.9960 & 0.17 & 0.9960 & 0.15 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.2cm}
+    \begin{alertblock}{Resultado}
+        FO iguala a SVS/IG/FP y \textbf{supera} el AUP reportado por
+        DynaMask (0.97) — sin requerir gradientes y ejecutándose
+        también sobre Random Forest.
+    \end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Verificación de Agnosticidad sobre S\&P 500}
+    \begin{columns}
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Consistencia inter-modelo}
+                Spearman $\rho$ entre matrices $\hat{\alpha}$,
+                $N=100$ instancias.
+                \vspace{0.2cm}
+                \begin{tabular}{lc}
+                    \toprule
+                    \textbf{Par} & \textbf{$\rho$} \\
+                    \midrule
+                    LSTM -- Transf. & 0.748 \\
+                    LSTM -- RF      & 0.255 \\
+                    Transf. -- RF   & 0.382 \\
+                    \bottomrule
+                \end{tabular}
+            \end{block}
+        \end{column}
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Significancia estadística}
+                Mann-Whitney U vs.\ baseline aleatorio.
+                \vspace{0.2cm}
+                \begin{tabular}{lc}
+                    \toprule
+                    \textbf{Modelo} & \textbf{$p$} \\
+                    \midrule
+                    LSTM        & $<10^{-300}$ \\
+                    Transformer & $<10^{-300}$ \\
+                    Rand. Forest & $<10^{-300}$ \\
+                    \bottomrule
+                \end{tabular}
+            \end{block}
+        \end{column}
+    \end{columns}
+    \vspace{0.3cm}
+    \begin{center}
+        Neuronal--neuronal $>$ neuronal--ensamble: las explicaciones
+        capturan el comportamiento de cada modelo, no un artefacto
+        del método.
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Resultados: Importancia por Variable}
+    \begin{columns}
+        \begin{column}{0.55\textwidth}
+            \includegraphics[width=\linewidth]{results/variable_importance.png}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{itemize}
+                \item \textbf{LSTM y Transformer}: priorizan
+                SMA\_5, SMA\_10, SMA\_20 y High.
+                \vspace{0.2cm}
+                \item \textbf{Random Forest}: concentra
+                importancia en Close y Low.
+                \vspace{0.2cm}
+                \item Indicadores de oscilación (MACD, RSI,
+                BB\_width) $\approx$ 0 en los tres modelos.
+                \vspace{0.2cm}
+                \item[] {\scriptsize \textit{Interpretar con cautela,
+                ver diapositiva de retorno logarítmico.}}
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Resultados: Patrón Temporal de Importancia}
+    \begin{columns}
+        \begin{column}{0.55\textwidth}
+            \includegraphics[width=\linewidth]{results/temporal_importance.png}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \begin{itemize}
+                \item \textbf{LSTM}: decreciente pasado$\to$presente
+                (razón 15.7) — memoria distribuida.
+                \vspace{0.2cm}
+                \item \textbf{Transformer}: perfil casi uniforme
+                (razón 1.5) — attention pooling.
+                \vspace{0.2cm}
+                \item \textbf{Random Forest}: concentrado en lag~0
+                (razón 860) — sin modelado secuencial.
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Resultados: Matrices de Importancia $\hat{\alpha}$}
+    \begin{center}
+        \includegraphics[width=0.9\linewidth]{results/heatmaps_comparison.png}
+    \end{center}
+    \begin{center}
+        \small
+        LSTM y Transformer: filas SMA concentran valores altos,
+        distribuidos en el tiempo. Random Forest: importancia
+        concentrada en lag~0 (Close, Low).
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Robustez: Target de Retorno Logarítmico}
+    \begin{alertblock}{¿Por qué?}
+        El target Close tiene alta autocorrelación con el precio
+        actual. Se repite todo el pipeline usando el retorno
+        logarítmico como target, que rompe esa autocorrelación.
+    \end{alertblock}
+    \centering
+    \scriptsize
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Modelo} & \textbf{MSE} & \textbf{MAE} & \textbf{RMSE}\\
+        \midrule
+        Persistencia (retorno=0) & 0.00257 & 0.03728 & 0.05067 \\
+        LSTM         & 0.00268 & 0.03842 & 0.05178 \\
+        Transformer  & 0.00260 & 0.03772 & 0.05104 \\
+        Random Forest& 0.00446 & 0.05625 & 0.06677 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.2cm}
+
+    \textbf{Ningún modelo supera la persistencia ingenua} —
+    consistente con eficiencia de mercado débil. Aun así, el patrón
+    de consistencia se reproduce: LSTM--Transf. $\rho{=}0.541$ $>$
+    LSTM--RF $\rho{=}0.187$, Transf.--RF $\rho{=}0.311$
+    ($p\approx 0$ vs.\ baseline aleatorio en los tres modelos).
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Robustez Adicional}
+    \begin{itemize}
+        \item \textbf{Exactitud direccional}: 46--50\% en los tres
+        modelos y ambos targets — indistinguible del azar (50\%).
+        \vspace{0.2cm}
+        \item \textbf{Sensibilidad al vector de referencia}
+        (media vs.\ mediana vs.\ cero): LSTM y Transformer estables
+        ($\rho>0.88$); Random Forest más sensible ($\rho$ hasta
+        0.666). El patrón neuronal $>$ ensamble se mantiene en las
+        tres referencias.
+        \vspace{0.2cm}
+        \item \textbf{Régimen de mercado} (bajista 2022 vs.\ alcista
+        2023--2024): correlaciones algo menores en el régimen bajista,
+        pero el orden relativo (neuronal--neuronal $>$
+        neuronal--ensamble) se preserva en ambos.
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.75\linewidth]{results/consistency_robustness.png}
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Consideración Específica para Random Forest}
+    \begin{block}{Hipótesis probada}
+        Random Forest particiona su entrada en hojas. En vez de una
+        referencia externa (media/mediana/cero), usar una referencia
+        \textbf{condicionada a la hoja} por instancia (promedio de
+        ejemplos de entrenamiento co-hoja, ponderado por cercanía),
+        motivado por Hooker et al.~\cite{hooker2021}: sin reentrenar.
+    \end{block}
+    \vspace{0.2cm}
+    \begin{alertblock}{Resultado: negativo}
+        \small
+        Sintético: AUP/AUR sin cambio significativo (0.9376 vs.\
+        0.9374). Real (S\&P 500): la consistencia con LSTM/Transformer
+        \textbf{empeora} de $\rho{=}0.184/0.311$ a
+        $\rho{=}{-}0.111/{-}0.232$.
+    \end{alertblock}
+    \vspace{0.2cm}
+    \begin{center}
+        La referencia condicionada a la hoja es \emph{interna} al
+        modelo (rompe el criterio externo compartido con LSTM/
+        Transformer). El framework mantiene una referencia externa
+        idéntica en su naturaleza para los tres modelos: esta
+        alternativa empeora la comparabilidad en vez de mejorarla.
+    \end{center}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Ablación: ¿Importa Respetar el Orden Temporal?}
+    \begin{block}{Variante \emph{shuffled} (control negativo)}
+        Sustituye la celda $(t,v)$ por el valor de la misma variable
+        en \textbf{otro instante} $t'\neq t$ elegido al azar, en vez
+        de la referencia fija $r_v$ — viola el orden temporal.
+    \end{block}
+    \centering
+    \scriptsize
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Par de modelos} & \textbf{FO} & \textbf{Shuffled} \\
+        \midrule
+        LSTM -- Transformer          & 0.748 & 0.487 \\
+        LSTM -- Random Forest        & 0.255 & $-0.055$ \\
+        Transformer -- Random Forest & 0.382 & 0.251 \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.2cm}
+    \begin{alertblock}{Resultado}
+        El benchmark sintético (determinista) \textbf{no distingue}
+        FO de \emph{shuffled}. Solo sobre datos reales se observa el
+        daño: consistencia cae, fidelidad $\Delta_\alpha$ se reduce
+        hasta ${\times}38$ en RF, y las explicaciones dejan de ser
+        reproducibles ($\rho\approx0.55$ entre corridas).
+    \end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Comparación en Condiciones Idénticas: FO vs.\ SVS}
+    \begin{block}{¿Qué se hizo?}
+        Se ocluyen las celdas más importantes según cada método y se
+        mide el desplazamiento de predicción $\Delta_\alpha$
+        (fidelidad). SVS = Shapley Value Sampling, único otro método
+        agnóstico con salida $T{\times}V$ aplicable a los 3 modelos.
+    \end{block}
+    \begin{columns}
+        \begin{column}{0.55\textwidth}
+            \includegraphics[width=\linewidth]{results/exp3_mae_shift.png}
+        \end{column}
+        \begin{column}{0.42\textwidth}
+            \scriptsize
+            \begin{tabular}{lcc}
+                \toprule
+                \textbf{Modelo} & \textbf{FO} & \textbf{SVS} \\
+                \midrule
+                LSTM        & \textbf{0.5033} & 0.4891 \\
+                Transformer & \textbf{0.4518} & 0.4352 \\
+                Rand. Forest& 0.3047 & \textbf{0.3212} \\
+                \bottomrule
+            \end{tabular}
+            \vspace{0.3cm}
+            FO más fiel en modelos neuronales; SVS mejor en RF
+            (interacciones combinatorias entre árboles).
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Velocidad: FO vs.\ Estado del Arte}
+    \centering
+    \scriptsize
+    \begin{tabular}{lccc}
+        \toprule
+        \textbf{Modelo} & \textbf{FO (ms)} & \textbf{SVS (ms)}
+        & \textbf{Aceleración} \\
+        \midrule
+        LSTM          & 17.6  & 469.1  & ${\times}26.6$ \\
+        Transformer   & 13.8  & 413.5  & ${\times}30.0$ \\
+        Random Forest & 112.0 & 2519.4 & ${\times}22.5$ \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.3cm}
+
+    \begin{itemize}
+        \item TimeSHAP~\cite{bento2021}: 2{,}813 ms/muestra$^\dagger$
+        — FO es ${\times}159{,}8$ más rápido.
+        \item GS-SHAP~\cite{gsshap2026}: 1{,}194 ms/muestra$^\dagger$
+        — FO es ${\times}67{,}8$ más rápido.
+    \end{itemize}
+    \vspace{0.2cm}
+    \begin{center}
+        \includegraphics[width=0.7\linewidth]{results/timing_comparison.png}
+    \end{center}
+    \tiny $^\dagger$Cifras de Kim y Park (2026), Tabla C3 — preprint
+    sin arbitrar; comparación provisional.
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Resumen de Avances frente al Estado del Arte}
+    \centering
+    \tiny
+    \setlength{\tabcolsep}{3pt}
+    \begin{tabular}{p{1.9cm}p{2.7cm}p{2.6cm}p{2.6cm}}
+        \toprule
+        \textbf{Trabajo previo} & \textbf{Brecha} & \textbf{Su resultado}
+        & \textbf{Este trabajo} \\
+        \midrule
+        DynaMask~\cite{crabbe2021} & Gradientes; sin RF
+        & AUP 0.97, sin RF & AUP \textbf{0.9960}, RF \checkmark \\
+        TimeSHAP~\cite{bento2021} & Solo secuencial; lento
+        & 2{,}813 ms/m.$^\dagger$ & \textbf{17.6} ms/m.\ (${\times}159.8$) \\
+        GS-SHAP~\cite{gsshap2026} & Salida agrupada $K{\times}J$
+        & 1{,}194 ms/m.$^\dagger$; solo $K{\times}J$
+        & \textbf{17.6} ms/m.; $T{\times}V$ \checkmark \\
+        \bottomrule
+    \end{tabular}
+    \vspace{0.3cm}
+    \begin{alertblock}{En síntesis}
+        Mismo o mejor AUP, resolución completa por celda, funciona
+        sobre modelos no diferenciables, y órdenes de magnitud más
+        rápido que las alternativas basadas en Shapley.
+    \end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Conclusiones}
+    \begin{itemize}
+        \item Framework de explicabilidad temporal agnóstico al
+        modelo mediante un adaptador de dos niveles: cualquier modelo
+        con firma $(N,T,V)\to(N,)$ se conecta sin modificar el motor.
+        \vspace{0.2cm}
+        \item Sobre datos sintéticos: FO iguala a SVS en precisión de
+        identificación (AUP $=0.9960$).
+        \vspace{0.2cm}
+        \item Sobre S\&P 500: FO supera a SVS en fidelidad en modelos
+        neuronales, ${\times}22$--${\times}30$ más rápido; SVS mejor
+        en Random Forest.
+        \vspace{0.2cm}
+        \item Atribuciones estadísticamente no triviales
+        ($p<10^{-300}$) y consistentes con la familia arquitectónica
+        ($\rho=0.748$ neuronal--neuronal vs.\ $\rho<0.40$
+        neuronal--ensamble), robustas a target, referencia y régimen
+        de mercado.
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Limitaciones}
+    \begin{itemize}
+        \small
+        \item \textbf{Autocorrelación del target Close}: mitigada
+        evaluando también el retorno logarítmico (Log\_Return).
+        \item \textbf{Escalado MinMax} ajustado sobre 2010--2021 no
+        cubre los máximos históricos de 2022--2024 — perjudica en
+        particular a Random Forest.
+        \item \textbf{Benchmark sintético no discriminativo}: función
+        determinista sin ruido; con ruido aditivo, FO y SVS sí se
+        diferencian (SVS más robusto por promediar permutaciones).
+        \item \textbf{Alcance}: un único índice (S\&P 500). Evaluado
+        frente a referencia, régimen de mercado y target alternativo,
+        pero no frente a otro mercado.
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Trabajo Futuro}
+    \begin{itemize}
+        \item Perturbación bidireccional (arriba/abajo de $r_v$) para
+        recuperar el \textbf{signo} de la atribución, no solo la
+        magnitud.
+        \item Replicar el pipeline sobre otro índice (p.\ ej.\ NASDAQ
+        Composite, \texttt{\^{}IXIC}) cambiando un solo parámetro de
+        configuración.
+        \item Correlacionar volatilidad realizada por ventana con la
+        concordancia inter-modelo de $\hat{\alpha}$, instancia por
+        instancia (no solo por régimen agregado).
+        \item Extender a perturbación por bloques de celdas para
+        escalar a $T$ o $V$ mucho mayores.
+    \end{itemize}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Declaración de Uso de IA}
+    \begin{block}{Alcance del uso de asistentes de IA generativa}
+        \begin{itemize}
+            \item Apoyo en edición de redacción y verificación de
+            referencias bibliográficas.
+            \item Generación de código auxiliar para experimentos
+            adicionales de robustez, siempre bajo mi supervisión directa.
+        \end{itemize}
+    \end{block}
+    \begin{alertblock}{Lo que no proviene de IA}
+        Todas las cifras reportadas provienen de ejecución real del
+        código sobre los datos descritos. El diseño del framework,
+        la formulación matemática del motor de perturbaciones, la
+        interpretación de resultados y las conclusiones son
+        responsabilidad exclusiva de mi persona.
+    \end{alertblock}
+\end{frame}
+
+% -----------------------------------------------------------------------------
+\begin{frame}{Referencias Principales}
+    \tiny
+    \begin{thebibliography}{99}
+        \bibitem{arsenault2025} Arsenault et al.\ (2025). Revisión
+        sistemática de XAI en series temporales financieras.
+        \bibitem{tonekaboni2020} Tonekaboni et al.\ (2020). FIT:
+        Feature Importance in Time.
+        \bibitem{leung2023winit} Leung et al.\ (2023). WinIT.
+        \bibitem{crabbe2021} Crabbé y Van Der Schaar (2021). DynaMask.
+        \bibitem{enguehard2023} Enguehard (2023). Learning
+        Perturbations to Explain Time Series Predictions (ExtrMask).
+        \bibitem{liu2024contralsp} Liu et al.\ (2024). ContraLSP.
+        \bibitem{hooker2021} Hooker, Mentch y Zhou (2021). Unrestricted
+        Permutation Forces Extrapolation.
+        \bibitem{bento2021} Bento et al.\ (2021). TimeSHAP.
+        \bibitem{raykar`2023} Raykar et al.\ (2023). TsSHAP.
+        \bibitem{roshinta2026} Roshinta et al.\ (2026). Ventanas de
+        perturbación dinámicas.
+        \bibitem{gsshap2026} Kim y Park (2026). GS-SHAP.
+        \bibitem{schlegel2019} Schlegel et al.\ (2019). Evaluación de
+        métodos XAI en series temporales.
+        \bibitem{huang2025} Huang et al.\ (2025). ShapeX.
+        \bibitem{yadav2025} Yadav y Subbian (2025).
+        \bibitem{adebayo2018} Adebayo et al.\ (2018). Sanity checks
+        for saliency maps.
+        \bibitem{samek2017aopc} Samek et al.\ (2017). AOPC.
+        \bibitem{captum2020} Captum (2020). FeatureAblation.
+    \end{thebibliography}
+\end{frame}
+
+\end{document}

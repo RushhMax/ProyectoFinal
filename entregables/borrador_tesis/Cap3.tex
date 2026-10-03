@@ -1,0 +1,60 @@
+\chapter{Trabajos Relacionados}
+\hrule \bigskip \vspace*{1cm}
+%------------------------------------------------------------------------
+\label{sec:trabajosrelacionados}
+
+\section{Consideraciones iniciales}
+
+Este capítulo examina los trabajos que sustentan y delimitan la presente investigación. Se organizan en tres ejes. El primero cubre los métodos de perturbación agnósticos al modelo que incorporan de algún modo la dimensión temporal, y las limitaciones que surgen al hacerlo. El segundo cubre los frameworks explícitamente diseñados para ser temporalmente conscientes y agnósticos a la vez, incluyendo el linaje directo de DynaMask \cite{crabbe2021}, el antecedente más cercano a esta propuesta. El tercero cubre la línea más reciente, que aprende explicadores con objetivos de cuello de botella de información y busca integrar la atribución con las explicaciones contrafactuales.
+
+\section{Estructurar los trabajos relacionados}
+
+El criterio de organización no es cronológico sino mecánico. Un trabajo se ubica en el Eje 1 si su mecanismo de perturbación no fue diseñado pensando en la dependencia temporal entre pasos consecutivos, y en el Eje 2 si sí lo fue. Dentro del Eje 2 se distingue además a los trabajos que además reclaman agnosticismo al modelo, de los que quedan atados a una arquitectura recurrente o secuencial. El Eje 3 agrupa a los trabajos que, sin ser necesariamente posteriores a los del Eje 2, cambian el mecanismo de explicación, en vez de perturbar la entrada y observar la salida, entrenan una red que produce la explicación y la conecta con explicaciones contrafactuales. Esta distinción es la que permite, al final del capítulo, señalar con precisión qué combinación de propiedades (agnosticismo real, costo fijo, resolución por celda, validación financiera) ningún trabajo previo satisface simultáneamente.
+
+\section{Análisis de los trabajos relacionados}
+
+\subsection{Eje 1. Métodos de perturbación agnósticos y el supuesto de independencia}
+
+SHAP formaliza la atribución de importancia con valores de Shapley de la teoría de juegos cooperativos, calculando la contribución promedio de cada variable sobre todas las combinaciones posibles de variables presentes y ausentes. LIME sigue una estrategia distinta, genera perturbaciones alrededor de la instancia a explicar y ajusta un modelo lineal local sobre ellas \cite{arsenault2025}. Ambos métodos asumen independencia entre variables de entrada, un supuesto razonable en datos tabulares pero no en series temporales, donde las observaciones consecutivas están correlacionadas por construcción.
+
+Yadav y Subbian \cite{yadav2025} diagnostican por qué los métodos de gradiente, oclusión y permutación fallan específicamente en escenarios de predicción dinámica, donde el modelo genera una predicción nueva en cada instante y romper la dependencia temporal corrompe la cadena de predicciones sucesivas. Huang et al.\ \cite{huang2025} proponen ShapeX, que aplica valores de Shapley sobre \emph{shapelets} en vez de puntos individuales para capturar coherencia temporal, pero está diseñado para clasificación, no para regresión continua, la distinción se ancla en que en clasificación el patrón-forma es la evidencia de la etiqueta, mientras que en regresión multivariada dos variables del mismo instante pueden tener roles causales independientes que agrupar en un segmento diluye. Un conjunto de trabajos de aplicación financiera \cite{gupta2025, sathyampeth2025, manikrao2026, jagannathan2025, kumar2024, singh2025, muhammad2024} usa SHAP o LIME directamente sobre ventanas temporales sin ninguna adaptación, sin verificar si las atribuciones resultantes respetan el orden causal de la serie.
+
+\subsection{Eje 2. Frameworks temporalmente conscientes y el linaje de DynaMask}
+
+Leung et al.\ \cite{leung2023winit} proponen WinIT, que extiende el enfoque de remoción de observaciones descrito en el Capítulo~2 para capturar efectos retrasados, un cambio en una variable observado en un instante puede no afectar la predicción sino hasta un instante posterior. Su mecanismo es agnóstico por construcción, no requiere gradientes, pero fue evaluado únicamente sobre arquitecturas recurrentes y sobre tareas de clasificación clínica, sin verificar consistencia cruzada entre modelos de distinta naturaleza computacional.
+
+Crabbé y Van Der Schaar \cite{crabbe2021} propusieron DynaMask, el antecedente más directo de esta propuesta. Produce una matriz de importancia $T \times V$ ajustando una máscara de perturbación que penaliza saltos abruptos para garantizar coherencia temporal en las atribuciones. Sin embargo, requiere acceso a los gradientes del modelo para optimizar la máscara, lo que lo restringe a redes neuronales y le impide operar sobre Random Forest. Dos trabajos posteriores extendieron directamente este mecanismo, señalando que sus perturbaciones fijas (difuminado gaussiano, promedio móvil) no capturan dependencias de largo plazo en la serie. Enguehard \cite{enguehard2023} reemplaza la perturbación fija por una perturbación aprendida mediante una red recurrente adicional, entrenada junto con la máscara. Liu et al.\ \cite{liu2024contralsp} incorporan aprendizaje contrastivo para evitar que la perturbación saque a la entrada de su distribución original, un problema documentado por Hooker, Mentch y Zhou \cite{hooker2021} para toda la familia de métodos de tipo permutar-y-predecir. Ambos trabajos mejoran la calidad de la atribución sobre DynaMask, pero ninguno relaja el requisito de acceso a gradientes, y ninguno de los tres evalúa sobre series financieras pese a mencionarlas como motivación en su introducción.
+
+Bento et al.\ \cite{bento2021} proponen TimeSHAP, que produce importancia por evento, celda y característica, pero está limitado a modelos secuenciales. Raykar et al.\ \cite{raykar2023} proponen TsSHAP, que opera sobre características predefinidas por el usuario sin atribuir importancia a variables individuales dentro de una ventana multivariada, y fue diseñado para predicción univariada. Roshinta et al.\ \cite{roshinta2026} proponen un framework de ventanas de perturbación dinámicas que reduce la redundancia entre variables correlacionadas mediante PCA antes de perturbar, y reconstruye las atribuciones en el espacio original, evaluado solo sobre arquitecturas recurrentes (GRU y LSTM). Kim y Park \cite{gsshap2026} proponen GS-SHAP, que agrupa variables correlacionadas y segmentos temporales mediante HSIC y divergencia MMD para preservar interacciones conjuntas, evaluado sobre un único modelo por tarea y con una granularidad de grupo que pierde resolución por variable individual.
+
+\subsection{Eje 3. Explicadores aprendidos, cuello de botella de información y contrafactuales}
+
+Una tercera línea abandona la idea de perturbar la entrada y observar la salida, y entrena en cambio un explicador. Queen et al.\ \cite{queen2023timex} proponen TimeX, que entrena un modelo sustituto cuyo espacio latente conserva las relaciones del modelo original, produce mapas de atribución discretos y aprende un conjunto de patrones temporales recurrentes, algo que DynaMask, que explica cada instancia sin memoria de las demás, no ofrece. Liu et al.\ \cite{liu2024timexpp} formulan TimeX++ bajo el principio del cuello de botella de información descrito en el Capítulo~2, con el propósito de evitar las soluciones triviales en las que la máscara se ignora y el desplazamiento de la distribución que ya señalaba ContraLSP. Ambos son métodos diseñados y evaluados para clasificación.
+
+El trabajo más reciente de esta línea es el de Zheng et al.\ \cite{zheng2026unifiedib}, un marco unificado que integra dos tipos de explicación que se habían desarrollado por separado. La atribución identifica las regiones temporales responsables de una predicción, pero carece de fundamento causal. La explicación contrafactual, descrita en el Capítulo~2, indica cómo modificar la entrada para cambiar la decisión, pero resulta inestable. Los autores usan una red paramétrica que construye instancias con la explicación incorporada, de modo que la información preservada produce la atribución y la información removida de forma controlada produce un contrafactual estable. Los tres trabajos comparten dos rasgos. Entrenan una red auxiliar para producir la explicación, por lo que su costo no es el de consultar el modelo una vez por celda. Y, según sus resúmenes, se evalúan sobre benchmarks sintéticos y de dominios ajenos a las finanzas, sin abordar la regresión sobre series financieras. Zheng et al.\ es un preprint de 2026 cuya evaluación completa no se revisó en detalle para este documento.
+
+\section{Consideraciones finales}
+
+La Tabla~\ref{tab:gaps} resume los trabajos revisados y la brecha que motiva esta propuesta. Las líneas más recientes, los explicadores aprendidos y la unificación de atribución con contrafactuales, refinan la calidad de la explicación a costa de entrenar una red auxiliar por cada modelo o tarea, lo que desplaza el problema en vez de resolver el requisito de operar solo con consultas al modelo. Ningún trabajo previo satisface simultáneamente agnosticismo real al modelo (sin gradientes, sin estructura secuencial obligatoria), resolución completa por celda $(t,v)$ sin agrupar variables ni segmentos, y verificación empírica de que las explicaciones cambian entre modelos de distinta naturaleza computacional, siguiendo el criterio descrito en el Capítulo~2.
+
+\begin{table}[h!]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{5.0cm}|>{\raggedright\arraybackslash}p{2.3cm}|>{\raggedright\arraybackslash}p{2.3cm}|>{\raggedright\arraybackslash}p{3.0cm}|}
+\hline
+\textbf{Referencia} & \textbf{Mecanismo} & \textbf{Dominio} & \textbf{Brecha respecto a la propuesta} \\ \hline
+SHAP, LIME \cite{arsenault2025} & Perturbación agnóstica genérica & Datos tabulares & Asumen independencia entre pasos de tiempo. \\ \hline
+WinIT \cite{leung2023winit} & Remoción de observaciones, sin gradientes & Clínico secuencial & Evaluado solo en modelos recurrentes, sin verificar consistencia cruzada. \\ \hline
+DynaMask \cite{crabbe2021} & Máscara aprendida por gradiente & Sintético, MIMIC-III & Requiere gradientes, no corre sobre Random Forest. \\ \hline
+ExtrMask \cite{enguehard2023}, ContraLSP \cite{liu2024contralsp} & Perturbación aprendida, contrastiva & Sintético, MIMIC-III & Corrigen la perturbación de DynaMask pero mantienen la dependencia del gradiente. \\ \hline
+TimeSHAP \cite{bento2021} & Shapley sobre eventos, recurrente & Secuencial & Limitado a modelos secuenciales. \\ \hline
+Roshinta et al.\ \cite{roshinta2026}, GS-SHAP \cite{gsshap2026} & Ventanas dinámicas, agrupación de variables & Financiero, un solo modelo & Pierden resolución por variable individual o evalúan un único tipo de modelo. \\ \hline
+TimeX \cite{queen2023timex}, TimeX++ \cite{liu2024timexpp} & Explicador aprendido, cuello de botella de información & Clasificación, sintético y real & Entrenan una red auxiliar, no se validan en regresión financiera. \\ \hline
+Zheng et al.\ \cite{zheng2026unifiedib} & Atribución y contrafactual unificados, red paramétrica & Benchmarks sintéticos y reales & Requiere entrenar una red de transformación, preprint de 2026 no revisado en detalle. \\ \hline
+\textbf{Propuesta} & \textbf{Oclusión celda a celda, sin gradientes} & \textbf{S\&P 500, 3 modelos} & \textbf{Agnóstica, costo fijo, resolución por celda, validada sobre series financieras reales.} \\ \hline
+\end{tabular}
+\caption{Matriz de síntesis y brecha de investigación.}
+\label{tab:gaps}
+\end{table}

@@ -1,0 +1,226 @@
+\chapter{Marco Teórico}
+\hrule \bigskip \vspace*{1cm}
+%------------------------------------------------------------------------
+\label{chap:marco_teorico}
+
+\section{Consideraciones iniciales}
+
+Este capítulo presenta los conceptos sobre los que se construye la propuesta del Capítulo~4. El orden es deliberado y va de lo general a lo específico. Parte del objeto que se quiere explicar, las series temporales financieras, con las propiedades estadísticas que condicionan cualquier modelo y cualquier explicación. Continúa con los modelos que se entrenan sobre esas series, de naturaleza computacional distinta, porque esa diferencia determina qué métodos de explicación pueden aplicarse a cada uno. Luego define qué significa interpretar y explicar un modelo, y por qué la explicación es una necesidad en el sector financiero. Después presenta las propiedades que se exigen a un método de explicación, que sea post-hoc y agnóstico al modelo, y las familias de métodos de atribución, de las cuales se deriva la perturbación. Formaliza a continuación la explicabilidad temporal, que es el problema específico que resuelve este trabajo, y describe las líneas más recientes del área, las máscaras aprendidas, las explicaciones contrafactuales y el cuello de botella de información. Cierra con los criterios que se emplean para evaluar si una explicación es confiable.
+
+\section{Series temporales financieras}
+\label{sec:mt_series}
+
+\subsection{Definición y formulación como ventana de entrada}
+\label{sec:mt_ventana}
+
+Una serie temporal es una secuencia de observaciones ordenadas en el tiempo, y es multivariada cuando cada instante reúne varias variables medidas a la vez \cite{tsay2010}. En finanzas, la observación de un día puede contener el precio de apertura, el máximo, el mínimo, el cierre, el volumen negociado y otras cantidades derivadas de ellas. La predicción de series temporales consiste en estimar el valor futuro de una variable de interés a partir de su historia, y el aprendizaje profundo se ha consolidado como una de las familias de métodos más usadas para esta tarea \cite{lim2021}. En el ámbito financiero, Sezer et al.\ \cite{sezer2020} revisan la literatura de 2005 a 2019 sobre el uso de aprendizaje profundo en el pronóstico de series financieras, y Kumbure et al.\ \cite{kumbure2022} hacen lo propio para las técnicas de aprendizaje automático y los datos de entrada empleados en la predicción de mercados bursátiles.
+
+Los modelos de aprendizaje automático no reciben la serie completa, reciben una ventana de longitud fija formada por los últimos $T$ pasos de tiempo \cite{lim2021}. Dado un instante $\tau$, la entrada es la matriz
+\begin{equation}
+    x = \begin{pmatrix} x_{\tau-T+1,1} & \cdots & x_{\tau-T+1,V} \\ \vdots & \ddots & \vdots \\ x_{\tau,1} & \cdots & x_{\tau,V} \end{pmatrix} \in \mathbb{R}^{T \times V},
+    \label{eq:ventana}
+\end{equation}
+donde $V$ es el número de variables. Un modelo predictivo es una función $f\colon \mathbb{R}^{T \times V} \rightarrow \mathbb{R}$ que asigna a cada ventana una predicción $\hat{y} = f(x)$ del valor de la variable objetivo en el instante siguiente. Cada celda $(t,v)$ de la ventana corresponde a una variable en un paso de tiempo, y es la unidad sobre la que esta tesis atribuye importancia.
+
+\subsection{Retornos y propiedades estadísticas de las series financieras}
+\label{sec:mt_retornos}
+
+Los precios no se modelan directamente, se modelan sus retornos. El retorno logarítmico entre dos instantes consecutivos se define como $r_{\tau+1} = \ln(P_{\tau+1}/P_{\tau})$, donde $P$ es el precio de cierre, y se prefiere sobre el precio porque es aditivo en el tiempo y su media es aproximadamente estable \cite{tsay2010}. El precio, en cambio, crece con el tiempo y produce valores fuera del rango observado durante el entrenamiento.
+
+Cont \cite{cont2001} recopila un conjunto de regularidades estadísticas que se observan de forma consistente en retornos de distintos activos, mercados y periodos, y que denomina hechos estilizados. Tres de ellas son relevantes para esta tesis. La primera es la ausencia de autocorrelación lineal significativa en los retornos, lo que significa que el retorno de hoy casi no se puede predecir linealmente a partir del de ayer. La segunda es la presencia de colas pesadas en la distribución de los retornos, es decir, que los movimientos extremos son más frecuentes de lo que predice una distribución normal. La tercera es el agrupamiento de volatilidad, la tendencia de los periodos de alta variación a concentrarse juntos en el tiempo. Estas propiedades hacen que el retorno sea una variable objetivo difícil de predecir y que su relación con las variables de entrada cambie según el momento.
+
+\subsection{Eficiencia de mercado y el baseline de persistencia}
+\label{sec:mt_eficiencia}
+
+La hipótesis de mercado eficiente, formalizada por Fama \cite{fama1970}, sostiene que los precios reflejan la información disponible. En su forma débil, esa información es la historia pasada de los precios, de modo que ningún modelo que solo use precios y volúmenes pasados debería obtener una ventaja sistemática. Una consecuencia práctica es que la mejor predicción del valor siguiente de un precio es, en primera aproximación, el último valor observado, que se conoce como baseline de persistencia o paseo aleatorio.
+
+Este criterio no es solo teórico. Meese y Rogoff \cite{meese1983} mostraron, en el mercado de divisas, que los modelos estructurales de tipo de cambio no superaban fuera de muestra a un paseo aleatorio, y desde entonces la comparación con ese baseline es un estándar para juzgar modelos de pronóstico financiero. Por el lado del aprendizaje automático, Gu et al.\ \cite{gu2020} comparan distintos métodos para predecir primas de riesgo de activos y encuentran que los árboles de decisión y las redes neuronales son los de mejor desempeño, lo que atribuyen a su capacidad de capturar interacciones no lineales entre los predictores. Esto justifica el uso de ambas familias de modelos, pero no elimina la necesidad de compararlas con un baseline simple. Para la explicabilidad esto tiene una consecuencia metodológica. Un modelo que no supera al baseline de persistencia no aporta información propia sobre la serie, y explicarlo equivale a explicar un artefacto de la autocorrelación trivial del precio, por lo que este trabajo reporta ese baseline junto con los modelos que explica.
+
+\subsection{No estacionariedad y regímenes de mercado}
+\label{sec:mt_regimenes}
+
+Las series financieras no mantienen sus propiedades estadísticas en el tiempo. Hamilton \cite{hamilton1989} propuso modelar series no estacionarias como procesos que alternan entre distintos regímenes, cada uno con parámetros propios, y Ang y Timmermann \cite{angtimmermann2012} revisan la evidencia de que los mercados financieros presentan cambios de régimen persistentes en la media, la volatilidad y las correlaciones de los retornos. En la práctica, esto se traduce en tramos alcistas de baja volatilidad que alternan con tramos bajistas de alta volatilidad.
+
+Esta no estacionariedad tiene dos consecuencias para la explicabilidad. Primero, una explicación válida en un régimen puede dejar de serlo en otro, por lo que debe evaluarse por régimen y no solo como promedio sobre todo el periodo. Segundo, los supuestos de suavidad o estacionariedad local, que varios métodos temporales asumen para construir sus perturbaciones, se violan justo en los momentos de mayor interés para la gestión del riesgo.
+
+\subsection{Variables de entrada, indicadores técnicos y ventanas deslizantes}
+\label{sec:mt_variables}
+
+Además de los precios y el volumen, la literatura de predicción bursátil utiliza de forma habitual indicadores técnicos, cantidades derivadas del precio y del volumen que resumen tendencia, momentum o volatilidad \cite{kumbure2022}. En esta tesis se derivan diez a partir de las cinco series base. Las medias móviles simples de $n$ días, $\mathrm{SMA}_n(\tau)=\frac{1}{n}\sum_{i=0}^{n-1}P_{\tau-i}$, resumen la tendencia. El MACD es la diferencia entre dos medias móviles exponenciales de periodos distintos, y su señal es una media móvil exponencial del propio MACD. El índice de fuerza relativa (RSI) compara la magnitud de las subidas y las bajadas recientes. El ancho de las bandas de Bollinger mide la dispersión del precio alrededor de su media móvil. El rango verdadero promedio (ATR) mide la volatilidad a partir de los rangos diarios, el retorno logarítmico es el definido en la Sección~\ref{sec:mt_retornos} y el volumen relativo compara el volumen del día con su promedio reciente. Con las cinco variables base resultan $V=15$ variables por paso de tiempo.
+
+Las ventanas se construyen deslizando una ventana de longitud $T$ sobre la serie y emparejando cada una con el valor objetivo del instante siguiente. La partición de los datos en desarrollo y prueba debe respetar el orden temporal, y cualquier transformación que se ajuste con los datos, como una normalización, debe ajustarse solo con el periodo de desarrollo para no filtrar información del futuro hacia el pasado.
+
+\section{Modelos predictivos de distinta naturaleza computacional}
+\label{sec:mt_modelos}
+
+Los modelos que se entrenan sobre estas ventanas difieren en cómo las procesan, y esa diferencia es la razón por la que un método de explicación debe ser verificado en más de una arquitectura.
+
+\subsection{Redes de memoria larga (LSTM)}
+
+Una red LSTM \cite{hochreiter1997} es una red neuronal recurrente que procesa la ventana paso a paso y resume el pasado en un estado interno. Incorpora compuertas que regulan qué información se escribe, se conserva y se descarta de ese estado, un diseño que busca conservar dependencias de largo plazo que las redes recurrentes simples pierden durante el entrenamiento. Es un modelo diferenciable, de modo que el gradiente de su salida respecto de la entrada puede calcularse.
+
+\subsection{Transformer}
+
+El Transformer \cite{vaswani2017} reemplaza la recurrencia por el mecanismo de autoatención, en el que cada paso de la secuencia se compara con todos los demás para decidir cuánto debe pesar cada uno en su representación. Su aplicación a series temporales ha dado lugar a una familia amplia de variantes, revisada por Wen et al.\ \cite{wen2023}. Como la autoatención no distingue por sí sola el orden de los pasos, se le añade una codificación posicional. Para producir una única predicción a partir de la secuencia, una opción es agregar los pasos con pesos aprendidos mediante una capa de atención, en vez de usar solo el último paso, que es la elección que se usa en este trabajo. Al igual que la LSTM, es diferenciable.
+
+\subsection{Bosques aleatorios (Random Forest)}
+
+Un bosque aleatorio \cite{breiman2001} es un conjunto de árboles de decisión entrenados cada uno sobre una muestra bootstrap de los datos y con una selección aleatoria de atributos en cada división. En regresión, su predicción es el promedio de las predicciones de los árboles. No tiene noción de secuencia, de modo que recibe la ventana aplanada como un vector de $T \cdot V$ atributos, y cada celda es para el modelo un atributo tabular más. No es diferenciable, porque sus predicciones son constantes por tramos. Una consecuencia directa de su definición es que cada hoja predice el promedio de los valores objetivo vistos en el entrenamiento, por lo que la salida del bosque queda dentro del rango de esos valores y no puede extrapolar más allá de él. Esto es relevante para series financieras con tendencia, y es una de las razones para entrenar sobre retornos y no sobre precios. A pesar de ello, los modelos basados en árboles siguen siendo competitivos frente al aprendizaje profundo en datos tabulares de tamaño mediano \cite{grinsztajn2022}.
+
+\subsection{Diferenciabilidad y acceso al modelo}
+
+La Tabla~\ref{tab:mt_modelos} resume las propiedades de los tres modelos que importan para la explicabilidad. Que los dos primeros sean diferenciables y el tercero no decide qué métodos de atribución pueden aplicarse a cada uno, un punto que se desarrolla en la Sección~\ref{sec:mt_familias}.
+
+\begin{table}[h!]
+\centering
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.9cm}|>{\raggedright\arraybackslash}p{4.3cm}|>{\centering\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{2.8cm}|}
+\hline
+\textbf{Modelo} & \textbf{Cómo procesa la ventana} & \textbf{Diferenciable} & \textbf{Entrada} \\ \hline
+LSTM & Recurrente, paso a paso & Sí & Secuencia $(T,V)$ \\ \hline
+Transformer & Autoatención entre todos los pasos & Sí & Secuencia $(T,V)$ \\ \hline
+Random Forest & Promedio de árboles, sin noción de secuencia & No & Vector de $T\cdot V$ atributos \\ \hline
+\end{tabular}
+\caption{Modelos empleados y propiedades relevantes para la explicabilidad (referencias en la Sección~\ref{sec:mt_modelos}).}
+\label{tab:mt_modelos}
+\end{table}
+
+\section{Interpretabilidad y explicabilidad}
+\label{sec:mt_interpretabilidad}
+
+\subsection{Definiciones}
+
+Los términos interpretabilidad y explicabilidad suelen usarse como sinónimos, pero designan ideas cercanas y distintas. Doshi-Velez y Kim \cite{doshivelez2017} definen la interpretabilidad como la capacidad de explicar o presentar el comportamiento de un modelo en términos comprensibles para una persona. Barredo Arrieta et al.\ \cite{arrieta2020} distinguen entre modelos transparentes, que son comprensibles por su propia estructura, y la explicabilidad como el conjunto de acciones o procedimientos que produce un modelo para dejar claros los motivos de su funcionamiento. Lipton \cite{lipton2018} advierte que la interpretabilidad no es una propiedad única y bien definida sino un conjunto de objetivos distintos, como la confianza, la auditoría o la identificación de causas, y que por eso una explicación debe evaluarse siempre respecto de un propósito.
+
+\subsection{Taxonomía de los métodos}
+
+Guidotti et al.\ \cite{guidotti2018} organizan los métodos de explicación según el problema que resuelven. Distinguen explicar el modelo completo, explicar el resultado de una instancia particular e inspeccionar el comportamiento de una caja negra. Esto da lugar a dos ejes. El primero separa las explicaciones \emph{locales}, que justifican una predicción individual, de las \emph{globales}, que describen el comportamiento general del modelo. Esta tesis trabaja con explicaciones locales, una matriz de importancia por cada ventana explicada. El segundo eje separa los modelos interpretables por diseño, como un árbol de decisión individual o una regresión lineal, de los métodos que explican modelos ya construidos, que son los llamados métodos post-hoc.
+
+Rudin \cite{rudin2019} sostiene que para decisiones de alto riesgo es preferible usar modelos interpretables por diseño en lugar de explicar a posteriori una caja negra, entre otras razones porque una explicación post-hoc no es completamente fiel al modelo que explica. Este argumento no invalida el enfoque de esta tesis, pero sí fija una exigencia, que la fidelidad de la explicación debe medirse y no darse por supuesta, tema que se desarrolla en la Sección~\ref{sec:mt_evaluacion}.
+
+\subsection{La explicabilidad en el sector financiero}
+
+La necesidad de explicar los modelos financieros tiene un origen regulatorio. La guía SR~11-7 de la Reserva Federal de los Estados Unidos \cite{sr117} exige a los bancos comprender las capacidades y los límites de un modelo antes de usarlo, y define el riesgo de modelo como el riesgo de consecuencias adversas derivadas de decisiones basadas en resultados de modelos incorrectos o mal utilizados. Cohen et al.\ \cite{cohen2023blackbox} documentan que la opacidad de los modelos de aprendizaje automático agrega una capa adicional a ese riesgo. El Reglamento de Inteligencia Artificial de la Unión Europea \cite{euaiact2024} exige, para ciertos usos financieros como la evaluación crediticia, un grado de transparencia suficiente para que quien usa el sistema pueda interpretar sus resultados. Sovrano et al.\ \cite{sovrano2026} muestran que los métodos de explicabilidad actuales todavía no cumplen estas exigencias de forma sistemática.
+
+La literatura aplicada refleja esa demanda. Weber et al.\ \cite{weber2024} revisan de forma sistemática las aplicaciones de la inteligencia artificial explicable en finanzas, y Bussmann et al.\ \cite{bussmann2021} aplican valores de Shapley para explicar un modelo de riesgo crediticio. Sin embargo, estos trabajos se centran sobre todo en datos tabulares, y la explicación de predicciones sobre series temporales, donde el orden de las observaciones importa, requiere una formulación propia que se desarrolla en la Sección~\ref{sec:mt_temporal}.
+
+\section{Explicabilidad post-hoc}
+\label{sec:mt_posthoc}
+
+Un método de explicabilidad es post-hoc cuando opera sobre un modelo ya entrenado, sin modificar su estructura ni su proceso de entrenamiento \cite{guidotti2018, arsenault2025}. Dado un modelo $f$ y una entrada $x$, un método de atribución devuelve una matriz de importancias con la misma forma que $x$, en la que cada elemento indica cuánto contribuyó la correspondiente entrada a la predicción. La atribución no es una propiedad del modelo por sí solo. Depende también del método, de la instancia explicada y de la forma en que el método define la ausencia de información, un punto que se desarrolla en la Sección~\ref{sec:mt_perturbacion}.
+
+\section{Agnosticismo al modelo}
+\label{sec:mt_agnostico}
+
+Un método post-hoc es agnóstico al modelo cuando no requiere acceso a la estructura interna del modelo para generar una explicación \cite{ribeiro2016, arsenault2025}. Puede aplicarse sobre redes neuronales, modelos de ensamble o modelos estadísticos sin conocer sus pesos, gradientes ni arquitectura. En términos de acceso, el modelo se trata como una caja negra que solo puede consultarse, se le entrega una entrada y se observa su salida. En contraste, métodos como DeepLIFT \cite{shrikumar2017} o los que interpretan los pesos de atención están ligados a una arquitectura específica y no pueden transferirse a modelos de distinta naturaleza \cite{schlegel2019}. La agnosticidad es lo que permite comparar explicaciones entre modelos bajo las mismas condiciones.
+
+Que un método sea agnóstico por diseño no garantiza que sus atribuciones reflejen el comportamiento real del modelo explicado. Adebayo et al.\ \cite{adebayo2018} mostraron que varios métodos de saliencia producen explicaciones prácticamente idénticas incluso cuando los pesos del modelo se aleatorizan, es decir, atribuciones independientes tanto del modelo como de los datos con que se entrenó. Esto implica que la agnosticidad mecánica de un método debe verificarse empíricamente y no puede darse por probada solo a partir de su diseño. Esta tesis adopta ese criterio, y por ello la verificación entre modelos de distinta naturaleza forma parte de la evaluación del Capítulo~5.
+
+\section{Familias de métodos de atribución}
+\label{sec:mt_familias}
+
+Los métodos de atribución se agrupan en tres familias según el mecanismo con el que obtienen la importancia.
+
+\textbf{Métodos basados en gradientes.} Estiman la importancia de una entrada a partir de la derivada de la salida respecto de ella. Simonyan et al.\ \cite{simonyan2014} propusieron usar el gradiente de la salida respecto de la entrada como mapa de saliencia. Integrated Gradients \cite{sundararajan2017} acumula los gradientes a lo largo de una trayectoria entre una entrada de referencia y la entrada real, y cumple axiomas como la completitud, según la cual la suma de las atribuciones iguala la diferencia entre la predicción de la entrada y la de la referencia. Son eficientes, pero requieren que el modelo sea diferenciable y que se pueda acceder a sus gradientes, por lo que no pueden aplicarse a un bosque aleatorio.
+
+\textbf{Métodos basados en atención.} Interpretan los pesos de atención de un Transformer como la importancia de cada elemento. Dependen de la arquitectura y su equivalencia con una explicación es discutida, ya que Jain y Wallace \cite{jain2019} muestran que los pesos de atención pueden modificarse sin cambiar la predicción, por lo que no siempre reflejan la importancia real.
+
+\textbf{Métodos basados en perturbación.} Estiman la importancia observando cómo cambia la salida cuando se modifica o se elimina parte de la entrada \cite{zeiler2014, ribeiro2016}. Solo requieren consultar el modelo, por lo que son agnósticos. Su costo es que necesitan varias consultas por cada explicación. Esta es la familia de la que se deriva la propuesta.
+
+\section{Métodos de perturbación}
+\label{sec:mt_perturbacion}
+
+\subsection{Oclusión y vector de referencia}
+\label{sec:mt_oclusion}
+
+La forma más directa de un método de perturbación es la oclusión. Zeiler y Fergus \cite{zeiler2014} la usaron para visualizar qué regiones de una imagen determinan la salida de una red convolucional, tapando sistemáticamente partes de la imagen y observando la respuesta del modelo. Aplicada a una ventana de series temporales, consiste en reemplazar una celda por un valor neutro y medir cuánto cambia la predicción. Sea $x_{-(t,v)}$ la ventana que resulta de reemplazar la celda $(t,v)$ por un valor de referencia $r_{v}$ y dejar el resto igual. La importancia de la celda se define como
+\begin{equation}
+    \alpha(t,v) = \left| f(x) - f(x_{-(t,v)}) \right|.
+    \label{eq:oclusion}
+\end{equation}
+Si reemplazar la celda no cambia la predicción, la celda no fue relevante para ella. Si la cambia mucho, sí lo fue.
+
+El resultado depende de la elección de la referencia, porque esta define qué se entiende por ausencia de información. Una referencia habitual es la media de entrenamiento de cada variable, que representa un valor típico y no informativo. Otras opciones son un cero, un valor previo de la serie o un valor condicionado al contexto de la instancia. Como distintas referencias pueden producir atribuciones distintas, la sensibilidad del método a esta elección es una propiedad que debe medirse. Fong y Vedaldi \cite{fong2017} formalizan además la idea de perturbar la entrada de forma significativa para estudiar la respuesta del modelo, y plantean el problema de que la perturbación elegida condiciona la explicación.
+
+\subsection{Valores de Shapley}
+\label{sec:mt_shapley}
+
+Los valores de Shapley provienen de la teoría de juegos cooperativos \cite{shapley1953}. Reparten el valor total de una coalición entre sus jugadores según la contribución promedio de cada uno sobre todas las coaliciones posibles. Aplicados a la explicación, los jugadores son las variables de entrada y el valor de una coalición $S$ es la predicción del modelo cuando solo las variables de $S$ están presentes. La contribución de la variable $i$ entre $N$ variables es
+\begin{equation}
+    \phi_i = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|!\,(|N|-|S|-1)!}{|N|!} \left[ v(S \cup \{i\}) - v(S) \right],
+\end{equation}
+donde $v(S)$ es la predicción con las variables de $S$ presentes y el resto ausentes. Štrumbelj y Kononenko \cite{strumbelj2014} explican predicciones de modelos arbitrarios mediante contribuciones basadas en este concepto, y SHAP \cite{lundberg2017} unifica varios métodos de atribución bajo este marco. El cálculo exacto requiere evaluar un número de coaliciones que crece de forma exponencial con $|N|$, por lo que en la práctica se usan aproximaciones por muestreo de permutaciones, como la de Castro et al.\ \cite{castro2009}, conocida como Shapley Value Sampling. En una ventana de $T \times V$ celdas el número de jugadores es $T \cdot V$, lo que vuelve costosa esta aproximación.
+
+\subsection{LIME}
+
+LIME \cite{ribeiro2016} sigue una estrategia distinta. Genera perturbaciones alrededor de la instancia a explicar, evalúa el modelo sobre ellas y ajusta un modelo lineal ponderado por la cercanía a la instancia original. Los coeficientes de ese modelo lineal se interpretan como la importancia local de cada variable.
+
+\subsection{Limitaciones de los métodos de perturbación clásicos}
+
+Los métodos anteriores comparten dos limitaciones. La primera es el supuesto de independencia. SHAP y LIME asumen, en su formulación habitual, que las variables de entrada pueden ausentarse de forma independiente, un supuesto razonable en datos tabulares pero no en series temporales, donde las observaciones consecutivas están correlacionadas por construcción \cite{tonekaboni2020}.
+
+La segunda es el problema de la distribución. Al reemplazar valores, la entrada perturbada puede convertirse en una combinación que nunca ocurrió en los datos, y el modelo se evalúa entonces fuera de la región donde aprendió. Hooker et al.\ \cite{hooker2021} muestran que las perturbaciones sin restricción fuerzan al modelo a extrapolar, de modo que la importancia medida refleja el comportamiento del modelo en una zona sin datos y no la relevancia real de la variable. Esta limitación es especialmente relevante para modelos de árboles, que responden de forma poco predecible fuera del rango de entrenamiento.
+
+\section{Explicabilidad temporal}
+\label{sec:mt_temporal}
+
+La explicabilidad temporal extiende la atribución de importancia a la dimensión del tiempo, reconociendo que una misma variable puede ser determinante en un momento del historial e irrelevante en otro \cite{tonekaboni2020}. Rojat et al.\ \cite{rojat2021} presentan un panorama de los métodos de explicabilidad aplicados a series temporales y de los tipos de explicación que producen, y Theissler et al.\ \cite{theissler2022} hacen lo propio para la clasificación de series temporales y proponen una taxonomía. Formalmente, dado un modelo entrenado y una ventana de $T$ pasos de tiempo y $V$ variables, la explicabilidad temporal produce una matriz $\hat{\alpha} \in \mathbb{R}^{T \times V}$, donde cada celda $\hat{\alpha}(t, v)$ representa la relevancia de la variable $v$ en el paso de tiempo $t$ para la predicción analizada. Esta representación permite responder a la vez dos preguntas, qué variable influyó en la predicción y en qué momento del historial lo hizo.
+
+Aplicar directamente métodos diseñados para imágenes o texto sobre series temporales produce resultados poco confiables. Ismail et al.\ \cite{ismail2020} demuestran, sobre benchmarks con verdad conocida, que los métodos de saliencia estándar mezclan el eje del tiempo con el eje de las variables y fallan al identificar cuándo y qué variable importó. Este hallazgo motivó el desarrollo de métodos específicos para series temporales, que se revisan en el Capítulo~3.
+
+Para que una explicación temporal sea válida, las perturbaciones sobre la serie deben respetar el orden temporal. No puede modificarse información futura para explicar un instante pasado, ya que esto introduce situaciones que no ocurren en los datos reales \cite{tonekaboni2020, crabbe2021}. Además, la explicación debe distinguir entre dos formas en que el tiempo interviene. Una es la dependencia entre pasos, donde el valor de una variable en $t$ solo tiene sentido dentro del contexto de sus vecinos temporales. La otra es el efecto retrasado, donde un cambio en un paso afecta la predicción a través de pasos posteriores \cite{leung2023winit}. Un método que perturba cada paso de forma aislada ignora ambas.
+
+\section{Máscaras y perturbaciones aprendidas}
+\label{sec:mt_mascaras}
+
+Una alternativa a reemplazar celdas una por una es aprender una máscara que indique cuánto de cada celda debe conservarse. Fong y Vedaldi \cite{fong2017} formularon esta idea para imágenes, buscar la máscara más pequeña que, al perturbar el resto de la entrada, produce el mayor cambio en la predicción. Crabbé y Van Der Schaar \cite{crabbe2021} la adaptaron a series temporales con DynaMask. Dada una máscara $m \in [0,1]^{T \times V}$ y un operador de perturbación $\pi$ que produce una versión neutra de la ventana, la entrada perturbada es
+\begin{equation}
+    \Phi_m(x) = m \odot x + (1 - m) \odot \pi(x),
+\end{equation}
+donde $\odot$ es el producto elemento a elemento. Un valor $m_{t,v}=1$ conserva la celda original y $m_{t,v}=0$ la reemplaza completamente. La máscara se obtiene minimizando
+\begin{equation}
+    \mathcal{L}(m) = \mathcal{L}_e\big(f(x), f(\Phi_m(x))\big) + \lambda_a \mathcal{L}_a(m) + \lambda_c \mathcal{L}_c(m),
+\end{equation}
+donde $\mathcal{L}_e$ mide cuánto se aleja la predicción de la original, $\mathcal{L}_a$ penaliza el tamaño del área conservada y $\mathcal{L}_c$ penaliza los saltos bruscos entre pasos consecutivos, $\sum_{t,v} |m_{t+1,v} - m_{t,v}|$, para forzar coherencia temporal. La minimización se resuelve por descenso de gradiente para cada instancia explicada.
+
+Este enfoque tiene tres propiedades relevantes para esta tesis. Requiere el gradiente del modelo, de modo que no es aplicable a modelos no diferenciables. Su costo por instancia depende del número de iteraciones de la optimización. Y su calidad depende del operador $\pi$, que en DynaMask es fijo, un difuminado gaussiano, un promedio móvil o el valor pasado, y asume que la serie es localmente suave o estacionaria, un supuesto que choca con los regímenes descritos en la Sección~\ref{sec:mt_regimenes}.
+
+Enguehard \cite{enguehard2023} cuestiona esa elección, señalando que hay poca justificación para fijar la perturbación de antemano en datos temporales, y propone aprender conjuntamente la máscara y la función de perturbación. Con ello la perturbación se adapta a la estructura de cada serie. Liu et al.\ \cite{liu2024contralsp} atacan el problema de la distribución construyendo perturbaciones contrafactuales mediante aprendizaje contrastivo, de modo que la entrada perturbada permanezca dentro de la distribución original.
+
+\section{Explicaciones contrafactuales, necesidad y suficiencia}
+\label{sec:mt_contrafactual}
+
+Una explicación contrafactual responde a una pregunta distinta de la atribución. La atribución indica qué partes de la entrada pesaron en la predicción. La explicación contrafactual indica cómo tendría que cambiar la entrada para que la predicción fuera otra \cite{wachter2017}. Formalmente, dada una entrada $x$ con predicción $f(x)$, un contrafactual es una entrada $x'$ cercana a $x$ tal que $f(x')$ cumple una condición deseada, por ejemplo que la dirección predicha se invierta. En series temporales el reto es que $x'$ sea plausible, es decir, que respete la estructura temporal de los datos, ya que un contrafactual con ruido de aspecto adversarial no aporta una explicación con sentido.
+
+La teoría de la causalidad de Pearl \cite{pearl2009} ofrece dos nociones para separar los papeles de una parte de la entrada. La \emph{suficiencia} pregunta si conservar esa parte, y neutralizar el resto, basta para mantener la predicción. La \emph{necesidad} pregunta si quitar esa parte rompe la predicción original. Las dos son independientes, una subsecuencia puede ser suficiente sin ser necesaria, por ejemplo si otra parte de la entrada contiene la misma información. Los métodos de máscara, incluido DynaMask, buscan la parte mínima que mantiene la predicción, por lo que se orientan a la suficiencia y pueden asignar importancia a subsecuencias que acompañan la predicción sin ser necesarias para ella. La oclusión de la ecuación~\eqref{eq:oclusion} es, en cambio, una medida de tipo necesidad, porque cuantifica cuánto se pierde de la predicción al quitar una celda. Esta lectura sitúa la propuesta frente a los métodos de máscara y se retoma en el Capítulo~4.
+
+\section{Cuello de botella de información}
+\label{sec:mt_ib}
+
+El principio del cuello de botella de información, formulado por Tishby, Pereira y Bialek \cite{tishby2000}, busca una representación $Z$ de la entrada $X$ que sea lo más comprimida posible y conserve la información relevante para la salida $Y$. Se expresa como
+\begin{equation}
+    \min_{Z} \; I(X;Z) - \beta \, I(Z;Y),
+\end{equation}
+donde $I(\cdot\,;\cdot)$ es la información mutua y $\beta > 0$ controla el balance entre compresión y relevancia. Aplicado a la explicación, $Z$ es la parte de la serie que se conserva como explicación. Un término de compresión bajo exige que la explicación sea pequeña y dispersa, y un término de relevancia alto exige que conserve lo necesario para predecir.
+
+Queen et al.\ \cite{queen2023timex} lo aplican a series temporales con TimeX, que entrena un modelo sustituto cuyo espacio latente conserva las relaciones del modelo original y produce mapas de atribución discretos. Liu et al.\ \cite{liu2024timexpp} formulan con TimeX++ un objetivo bajo este principio que evita soluciones triviales, en las que la máscara se ignora, y el desplazamiento de la distribución. Zheng et al.\ \cite{zheng2026unifiedib} proponen un marco unificado en el que una red paramétrica construye instancias con la explicación incorporada, de modo que la información preservada da la atribución y la información removida de forma controlada da un contrafactual estable. Estos métodos comparten un rasgo relevante. Entrenan una red auxiliar para producir la explicación, por lo que su costo y su requisito de acceso al modelo son distintos de los de un método que solo consulta el modelo.
+
+\section{Evaluación de explicaciones}
+\label{sec:mt_evaluacion}
+
+Una explicación puede ser convincente para una persona sin reflejar el comportamiento real del modelo, por lo que su calidad debe medirse con criterios objetivos. Se usan tres tipos de evidencia, según se disponga o no de una verdad conocida.
+
+\textbf{Verdad conocida (ground truth).} Cuando los datos se generan con una función definida por el investigador, se conoce el conjunto $A$ de celdas que determinan la salida, y la matriz de importancia puede compararse con $A$. Las métricas AUP y AUR \cite{crabbe2021} miden, respectivamente, el área bajo la curva de precisión y de cobertura de las celdas identificadas al variar el umbral de importancia. Una explicación exacta identifica solo las celdas de $A$, lo que da alta precisión, y todas ellas, lo que da alta cobertura. Ismail et al.\ \cite{ismail2020} usan una estrategia análoga para evaluar métodos de saliencia en series temporales.
+
+\textbf{Fidelidad.} Mide si la importancia asignada corresponde a un efecto real sobre la predicción. Un procedimiento habitual, la curva de perturbación progresiva (AOPC) \cite{samek2017aopc}, elimina primero las celdas más importantes y registra cuánto cae la predicción, de modo que una explicación fiel produce una caída mayor que una asignación aleatoria.
+
+\textbf{Consistencia y robustez.} Cuando no existe verdad conocida, como en las series financieras reales, se recurre a señales indirectas. Se comparan las matrices de importancia entre modelos con la correlación de rangos de Spearman \cite{spearman1904}, que para $n$ observaciones sin empates se calcula como
+\begin{equation}
+    \rho = 1 - \frac{6 \sum_{i=1}^{n} d_i^2}{n (n^2 - 1)},
+\end{equation}
+donde $d_i$ es la diferencia entre los rangos de la observación $i$ en las dos variables comparadas. Se contrasta si las explicaciones difieren de una asignación aleatoria con la prueba no paramétrica de Mann y Whitney \cite{mann1947}, que no supone normalidad, y se verifica que no cambien de forma arbitraria frente a variaciones del procedimiento, como el vector de referencia, el orden de la perturbación o el régimen de mercado. Estas verificaciones siguen el espíritu de las pruebas de sensatez de Adebayo et al.\ \cite{adebayo2018}, una explicación que no cambia cuando cambia el modelo no está explicando ese modelo.
+
+\section{Consideraciones finales}
+
+Los conceptos presentados en este capítulo se encadenan. Las series financieras son ruidosas, no estacionarias y difíciles de predecir, y los modelos que se entrenan sobre ellas difieren en si admiten o no el cálculo de gradientes. Por eso el agnosticismo al modelo es una propiedad útil y su verificación empírica es una exigencia. Los métodos de perturbación, y en particular la oclusión por celda, cumplen el requisito de agnosticismo y producen una atribución con la forma de la ventana, pero deben respetar el orden temporal para ser válidos en series. Las máscaras aprendidas, las explicaciones contrafactuales y el cuello de botella de información delimitan el estado más reciente del área y comparten el uso de una red o de una optimización auxiliar, lo que las diferencia de la oclusión directa que emplea esta tesis. Finalmente, la evaluación descrita en la Sección~\ref{sec:mt_evaluacion} fija los criterios con los que se juzgan los resultados del Capítulo~5.

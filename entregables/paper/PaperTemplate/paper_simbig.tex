@@ -1,0 +1,953 @@
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage[cmex10]{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{\ensuremath{\times}}
+
+\begin{document}
+
+\title{A Model-Agnostic Temporal Explainability Framework\\
+for Financial Time Series Prediction}
+
+\titlerunning{Model-Agnostic Temporal Explainability for Finance}
+
+\author{Rushell Vanessa Zavalaga Orozco\inst{1} \and
+Juan Carlos Gutiérrez Cáceres\inst{1} \and
+Ana María Cuadros Valdivia\inst{1}}
+
+\authorrunning{R. V. Zavalaga Orozco et al.}
+
+\institute{School of Computer Science,\\
+Universidad Nacional de San Agustín de Arequipa, Arequipa, Peru\\
+\email{rzavalaga@unsa.edu.pe, jgutierrezca@unsa.edu.pe, acuadrosv@unsa.edu.pe}}
+
+\maketitle
+
+% =======================================================
+\begin{abstract}
+Stock market forecasting models based on deep learning achieve high
+accuracy but function as black boxes: they produce predictions without
+revealing which historical observations---which variables, on which
+days---drove them. Without knowing which inputs drive a prediction,
+it is impossible to validate model behavior, detect spurious
+correlations, or determine whether different architectures learn the
+same representations from financial data.
+
+Existing explanation methods have critical gaps: some require access
+to the model's internal computations, making them inapplicable to
+non-neural models; others ignore the sequential structure of financial
+data, generating explanations based on combinations of observations
+that could never occur in real markets.
+
+This paper proposes a framework that explains any forecasting model
+by systematically asking: \textit{``if I had not known the value of
+variable $v$ on day $t$, how different would the prediction have
+been?''} The answer is an importance matrix
+$\hat{\alpha} \in \mathbb{R}^{T \times V}$ showing each variable's
+contribution at each historical day. The framework communicates with
+the model only through its prediction function, requiring no internal
+access to weights, gradients, or architecture.
+
+Applied to three structurally different models---LSTM, Transformer,
+and Random Forest---trained on S\&P~500 data (2010--2024): the
+framework correctly identifies which inputs matter when the ground
+truth is known (AUP\,=\,0.9960), runs at 17.6\,ms per
+explanation---up to $160{\times}$ faster than competing
+methods---and produces explanations that differ appropriately between
+model types (Spearman $\rho=0.748$ between neural models vs.\
+$\rho<0.40$ against the ensemble model, $p<10^{-300}$), confirming
+that the framework captures model-specific behavior rather than
+artifacts of the explanation procedure. This pattern is robust to the
+choice of reference vector, to the market regime evaluated, and to a
+naturally bounded target formulation that also shows none of the
+three models beats a naive persistence baseline, in magnitude or in
+direction, consistent with weak-form market efficiency.
+
+\keywords{Financial time series \and Post-hoc explainability \and
+Model-agnostic \and Temporal perturbations \and Feature importance \and
+LSTM \and Transformer \and Random Forest}
+\end{abstract}
+
+% =======================================================
+\section{Introduction}
+\label{sec:introduction}
+
+Financial time series prediction is a central task in risk
+management, where decisions based on incorrect forecasts can have
+quantifiable consequences on portfolios and institutions
+\cite{arsenault2025}. In recent years, deep learning models have
+reduced prediction error on this type of data compared to classical
+statistical methods \cite{bhandari2022,abdulquadir2023}. However,
+these models produce their outputs without revealing the factors
+that determine them, which restricts their adoption in regulated
+environments where transparency is not optional \cite{arsenault2025}.
+
+To address this opacity, the field of Explainable Artificial
+Intelligence (XAI) groups methods that identify which factors
+influenced a prediction. These methods are organized by mechanism:
+gradient-based methods require access to the model's internal
+structure, attention-based methods depend on the architecture used,
+and perturbation-based methods such as SHAP and LIME are
+model-agnostic because they generate explanations by observing how
+the output changes when parts of the input are modified
+\cite{arsenault2025}. However, these perturbation methods were
+formulated under the assumption that input variables are
+independent. When applied to time series, they treat each time step
+as an isolated variable, ignoring that observations form a sequence
+with structural dependencies \cite{tonekaboni2020,huang2025}. In
+the financial domain, where market dynamics depend on patterns
+accumulated over time, this omission can produce explanations that
+do not reflect the actual behavior of the model
+\cite{yadav2025,crabbe2021}.
+
+Attention mechanisms in architectures such as LSTM with attention or
+Transformers produce weights indicating where the model focused, but
+being integrated within the architecture they are only valid for
+that specific model and cannot transfer to models of a different
+nature. This leaves perturbation-based methods as the only
+model-agnostic family, but their application to time series requires
+explicitly incorporating the temporal dependency their standard
+formulation ignores. Methods that do respect temporal ordering while
+remaining model-agnostic, such as dynamic masks \cite{crabbe2021} and
+perturbation-window frameworks \cite{roshinta2026}, have not been
+evaluated on models of fundamentally different computational natures
+trained on the same data, which prevents determining whether their
+explanations reflect model behavior or are a consequence of the
+chosen architecture.
+
+This paper proposes a model-agnostic temporal explainability
+framework that identifies which variables and at which historical
+moment were most relevant for a prediction, without depending on
+the internal structure of the model used. The framework operates
+through temporally ordered perturbations on the input window,
+producing an importance matrix per variable and time step that can
+be computed over any prediction model. Its model-agnostic nature
+is demonstrated by training models of fundamentally different
+computational natures on financial time series and verifying that
+the generated explanations capture the specific behavior of each
+model, rather than being independent of the explained model as in
+the failure mode documented by Adebayo et al.~\cite{adebayo2018}.
+
+% =======================================================
+\section{Related Work}
+\label{sec:related_work}
+
+Related work is organized into two thematic axes. (1) XAI methods
+incorporating the temporal dimension. (2) Temporally-aware
+model-agnostic explainability frameworks.
+
+\subsection{XAI Methods Incorporating the Temporal Dimension}
+
+Huang et al.~\cite{huang2025} proposed ShapeX, which segments series
+into shapelets and computes Shapley values over them for
+classification, where a recognizable pattern over a subsequence is
+itself the evidence for the predicted label. This work targets
+continuous prediction over a multivariate window instead, where that
+premise breaks down. Two variables at the same instant can have
+independent causal roles, and grouping them into a shared segment
+would dilute that distinction, motivating cell-level rather than
+segment-level attribution.
+
+Yadav and Subbian~\cite{yadav2025} showed that gradient, occlusion,
+and permutation-based methods fail on dynamic prediction because they
+do not adapt to time-varying variable-target relationships, producing
+attributions that jump abruptly instead of varying smoothly. Their
+proposed fix, learnable masks optimized via gradients, ties the
+solution to differentiable models. This work shares the diagnosis but
+resolves it without that cost, respecting causal order per
+perturbation instead of optimizing a global gradient-based mask.
+
+This pattern is not exclusive to generic domains. It repeats in
+financial applications combining SHAP or LIME with LSTM/CNN
+architectures for auditing, non-technical decision support, or trend
+classification \cite{gupta2025,sathyampeth2025,manikrao2026,
+jagannathan2025,kumar2024,singh2025,muhammad2024}, applying these
+methods directly on the series without adapting their perturbation
+mechanism to temporal order.
+
+\subsection{Temporally-Aware Model-Agnostic Explainability Frameworks}
+
+Tonekaboni et al.~\cite{tonekaboni2020} introduced FIT, which
+quantifies observation importance via the prediction change upon
+removal, controlling for the natural prediction drift as more data
+becomes available. Its mechanism needs only model predictions, so it
+could in principle run on any model, but it was evaluated on a
+single model type, leaving open whether its attributions reflect
+model behavior or architecture.
+
+Bento et al.~\cite{bento2021} proposed TimeSHAP, extending KernelSHAP
+to sequences with feature, timestep, and cell-level attributions,
+evaluated on bank fraud detection, the domain closest to this work.
+Its coalition-sampling mechanism over reference sequences restricts
+it to natively sequential models, precluding direct use on Random
+Forest, and Shapley-sampling cost scales unfavorably with $T$ and
+$V$.
+
+Raykar et al.~\cite{raykar2023} proposed TsSHAP, applying TreeSHAP
+over a surrogate trained on user-defined interpretable features for
+univariate forecasting, without attributing importance to individual
+variables within a multivariate window.
+
+Crabbé and Van Der Schaar~\cite{crabbe2021} proposed DynaMask, which
+fits a gradient-optimized perturbation mask penalizing abrupt jumps
+to guarantee temporal coherence, producing a $T{\times}V$ score and
+making it the most direct antecedent of this work. However, it
+requires model gradients, restricting it to neural networks.
+
+Leung et al.~\cite{leung2023winit} proposed WinIT, extending
+FIT~\cite{tonekaboni2020} with importance per \emph{window} of recent
+observations rather than per individual observation, mitigating
+diluted attribution among temporally correlated variables. Like FIT,
+its mechanism needs no gradients or internal access, but it was
+evaluated only under recurrent models, leaving cross-architecture
+consistency unverified.
+
+Roshinta et al.~\cite{roshinta2026} proposed a dynamic-window
+perturbation framework using PCA to reduce redundancy among
+correlated variables before perturbing, reconstructing attributions
+in the original variable space. It is mechanically closest to this
+proposal, needing no Shapley values nor internal access, but
+per-variable attribution is indirect, reconstructed from principal
+components rather than obtained per cell, and evaluation is limited
+to recurrent architectures (GRU, LSTM).
+
+Kim and Park~\cite{gsshap2026} proposed GroupSegment-SHAP (GS-SHAP),
+the work closest in domain to this proposal. It groups correlated
+variables via the HSIC criterion, detects change points within each
+group via recursive MMD divergence producing segments
+$\mathcal{S}^{(k)}$, and computes Shapley values over structured
+players $p_{k,j} = G_k \times S_j^{(k)}$ via permutation sampling
+with mean-replacement masking, improving structural coherence by
+exploiting inter-variable correlation. However, GS-SHAP (1)~is
+evaluated on a single model per task, and (2)~its output granularity
+operates at the \emph{group} level ($K$ groups $\times$ $J$
+segments), losing the per-variable resolution that this framework
+produces directly in $\hat{\alpha} \in \mathbb{R}^{T \times V}$ with
+$V$ original ungrouped variables.
+
+The works in this axis share a common limitation. None evaluates its
+explanations on models of different computational natures trained on
+the same data. TimeSHAP and DynaMask cannot be applied to ensemble
+models such as Random Forest, the former due to its dependence on
+sequential model structure and the latter due to requiring gradients.
+TsSHAP operates on predefined features and does not attribute
+importance per individual cell. FIT, WinIT, Roshinta et al., and
+GS-SHAP evaluate on a single model type, which prevents ruling out
+the failure mode documented by Adebayo et al.~\cite{adebayo2018},
+attributions that reflect the perturbation method rather than the
+explained model's behavior. GS-SHAP aggregates variables into groups
+and Roshinta et al. reconstructs them indirectly via PCA, both losing
+the direct per-variable resolution that this framework produces. This
+work proposes a model-agnostic temporal perturbation framework that
+produces importances at full $(T \times V)$ resolution without prior
+grouping, can operate on any model through an injectable prediction
+function, and whose agnostic nature is demonstrated by evaluating
+models of different computational natures on the same data.
+Table~\ref{tab:related_work} summarizes the comparison.
+
+\begin{table}[ht]
+\caption{Comparison of related work along key problem dimensions.
+\cmark~=~yes; \xmark~=~no; $\sim$~=~partially.
+\textit{Temp. resp.}~= explanations respect temporal ordering;
+\textit{Agnostic}~= no access to model internals required;
+\textit{Temp. imp.}~= importance attributed per time step;
+\textit{Feat. imp.}~= importance attributed per input feature;
+\textit{Agn. verif.}~= behavior evaluated across models of
+different computational natures.}
+\label{tab:related_work}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccccl}
+\toprule
+\textbf{Work} &
+\textbf{XAI} &
+\textbf{Temp. resp.} &
+\textbf{Agnostic} &
+\textbf{Temp. imp.} &
+\textbf{Feat. imp.} &
+\textbf{Agn. verif.} &
+\textbf{Type} \\
+\midrule
+\multicolumn{8}{l}{\textit{Axis 1 --- XAI with temporal dimension}} \\
+\midrule
+Huang et al.~\cite{huang2025}
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark & ShapeX \\
+Yadav \& Subbian~\cite{yadav2025}
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark & Mask Eval. \\
+\midrule
+\multicolumn{8}{l}{\textit{Axis 2 --- Temporally-aware agnostic explainability}} \\
+\midrule
+Tonekaboni et al.~\cite{tonekaboni2020}
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark & FIT \\
+Leung et al.~\cite{leung2023winit}
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark & WinIT \\
+Crabbé \& Van Der Schaar~\cite{crabbe2021}
+& \cmark & \cmark & $\sim$ & \cmark & \cmark & \xmark & DynaMask \\
+Bento et al.~\cite{bento2021}
+& \cmark & \cmark & $\sim$ & \cmark & \cmark & \xmark & TimeSHAP \\
+Raykar et al.~\cite{raykar2023}
+& \cmark & \cmark & \cmark & \xmark & $\sim$ & \xmark & TsSHAP \\
+Roshinta et al.~\cite{roshinta2026}
+& \cmark & \cmark & \cmark & \cmark & $\sim$ & \xmark & Dyn. windows \\
+Kim and Park~\cite{gsshap2026}
+& \cmark & \cmark & \cmark & \cmark & $\sim$ & \xmark & GS-SHAP \\
+\midrule
+\textbf{This work}
+& \cmark & \cmark & \cmark & \cmark & \cmark & \cmark & Agnostic Fwk. \\
+\bottomrule
+\end{tabular}}
+\end{table}
+
+% =======================================================
+\section{Theoretical Background}
+\label{sec:background}
+
+\subsubsection{Post-hoc Explainability.}
+A method is post-hoc when it operates on an already-trained model
+without modifying its structure or training process \cite{arsenault2025}.
+Given a trained model and a specific prediction, the post-hoc method
+produces an importance attribution over the input variables.
+
+\subsubsection{Model-Agnostic Methods.}
+A post-hoc method is model-agnostic when it requires no access to
+the model's internal structure. It can be applied to neural networks,
+ensemble models, or statistical models without knowing their weights,
+gradients, or architecture \cite{arsenault2025}. This property
+enables comparing explanations across models under identical
+conditions.
+
+Being agnostic by design does not guarantee that a method's
+attributions reflect the actual behavior of the explained model.
+Adebayo et al.~\cite{adebayo2018} showed that several saliency
+methods produce nearly identical explanations even when a model's
+weights are randomized, that is, attributions independent of both
+the model and the data used to train it. This implies that the
+mechanical agnosticism of a method must be verified empirically, and
+cannot be assumed from its design alone.
+
+\subsubsection{Perturbation-Based Methods.}
+Perturbation methods estimate the importance of a variable by
+observing how the model's prediction changes when that variable is
+modified or removed from the input \cite{arsenault2025}. SHAP
+formalizes this with Shapley values from cooperative game theory;
+LIME fits a local linear model over perturbations near the instance.
+Both were formulated assuming independent input variables, which
+makes them generate temporally inconsistent sequences when applied
+to time series \cite{tonekaboni2020,crabbe2021}.
+
+\subsubsection{Temporal Explainability.}
+Temporal explainability extends importance attribution to the time
+dimension, recognizing that the same variable may be decisive at one
+historical moment and irrelevant at another \cite{tonekaboni2020}.
+Given a model and an input window of $T$ time steps and $V$
+variables, temporal explainability produces a matrix
+$\hat{\alpha} \in \mathbb{R}^{T \times V}$, where each cell
+$\hat{\alpha}(t, v)$ represents the relevance of variable $v$ at
+time step $t$ for the analyzed prediction. For a temporal
+explanation to be valid, perturbations must respect temporal
+ordering: future information cannot be modified to explain a past
+instant \cite{tonekaboni2020,crabbe2021}.
+
+% =======================================================
+\section{Proposed Framework}
+\label{sec:framework}
+
+The proposed framework produces a matrix
+$\hat{\alpha} \in \mathbb{R}^{T \times V}$ where each cell
+indicates how much variable $v$ at time step $t$ contributed to
+the analyzed prediction. It is composed of four modules with
+well-defined responsibilities, illustrated in
+Fig.~\ref{fig:pipeline}: (1)~a data ingestion and preparation
+module, (2)~a uniform prediction interface that decouples the
+perturbation engine from any concrete model, (3)~the temporal
+perturbation engine that produces $\hat{\alpha}$, and (4)~a
+statistical validation module. Modules (2) and (3) form the
+agnostic core: module (2) ensures any model can be connected
+without modifying the engine, and module (3) ensures perturbations
+are temporally coherent regardless of the connected model.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{../PIPELINE.png}
+\caption{Framework pipeline. Five modules.
+(1)~Data ingestion and preparation, S\&P~500 acquisition, $V{=}15$
+feature derivation, sliding windows of shape $(N, 20, 15)$.
+(2)~Training of three models of different computational natures
+(LSTM, Transformer, Random Forest) under the same interface.
+(3)~Uniform prediction interface via a two-level adapter pattern
+that decouples the engine from any concrete model.
+(4)~Temporal perturbation engine producing
+$\hat{\alpha} \in \mathbb{R}^{20 \times 15}$ per instance via a
+single batch of 301 perturbed windows.
+(5)~Statistical validation through inter-model consistency
+(Spearman~$\rho$), significance (Mann-Whitney~$U$), and additional
+robustness checks (alternative reference, market regime, bounded
+target).}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Data Ingestion and Preparation}
+
+The framework receives as input a multivariate time series
+organized in fixed-length sliding windows. Historical data of the
+S\&P~500 index (\texttt{\^{}GSPC}) for the period 2010--2024 was
+obtained via the \textit{yfinance} library, totaling 3,754 trading
+days. From five base price and volume variables (Open, High, Low,
+Close, Volume), ten technical indicators are derived: simple moving
+averages of 5, 10, and 20 days (SMA\_5, SMA\_10, SMA\_20), MACD
+and its signal (MACD, MACD\_Signal), 14-period relative strength
+index (RSI\_14), Bollinger bandwidth (BB\_width), 14-period average
+true range (ATR\_14), log return (Log\_Return), and relative volume
+(Volume\_ratio), forming a space of $V=15$ variables.
+
+Data were partitioned respecting temporal order into a development
+period (80\%) and test set (20\%). The MinMax scaler was fitted on
+the complete development period to avoid data leakage. Sliding
+windows of $T=20$ days with prediction horizon $H=1$ day were
+constructed, where the target variable is the normalized closing
+price of the next day. Each window has shape $(T, V) = (20, 15)$.
+
+\subsection{Uniform Prediction Interface}
+
+Model-agnosticism is implemented through a two-level adapter pattern.
+The \texttt{TemporalPerturbationEngine} receives as its sole contact
+point with the model a prediction function
+$f: \mathbb{R}^{N \times T \times V} \rightarrow \mathbb{R}^N$
+injected into its constructor; the engine never accesses the model
+directly. This separation ensures that incorporating a new model
+requires no modification to any existing component.
+
+\textbf{Level 1, signature adaptation.} Each model implements a
+wrapper standardizing the input signature to $(N, T, V)$ and the
+output to $(N,)$: the Random Forest wrapper flattens each window
+$(T,V) \rightarrow (T{\cdot}V)$ before invoking the scikit-learn
+regressor, while LSTM and Transformer wrappers convert NumPy arrays
+to PyTorch tensors and run gradient-free inference. From the
+engine's perspective, any model behaves identically.
+
+\textbf{Level 2, prediction function injection.} The
+\texttt{ModelAgnosticExplainer} builds the callable $f$ from the
+wrapper and injects it into the engine, automated for PyTorch and
+scikit-learn backends. For any other model, statistical, proprietary,
+or from a different framework, the user can inject a function with
+signature $(N, T, V) \rightarrow (N,)$ directly, without modifying
+any framework component, implementing dependency inversion.
+
+\subsection{Temporal Perturbation Engine}
+
+Given an input window $x \in \mathbb{R}^{T \times V}$ and a model
+$f$, the engine constructs an importance matrix
+$\alpha \in \mathbb{R}^{T \times V}$ where each cell $\alpha(t, v)$
+quantifies how much the model's prediction changes when variable $v$
+at time step $t$ is replaced by a neutral reference value:
+
+\begin{equation}
+    \alpha(t, v) = \left| f(x) - f(x_{-(t,v)}) \right|
+\end{equation}
+
+where $x_{-(t,v)}$ denotes the original window with position
+$(t, v)$ replaced by $r_v$, the reference value of variable $v$
+defined as its mean over the training set in normalized scale. The
+reference vector $\mathbf{r} \in \mathbb{R}^V$ is computed once
+before evaluation and kept fixed throughout.
+
+Perturbations respect the temporal ordering: each position $(t, v)$
+is masked independently without modifying any other value,
+guaranteeing that perturbed sequences are temporally coherent and
+do not introduce future information into past instants
+\cite{tonekaboni2020,crabbe2021}.
+
+For computational efficiency, the engine builds a single batch of
+$T \times V + 1$ windows---the original window plus one perturbed
+window per position---obtaining all predictions in a single
+inference call:
+
+\begin{equation}
+    \text{batch} = \left[ x,\; x_{-(0,0)},\; \ldots,\;
+    x_{-(T-1,V-1)} \right] \in
+    \mathbb{R}^{(TV+1) \times T \times V}
+\end{equation}
+
+With $T=20$ and $V=15$, the batch contains 301 windows per
+explained prediction. Importance values are then normalized by the
+$L_1$ norm to be comparable across predictions and models:
+
+\begin{equation}
+    \hat{\alpha}(t, v) = \frac{\alpha(t, v)}
+    {\sum_{t'}\sum_{v'} \alpha(t', v')}
+\end{equation}
+
+\subsection{Statistical Validation Module}
+
+\textbf{Inter-model consistency.}
+This verifies that the framework produces explanations reflecting
+each model's specific behavior and not an artifact of the
+perturbation method, in the sense flagged by Adebayo et
+al.~\cite{adebayo2018} for model-independent saliency methods. For
+each pair of models, the Spearman correlation $\rho$ between the
+flattened vectors of their $\hat{\alpha}$ matrices is computed,
+averaged over $N=100$ randomly selected test instances:
+
+\begin{equation}
+    \rho_{\text{inter}} = \frac{1}{N} \sum_{i=1}^{N}
+    \rho\!\left(
+    \text{vec}(\hat{\alpha}_i^{(A)}),\;
+    \text{vec}(\hat{\alpha}_i^{(B)})
+    \right)
+\end{equation}
+
+High correlation between models of the same family (neural) and
+lower correlation between different families (neural vs.\ ensemble)
+indicates that explanations capture model-specific behavior.
+
+\textbf{Statistical significance.}
+Explanations are compared against a random baseline: matrices of
+shape $(T, V)$ with values drawn from a uniform distribution and
+$L_1$-normalized, maintaining the same scale as real $\hat{\alpha}$
+matrices. The non-parametric Mann-Whitney U test is applied between
+real and baseline distributions without assuming normality
+\cite{schlegel2019}.
+
+% =======================================================
+\section{Experimental Results}
+\label{sec:results}
+
+\subsection{Experimental Setup}
+
+S\&P~500 historical data (\texttt{\^{}GSPC}) for 2010--2024
+(3,754 trading days, $V{=}15$ variables: 5 base price/volume series
+plus 10 derived technical indicators) was partitioned respecting
+temporal order into development (80\%) and test (20\%) sets.
+Sliding windows of $T{=}20$ days with one-day-ahead prediction
+horizon were constructed (shape $(T,V){=}(20,15)$); a MinMax scaler
+fitted on the development set was applied to prevent data leakage.
+The reference vector $\mathbf{r}{\in}\mathbb{R}^{15}$ is the
+per-variable mean over the training set in normalised scale,
+fixed for all evaluations.
+
+Three models of fundamentally different computational natures were
+trained on the same data under identical conditions:
+
+\begin{itemize}\setlength\itemsep{0pt}
+  \item \textbf{LSTM:} 2-layer recurrent network
+    (hidden$=$128, dropout~0.2).
+  \item \textbf{Transformer:} 2-layer encoder with 4 attention heads,
+    feedforward dimension 256, sinusoidal positional encoding,
+    and learned attention pooling over the full sequence.
+  \item \textbf{Random Forest:} 200 decision trees
+    (\texttt{RandomForestRegressor}), non-sequential tabular baseline.
+\end{itemize}
+
+All neural models were trained with AdamW ($lr{=}10^{-3}$),
+learning rate reduction on plateau (factor~0.5, patience~5),
+gradient clipping (norm~1.0), and early stopping (patience~15).
+Test-set MSE: LSTM~$0.00342$, Transformer~$0.00284$, RF~$0.12131$
+(higher RF error attributable to price extrapolation beyond the
+training-period maximum during the 2023--2024 bull market).
+
+As an additional reference, a naive persistence baseline
+$f(x)=x_{t,\text{Close}}$ (predicting no change) achieves
+MSE$=0.00016$, an order of magnitude below all three trained models.
+This does not invalidate the cross-model comparison, since this
+work's goal is verifying framework agnosticism rather than optimizing
+predictive accuracy, but it indicates none of the three models beats
+the random-walk hypothesis on nominal price prediction. It also
+connects to a scale artefact. The MinMax scaler is fit on the
+development period (2010--2021), but the S\&P~500 reached new
+all-time highs through most of the test period (2022--2024, 731
+windows), so $32.7\%$ of real test values fall outside $[0,1]$.
+Random Forest cannot extrapolate beyond its training-observed output
+range by design ($0.00\%$ of its predictions fall outside $[0,1]$,
+collapsing to $[0.645,0.657]$), inflating its MSE beyond the
+architectural gap alone. Section~\ref{sec:robustness} evaluates a
+naturally bounded target that resolves this.
+
+\subsection{Advance 1: Cell-Level Attribution Without Gradient Access}
+\label{sec:advance1}
+
+\textbf{Gap from DynaMask.}
+DynaMask~\cite{crabbe2021} is the closest antecedent in output
+format: it produces a $T{\times}V$ importance matrix via a
+gradient-optimised perturbation mask, reporting AUP\,$=0.97\pm0.01$
+on a synthetic benchmark (AR(1) inputs, $f{=}\Sigma x^2$,
+$T{=}50$, $V{=}4$; their Table~1).
+The fundamental restriction is that gradient access to the target
+model is mandatory; DynaMask cannot be applied to gradient-free
+models such as Random Forest.
+
+\textbf{This work.}
+FO computes attributions via a single batched call of
+$T{\times}V{+}1{=}301$ perturbed windows, requiring only
+prediction-function access. We replicate the benchmark family
+($T{=}20$, $V{=}15$, $n{=}10$ repetitions) under two ground-truth
+scenarios:
+
+\begin{itemize}\setlength\itemsep{0pt}
+  \item \textit{Rare Feature (RF):} $|\mathcal{A}_V|{=}3$
+    salient variables, all $T$ steps relevant.
+  \item \textit{Rare Time (RT):} $|\mathcal{A}_T|{=}4$ salient
+    time steps, all $V$ variables relevant.
+\end{itemize}
+
+The white-box target is $f(\mathbf{X}) = \sum_{(t,v)\in\mathcal{A}}
+x_{t,v}^{2}$; inputs are independent AR(1) per variable.
+Metrics follow~\cite{crabbe2021}: AUP ($\uparrow$), AUR ($\uparrow$),
+mask information content $I_M$ ($\uparrow$), mask entropy $S_M$
+($\downarrow$).
+
+\begin{table}[ht]
+\caption{Synthetic white-box validation ($n{=}10$ repetitions,
+         $N{=}30$; SVS: $N{=}5$\,\textsuperscript{$\star$}).}
+\label{tab:exp1_synthetic}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccccc}
+\toprule
+& \multicolumn{4}{c}{\textbf{Rare Feature (RF)}}
+& \multicolumn{4}{c}{\textbf{Rare Time (RT)}} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+\textbf{Method} & \textbf{AUP} & \textbf{AUR}
+  & $I_M$ & $S_M$
+  & \textbf{AUP} & \textbf{AUR}
+  & $I_M$ & $S_M$ \\
+\midrule
+FO (proposed)
+  & $1.00{\pm}0.00$ & $0.16{\pm}0.01$ & $30.6{\pm}1.1$ & $0.00{\pm}0.00$
+  & $1.00{\pm}0.00$ & $0.16{\pm}0.01$ & $30.0{\pm}0.8$ & $0.00{\pm}0.00$ \\
+FP
+  & $1.00{\pm}0.00$ & $0.18{\pm}0.01$ & $31.9{\pm}1.2$ & $0.00{\pm}0.00$
+  & $1.00{\pm}0.00$ & $0.18{\pm}0.01$ & $32.1{\pm}1.6$ & $0.00{\pm}0.00$ \\
+IG
+  & $1.00{\pm}0.00$ & $0.16{\pm}0.01$ & $30.6{\pm}1.1$ & $0.00{\pm}0.00$
+  & $1.00{\pm}0.00$ & $0.16{\pm}0.01$ & $30.0{\pm}0.8$ & $0.00{\pm}0.00$ \\
+SVS\textsuperscript{$\star$}
+  & $1.00{\pm}0.00$ & $0.17{\pm}0.01$ & $31.2{\pm}0.8$ & $0.00{\pm}0.00$
+  & $1.00{\pm}0.00$ & $0.15{\pm}0.01$ & $28.9{\pm}1.5$ & $0.00{\pm}0.00$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+FO achieves AUP\,$=0.9960\pm0.0000$ in both scenarios, exceeding the
+DynaMask FO baseline of $0.97$ while requiring no gradient access and
+running on LSTM, Transformer, \emph{and} Random Forest without
+modification. $S_M \approx 4.4{\times}10^{-5}$ is a floating-point
+residual of $L_1$ normalisation (analytically zero, since cells
+outside $\mathcal{A}$ receive zero raw importance). This confirms
+per-cell resolution over all $V{=}15$ original ungrouped variables,
+the $T{\times}V$ output format that prior gradient-free methods had
+not demonstrated simultaneously across neural and ensemble backends.
+
+SVS (Shapley Value Sampling) is the only other method that is
+model-agnostic, produces a $T{\times}V$ matrix, and requires no
+gradient access --- making it the valid same-conditions baseline.
+Both FO and SVS achieve AUP\,$=0.9960\pm0.0000$ in both scenarios,
+confirming Shapley-equivalent identification precision on a
+ground-truth benchmark. AUR differences remain within one standard
+deviation. The substantive difference between the two methods is
+therefore computational: quantified in Sections~\ref{sec:advance2}
+and~\ref{sec:results_faithfulness}.
+
+\subsection{Advance 2: Order-of-Magnitude Runtime Reduction}
+\label{sec:advance2}
+
+\textbf{Gap from TimeSHAP and GS-SHAP.}
+Two prior works share the S\&P~500, $T{=}20$ domain and report
+per-sample runtimes under a controlled perturbation budget of
+$M{=}50$ permutations (Kim and Park~\cite{gsshap2026}, Table~C3,
+CPU): TimeSHAP~\cite{bento2021} at \textbf{2,813\,ms/sample},
+requiring a reference sequence and sequential model structure that
+precludes Random Forest, and GS-SHAP~\cite{gsshap2026} at
+\textbf{1,194\,ms/sample}, model-agnostic but outputting $K{\times}J$
+group-segment players evaluated on a single BiLSTM. Both runtimes
+scale with the number of coalition evaluations required by Shapley
+value computation.
+
+\textbf{This work.}
+FO reduces the inference count to a single batch of
+$T{\times}V{+}1{=}301$ windows per instance, no coalition sampling,
+no permutations, deterministic result.
+Under the same domain (S\&P~500, $T{=}20$, CPU), FO achieves
+\textbf{17.6\,ms/sample} (LSTM), a reduction of ${\times}159.8$
+over TimeSHAP and ${\times}67.8$ over GS-SHAP.
+Table~\ref{tab:advances} summarises all three concrete advances over
+prior work with verifiable numbers.
+
+\begin{table}[ht]
+\caption{Concrete advances over prior work.
+  $\dagger$: reported by Kim and Park~\cite{gsshap2026}, Table~C3
+  (S\&P~500, $T{=}20$, $M{=}50$, CPU).
+  $\ddagger$: measured in this work, same domain and $T$.
+  $\star$: different synthetic setup ($T{=}50$, $V{=}4$) vs.\
+  ours ($T{=}20$, $V{=}15$); same function class.}
+\label{tab:advances}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lp{2.8cm}cc}
+\toprule
+\textbf{Prior work} & \textbf{Open gap} &
+\textbf{Their result} & \textbf{This work} \\
+\midrule
+DynaMask~\cite{crabbe2021}
+  & Requires gradients; no RF support
+  & AUP $0.97^{\star}$, no RF
+  & AUP $\mathbf{0.9960}$, RF \cmark \\[2pt]
+TimeSHAP~\cite{bento2021}
+  & Sequential models only; slow
+  & $2{,}813$\,ms/sample$^{\dagger}$
+  & $\mathbf{17.6}$\,ms/sample$^{\ddagger}$ (${\times}159.8$) \\[2pt]
+GS-SHAP~\cite{gsshap2026}
+  & Grouped output ($K{\times}J$); single model
+  & $1{,}194$\,ms/sample$^{\dagger}$; $K{\times}J$ only
+  & $\mathbf{17.6}$\,ms/sample$^{\ddagger}$; $T{\times}V$ \cmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Model-Agnosticism Verification}
+\label{sec:agnosticism}
+
+A key claim of this work is that the framework generates
+\emph{model-specific} explanations --- attributions that reflect the
+internal behavior of the queried model, not an artefact of the
+perturbation method. This is evaluated through two complementary
+tests on 100 randomly selected test instances.
+
+\textbf{Inter-model consistency (Spearman~$\rho$).}
+For each pair of models, we compute the mean Spearman $\rho$ between
+their flattened $\hat{\alpha}$ vectors over all instances
+(Table~\ref{tab:consistency}).
+
+\begin{table}[ht]
+\caption{Inter-model consistency (Spearman $\rho$, mean over 100
+instances). High within-family, lower across-family correlation
+confirms that attributions capture model-specific behavior.}
+\label{tab:consistency}
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Model pair} & \textbf{Spearman $\rho$} \\
+\midrule
+LSTM -- Transformer          & 0.748 \\
+LSTM -- Random Forest        & 0.255 \\
+Transformer -- Random Forest & 0.382 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The LSTM--Transformer pair yields $\rho{=}0.748$: both neural
+architectures agree on the most salient importance patterns despite
+differing mechanisms. Neural--RF pairs yield $\rho{<}0.40$, reflecting
+qualitatively different information processing by the ensemble.
+This cross-family divergence is only observable under a framework
+that runs on all three architectures simultaneously; DynaMask requires
+gradients (precluding RF) and TimeSHAP requires sequential structure
+(precluding RF).
+
+\textbf{Statistical significance (Mann-Whitney $U$).}
+Attributions are compared against $L_1$-normalised uniform random
+matrices of identical shape using the Mann-Whitney $U$ test. All
+three models reject the null hypothesis of equivalence with the
+random baseline by tens of orders of magnitude ($U{=}3.55{\times}10^9$
+LSTM, $3.59{\times}10^9$ Transformer, $2.72{\times}10^8$ Random
+Forest; $p{<}10^{-300}$ in all three cases), confirming that the
+framework produces informative, non-trivial attributions regardless
+of model nature.
+
+\subsection{Robustness Checks}
+\label{sec:robustness}
+
+The tests above use a single reference vector, a single target
+formulation, and a random test sample. This subsection reports three
+further checks reusing the checkpoints already described, plus a
+log-return retraining.
+
+\textbf{Naturally bounded target.} Retraining all three models on
+next-day log return instead of \texttt{Close} (same split, scaler,
+architectures) removes the MinMax saturation flagged in
+Section~\ref{sec:advance1}. Under this bounded target, \emph{no}
+model beats a zero-return persistence baseline (MSE$=0.00257$; LSTM
+$0.00268$, Transformer $0.00260$, RF $0.00446$), consistent with
+weak-form market efficiency. The RF-vs-neural MSE gap shrinks from
+${\sim}35{\times}$ to ${\sim}1.7{\times}$, and inter-model consistency
+reproduces the same pattern (LSTM--Transformer $\rho{=}0.541$,
+LSTM--RF $\rho{=}0.187$, Transformer--RF $\rho{=}0.311$; $p{\approx}0$
+vs.\ random), confirming agnosticism verification is not an artefact
+of price autocorrelation.
+
+\textbf{Directional accuracy.} Direction-of-movement accuracy against
+the previous close, for both targets, falls within a narrow band
+around chance for all six model-target combinations (Close: LSTM
+$47.1\%$, Transformer $46.4\%$, RF $48.0\%$; Log\_Return: LSTM
+$46.6\%$, Transformer $50.3\%$, RF $47.5\%$), reinforcing the
+market-efficiency reading above.
+
+\textbf{Reference sensitivity and market regime.} Table~\ref{tab:robustness}
+reports inter-model consistency under two alternative references
+(median, zero) on the same 100 instances, and under the two market
+regimes present in the test period (2022 bear, 188 windows;
+2023--2024 bull, 501 windows; the test period excludes the 2020
+COVID crash, which falls in the development split).
+
+\begin{table}[ht]
+\caption{Inter-model consistency (Spearman $\rho$) across reference
+vectors and market regimes. The neural--neural pair exceeds both
+neural--ensemble pairs in every row.}
+\label{tab:robustness}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Condition} & \textbf{LSTM--Transf.} & \textbf{LSTM--RF} & \textbf{Transf.--RF} \\
+\midrule
+Mean reference (baseline)   & 0.748 & 0.255 & 0.382 \\
+Median reference            & 0.750 & 0.332 & 0.475 \\
+Zero reference               & 0.587 & 0.255 & 0.370 \\
+\midrule
+Bear market 2022             & 0.703 & 0.173 & 0.287 \\
+Bull market 2023--2024       & 0.764 & 0.278 & 0.404 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The neural-vs-ensemble gap holds under every reference and every
+regime, confirming that the framework's central finding does not
+depend on the arbitrary choice of reference vector nor on the market
+window sampled. Consistency is systematically lower under the bear
+regime for all three model pairs, suggesting the three architectures
+agree less on what drives predictions when the market is more
+volatile. LSTM and Transformer attributions are highly stable across
+reference choices (mean-vs-median $\rho{\approx}0.99$); Random
+Forest is markedly more sensitive (mean-vs-median $\rho{=}0.81$,
+mean-vs-zero $\rho{=}0.67$).
+
+\subsection{Same-Conditions Quality Benchmark: FO vs.\ SVS}
+\label{sec:results_faithfulness}
+
+To quantify attribution quality in the absence of ground truth, we
+apply the faithfulness protocol of~\cite{crabbe2021}: for each
+fraction $\alpha{\in}\{0.1,\ldots,0.6\}$, the
+$\lfloor\alpha{\cdot}T{\cdot}V\rfloor$ highest-attribution cells are
+replaced by their reference value and the mean absolute prediction
+shift is measured:
+
+\begin{equation}
+    \Delta_\alpha = \frac{1}{N}\sum_{i=1}^{N}
+        \left|f(\mathbf{X}_i) - f(\tilde{\mathbf{X}}_i^{(\alpha)})\right|
+    \label{eq:faithfulness}
+\end{equation}
+
+A faithful explanation produces high $\Delta_\alpha$: perturbing
+truly relevant cells significantly affects model predictions.
+
+SVS (Shapley Value Sampling, 15~permutations) is the only other
+method that is model-agnostic, produces a $T{\times}V$ matrix, and
+runs on all three models, making it the valid same-conditions
+comparator. Evaluation uses the same S\&P~500 test set ($N{=}100$;
+SVS over $N{=}10$ due to computational cost), same reference vector,
+same three models.
+
+\begin{table}[ht]
+\caption{Prediction shift $\Delta_{0.3}$ at $\alpha{=}0.3$.
+         IG not applicable to Random Forest ($\dagger$);
+         SVS: $N{=}10$, 15~permutations. Bold: best per model.}
+\label{tab:faithfulness}
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Model} & \textbf{FO} & \textbf{FP}
+               & \textbf{IG} & \textbf{SVS} \\
+\midrule
+LSTM          & \textbf{0.5033} & 0.4776 & \textbf{0.5034} & 0.4891 \\
+Transformer   & 0.4518          & 0.4320 & \textbf{0.4565} & 0.4352 \\
+Random Forest & 0.3047          & 0.2723 & $\dagger$        & \textbf{0.3212} \\
+\midrule
+\multicolumn{5}{l}{\small FO$-$SVS: LSTM $+0.0142$ (FO better)\quad
+  Transformer $+0.0166$ (FO better)\quad RF $-0.0165$ (SVS better)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\caption{Per-sample runtime (ms, CPU, mean$\,\pm\,$std over 5~runs of
+         50~samples). FO: $T{\times}V{+}1{=}301$ forward passes.
+         SVS: $2{\times}15{\times}T{\times}V{=}9{,}000$ evaluations.}
+\label{tab:timing}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Model} & \textbf{FO (ms)} & \textbf{SVS (ms)}
+               & \textbf{FO speedup} \\
+\midrule
+LSTM          & $17.6\pm0.9$   & $469.1\pm3.1$   & ${\times}26.6$ \\
+Transformer   & $13.8\pm0.3$   & $413.5\pm15.9$  & ${\times}30.0$ \\
+Random Forest & $112.0\pm3.9$  & $2519.4\pm82.4$ & ${\times}22.5$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On neural models, FO surpasses SVS in faithfulness ($\Delta_{0.3}$:
+$+0.014$ LSTM, $+0.017$ Transformer) while running $22$--$30{\times}$
+faster.
+On Random Forest, SVS outperforms FO by $0.017$: coalition sampling
+captures combinatorial interactions among decision-tree splits that
+single-cell occlusion misses.
+The structural source of FO's speed advantage is that it issues
+exactly one batched inference call of size $T{\times}V{+}1{=}301$,
+whereas SVS issues $2{\times}n_\text{perms}{\times}T{\times}V{=}9{,}000$
+evaluations at 15~permutations.
+IG surpasses FO on Transformer by $0.005$ at the cost of gradient
+access (precluding RF).
+FP consistently ranks last: replacing a cell with another observed
+value introduces exploitable market signal, artificially attenuating
+the measured perturbation impact.
+
+% =======================================================
+\section{Conclusions}
+\label{sec:conclusions}
+
+This paper presented a model-agnostic temporal explainability
+framework for financial time series prediction. Its core contribution
+is a two-level adapter pattern that decouples the temporal perturbation
+engine from any specific model backend, enabling any model that exposes
+a prediction function with signature $(N, T, V) \rightarrow (N,)$ to
+be connected without modifying any framework component.
+
+Under identical conditions, same test set, reference vector, and
+three models, FO matches SVS, the only other model-agnostic method
+producing a $T{\times}V$ matrix on all three models, in synthetic
+ground-truth precision (AUP $=0.9960$ both) while running
+$22$--$30{\times}$ faster on neural architectures and slightly behind
+on Random Forest ($-0.017$ faithfulness), where coalition sampling
+better captures combinatorial tree interactions.
+
+The framework also produces statistically non-trivial attributions
+($p < 10^{-300}$) and inter-model consistency coherent with
+architectural families ($\rho = 0.748$ between neural models vs.\
+$\rho < 0.40$ against Random Forest), a pattern that holds under
+alternative reference vectors, under both market regimes present in
+the test period, and under a naturally bounded target that removes
+the MinMax saturation affecting Random Forest under \texttt{Close}
+(Section~\ref{sec:robustness}). Neither target formulation beats a
+naive persistence baseline, in magnitude or in direction, consistent
+with weak-form market efficiency. The main remaining limitation is
+evaluation on a single financial index. Future work includes
+multi-index evaluation and a deeper analysis of why inter-model
+consistency decreases under volatile market conditions.
+
+\begin{credits}
+\subsubsection{\discintname}
+The authors have no competing interests to declare that are
+relevant to the content of this article.
+\end{credits}
+
+\bibliographystyle{splncs04}
+\bibliography{biblio}
+
+\end{document}

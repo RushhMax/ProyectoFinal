@@ -1,0 +1,586 @@
+<title>Pivote hacia DynaMask — notas de sesión 2026-07-28</title>
+<style>
+  :root {
+    --bg: #FAFAFC;
+    --surface: #FFFFFF;
+    --surface-2: #F3F1F9;
+    --ink: #201E29;
+    --ink-muted: #5B5868;
+    --ink-faint: #8B87A0;
+    --rule: #E7E5EF;
+    --accent: #D8562F;
+    --accent-tint: #FCEAE3;
+    --cool: #3D5A80;
+    --cool-tint: #E8EDF3;
+    --good: #049873;
+    --good-tint: #E1F5EF;
+    --warn: #9A6B00;
+    --warn-tint: #FBF0DC;
+    --code-bg: #F3F1F9;
+    --shadow: 0 1px 2px rgba(32, 30, 41, 0.04), 0 4px 16px rgba(32, 30, 41, 0.05);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #15141C;
+    --surface: #1D1C27;
+    --surface-2: #262433;
+    --ink: #EEECF5;
+    --ink-muted: #A9A5BC;
+    --ink-faint: #746F8A;
+    --rule: #322F40;
+    --accent: #F0916A;
+    --accent-tint: #3D251C;
+    --cool: #90AECB;
+    --cool-tint: #22303F;
+    --good: #2FD3A3;
+    --good-tint: #163A31;
+    --warn: #E0B34D;
+    --warn-tint: #3B2E10;
+    --code-bg: #262433;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15141C;
+      --surface: #1D1C27;
+      --surface-2: #262433;
+      --ink: #EEECF5;
+      --ink-muted: #A9A5BC;
+      --ink-faint: #746F8A;
+      --rule: #322F40;
+      --accent: #F0916A;
+      --accent-tint: #3D251C;
+      --cool: #90AECB;
+      --cool-tint: #22303F;
+      --good: #2FD3A3;
+      --good-tint: #163A31;
+      --warn: #E0B34D;
+      --warn-tint: #3B2E10;
+      --code-bg: #262433;
+      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.3);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-serif, Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+  }
+
+  header.doc-head {
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 12.5px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 30px;
+    line-height: 1.25;
+    font-weight: 700;
+    margin: 0 0 10px;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  .doc-meta {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 13.5px;
+    color: var(--ink-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+    margin-top: 14px;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 12px;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    padding: 4px 10px 4px 8px;
+    border-radius: 999px;
+    background: var(--warn-tint);
+    color: var(--warn);
+  }
+  .status-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  nav.toc {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 28px 0 44px;
+    box-shadow: var(--shadow);
+  }
+  nav.toc .toc-label {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 11.5px;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  nav.toc ol {
+    margin: 0;
+    padding: 0 0 0 1.1em;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 14px;
+    columns: 2;
+    column-gap: 24px;
+  }
+  nav.toc li { margin-bottom: 6px; break-inside: avoid; }
+  nav.toc a { color: var(--ink); text-decoration: none; }
+  nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+
+  section {
+    margin-bottom: 44px;
+    scroll-margin-top: 20px;
+  }
+
+  h2 {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  h2 .step {
+    color: var(--accent);
+    margin-right: 6px;
+  }
+
+  p { margin: 0 0 14px; font-size: 16.5px; color: var(--ink); }
+  p:last-child { margin-bottom: 0; }
+
+  strong { font-weight: 650; }
+
+  code {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    font-size: 0.87em;
+    background: var(--code-bg);
+    padding: 0.1em 0.35em;
+    border-radius: 5px;
+  }
+
+  a { color: var(--cool); }
+
+  blockquote.quote {
+    margin: 0 0 18px;
+    padding: 14px 18px;
+    background: var(--surface-2);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    font-style: italic;
+    color: var(--ink);
+    font-size: 16.5px;
+  }
+  blockquote.quote cite {
+    display: block;
+    margin-top: 8px;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-style: normal;
+    font-size: 12.5px;
+    color: var(--ink-muted);
+  }
+
+  ul, ol.plain {
+    margin: 0 0 14px;
+    padding-left: 1.3em;
+  }
+  li { margin-bottom: 8px; font-size: 16.5px; }
+  li:last-child { margin-bottom: 0; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+
+  .idea-lead {
+    border-color: var(--accent-tint);
+    background: linear-gradient(180deg, var(--accent-tint), var(--surface) 65%);
+  }
+  .idea-lead .tag {
+    background: var(--accent);
+    color: var(--surface);
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+  }
+
+  .tag.weak { background: var(--surface-2); color: var(--ink-faint); }
+
+  .card h3 {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+  .card p { font-size: 15.5px; }
+
+  .findings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 620px) {
+    .findings-grid { grid-template-columns: 1fr; }
+  }
+  .finding {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .finding .metric {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 6px;
+  }
+  .finding p { font-size: 14.5px; color: var(--ink-muted); margin: 0; }
+
+  .limit {
+    display: flex;
+    gap: 16px;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .limit:last-child { border-bottom: none; }
+  .limit .num {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--cool);
+    min-width: 28px;
+    flex-shrink: 0;
+    padding-top: 2px;
+  }
+  .limit h3 {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15.5px;
+    margin: 0 0 6px;
+    color: var(--ink);
+  }
+  .limit p { font-size: 15px; margin: 0; }
+  .limit p + p { margin-top: 8px; }
+
+  .source {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .source:last-child { border-bottom: none; }
+  .source-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 4px;
+  }
+  .source-name {
+    font-weight: 650;
+    font-size: 15.5px;
+  }
+  .source .verdict {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 11.5px;
+    font-weight: 650;
+    color: var(--ink-faint);
+    white-space: nowrap;
+  }
+  .source p { font-size: 14.5px; color: var(--ink-muted); margin: 0; }
+
+  .tension-box {
+    background: var(--cool-tint);
+    border: 1px solid var(--cool-tint);
+    border-left: 3px solid var(--cool);
+    border-radius: 0 12px 12px 0;
+    padding: 18px 22px;
+  }
+  .tension-box p { font-size: 15.5px; }
+
+  .next-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .option {
+    display: flex;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .option .letter {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 700;
+    color: var(--ink-faint);
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .option p { margin: 0; font-size: 15.5px; }
+
+  footer.note {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--rule);
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 13px;
+    color: var(--ink-faint);
+    text-align: center;
+  }
+</style>
+
+<div class="page">
+
+  <header class="doc-head">
+    <div class="eyebrow">Notas de sesión &middot; framework XAI temporal</div>
+    <h1>Pivote hacia DynaMask</h1>
+    <div class="doc-meta">
+      <span>28 de julio, 2026</span>
+      <span>&middot;</span>
+      <span class="status-pill">sesión cortada, continuar mañana</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="toc-label">Contenido</div>
+    <ol>
+      <li><a href="#contexto">Contexto / por qué</a></li>
+      <li><a href="#hallazgo-codigo">Hallazgo en el código</a></li>
+      <li><a href="#hallazgos-previos">Hallazgos propios previos</a></li>
+      <li><a href="#idea-rf">Idea nueva para RF</a></li>
+      <li><a href="#limitaciones">Limitaciones de DynaMask</a></li>
+      <li><a href="#busquedas">Búsquedas hechas</a></li>
+      <li><a href="#tension">Tensión detectada</a></li>
+      <li><a href="#proximo-paso">Próximo paso</a></li>
+    </ol>
+  </nav>
+
+  <section id="contexto">
+    <h2>Contexto / por qué</h2>
+    <p>
+      La profesora dijo que el paper debería acortarse/delimitarse tipo DynaMask:
+      enfocar en menos modelos y encontrar una limitación específica de DynaMask
+      para mejorar desde ahí, en vez de comparar contra ~15 trabajos relacionados.
+    </p>
+    <blockquote class="quote">
+      ¿Qué hiciste para que el framework fuera bueno en RF? ¿Tuviste alguna
+      consideración extra?
+      <cite>Pregunta clave de la profesora (parafraseada) — su punto es que el framework debe tener consideración específica por modelo, no ser genérico aplicado igual a los 3.</cite>
+    </blockquote>
+  </section>
+
+  <section id="hallazgo-codigo">
+    <h2>Hallazgo en el código <span style="text-transform:none; letter-spacing:0; font-weight: 500; color: var(--ink-faint);">(confirma el punto de la profesora)</span></h2>
+    <p>
+      <code>framework/explainer.py:31-59</code> y <code>framework/perturbation.py</code>:
+      la única diferencia entre modelos es <code>model_type</code> ('pytorch' vs
+      'sklearn') para saber cómo llamar <code>.predict()</code>. El mecanismo de
+      perturbación (sustituir por vector de referencia) es <strong>idéntico</strong>
+      para LSTM, Transformer y RF. Cero consideración específica por arquitectura hoy.
+    </p>
+    <p>
+      <code>models/random_forest.py</code>: wrapper genérico, aplana <code>(N,T,V)</code>
+      a <code>(N,T*V)</code> antes de llamar a sklearn. No expone nada especial, pero
+      <code>RandomForestRegressor</code> sí tiene <code>.estimators_</code> (los árboles
+      individuales) disponible sin modificar el modelo.
+    </p>
+  </section>
+
+  <section id="hallazgos-previos">
+    <h2>Dos hallazgos propios ya existentes que apuntan a que RF necesitaba trato distinto</h2>
+    <div class="findings-grid">
+      <div class="finding">
+        <span class="metric">log&#8209;return fix</span>
+        <p>RF no puede extrapolar más allá del rango de target visto en entrenamiento &mdash; por eso se cambió a log&#8209;return (ver memoria <code>project_pfc</code> / <code>project_paper_related_work</code>).</p>
+      </div>
+      <div class="finding">
+        <span class="metric">&rho; = 0.81&nbsp;/&nbsp;0.67 vs &rho; &asymp; 0.99</span>
+        <p>RF es mucho más sensible al vector de referencia que LSTM/Transformer &mdash; resultados ya en "Robustez Adicional" (<code>results/additional_results.json</code>).</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="idea-rf">
+    <h2>Idea nueva para RF</h2>
+    <div class="card idea-lead">
+      <span class="tag">La más prometedora &middot; sin explorar aún</span>
+      <h3>Descomposición por árbol</h3>
+      <p>
+        Usar <code>rf.model.estimators_</code> para calcular el delta de oclusión
+        árbol por árbol y agregar media &plusmn; desviación estándar, dando un
+        intervalo de confianza natural para cada atribución &mdash; algo que
+        LSTM/Transformer no pueden ofrecer sin trabajo extra (ensemble de seeds,
+        MC dropout, etc.). Es una consideración anclada en la estructura del
+        modelo (bagging), no solo un hiperparámetro ajustado.
+      </p>
+    </div>
+    <div class="card">
+      <span class="tag weak">Idea secundaria, más débil</span>
+      <h3>Reference vector adaptado a RF</h3>
+      <p>Percentiles del training set en vez de media global, dado que RF corta por umbrales y es sensible a caer fuera de la distribución vista.</p>
+    </div>
+    <div class="card">
+      <span class="tag weak">Idea secundaria, más débil</span>
+      <h3>Chequeo cruzado con <code>feature_importances_</code></h3>
+      <p>Usar la importancia nativa de RF (MDI/permutation) como validación cruzada &mdash; único entre los 3 modelos porque RF tiene una señal de importancia nativa; LSTM/Transformer no.</p>
+    </div>
+  </section>
+
+  <section id="limitaciones">
+    <h2>Limitaciones de DynaMask verificadas contra el PDF original <span style="text-transform:none; letter-spacing:0; font-weight: 500; color: var(--ink-faint);">(más allá de "no gradientes")</span></h2>
+    <p style="font-size: 14px; color: var(--ink-muted);">
+      Fuente: PDF completo vía <a href="https://ar5iv.labs.arxiv.org/html/2106.05303">ar5iv</a>,
+      Crabbé y van der Schaar, ICML 2021. Verificado contra el texto real, no solo resúmenes.
+    </p>
+    <div class="card" style="padding: 6px 22px;">
+      <div class="limit">
+        <span class="num">1</span>
+        <div>
+          <h3>Nunca se valida en datos financieros</h3>
+          <p>La introducción menciona finanzas como motivación, pero los 3 experimentos reales son: sintético caja blanca (ARMA), sintético caja negra (HMM), y MIMIC&#8209;III (mortalidad clínica). Cero finanzas.</p>
+          <p>Limitación válida porque conecta con algo que el propio paper reclama (motivación financiera) &mdash; mismo criterio de validez usado en Trabajos Relacionados (ver memoria <code>project_paper_related_work</code>).</p>
+        </div>
+      </div>
+      <div class="limit">
+        <span class="num">2</span>
+        <div>
+          <h3>Optimización costosa e hiperparametrizada, sin análisis de sensibilidad propio</h3>
+          <p>La máscara se ajusta por instancia con ~1000 épocas de descenso de gradiente, 2 forward passes por época. 5 hiperparámetros: restricción de área <em>a</em>, &lambda;<sub>a</sub> (regulador de tamaño, init ~0.1, dilatado por &delta;&asymp;1000), &lambda;<sub>c</sub> (continuidad temporal, penaliza &sum;|m<sub>t+1,i</sub>&minus;m<sub>t,i</sub>|), learning rate (típico 1), momentum (típico 1).</p>
+          <p>El propio paper dice explícitamente que no discute failure modes ni sensibilidad a estos valores. FO no tiene ningún hiperparámetro y es una sola pasada batch determinista.</p>
+        </div>
+      </div>
+      <div class="limit">
+        <span class="num">3</span>
+        <div>
+          <h3>Los operadores de perturbación asumen suavidad/estacionariedad local</h3>
+          <p>Tres operadores: blur gaussiano (&pi;<sup>g</sup>, asume suavidad temporal local, <em>O(d<sub>X</sub>T&sup2;)</em>), fade&#8209;to&#8209;moving&#8209;average (&pi;<sup>m</sup>, asume estacionariedad en ventana 2W+1, <em>O(d<sub>X</sub>TW)</em>), fade&#8209;to&#8209;past (&pi;<sup>p</sup>, para forecasting, solo usa pasado).</p>
+          <p>Todos asumen ventanas localmente suaves/estacionarias &mdash; choca con lo que ya documentó la tesis en "Robustez Adicional" (consistencia cae en régimen bajista 2022, mercados financieros tienen saltos de volatilidad que violan esa suposición). Puente natural a resultados ya existentes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="busquedas">
+    <h2>Búsquedas hechas <span style="text-transform:none; letter-spacing:0; font-weight: 500; color: var(--ink-faint);">(para no repetir)</span></h2>
+    <div class="card" style="padding: 4px 22px;">
+      <div class="source">
+        <div class="source-head">
+          <span class="source-name">WinTSR</span>
+          <span class="verdict" style="color: var(--warn);">preprint sin arbitrar</span>
+        </div>
+        <p>Islam y Fox, arXiv 2412.04532, marzo 2025. Lista 4 limitaciones de métodos tipo DynaMask (enfoque en clasificación no regresión, baselines desactualizados, datasets sintéticos simples, requieren entrenar/optimizar otro modelo por instancia). Útil como apoyo pero no como evidencia central &mdash; mismo problema que GS&#8209;SHAP/TsSHAP ya documentado.</p>
+      </div>
+      <div class="source">
+        <div class="source-head">
+          <span class="source-name">Semantic Alignment in Time Series XAI</span>
+          <span class="verdict" style="color: var(--ink-faint);">probablemente no aplica</span>
+        </div>
+        <p>arXiv 2602.02239, ICML 2026, arbitrado. Crítica conceptual de que métodos de masking reducen todo a un escalar sin alineación semántica. No menciona DynaMask directamente; ángulo distinto (semántico, no mecanístico).</p>
+      </div>
+      <div class="source">
+        <div class="source-head">
+          <span class="source-name">Yadav y Subbian</span>
+          <span class="verdict" style="color: var(--ink-faint);">ya conocido</span>
+        </div>
+        <p>arXiv 2506.19035 &mdash; ya conocido y citado en el paper, no es nuevo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tension">
+    <h2>Tensión detectada <span style="text-transform:none; letter-spacing:0; font-weight: 500; color: var(--ink-faint);">(importante, no resuelta del todo)</span></h2>
+    <div class="tension-box">
+      <p>
+        El paper YA está bastante centrado en DynaMask (<code>sec:avance2</code> /
+        tabla <code>tab:advances</code>, sección "Brecha con DynaMask" línea
+        ~1263 de <code>paper.tex</code>, replica el experimento exacto de Crabbé
+        con las mismas métricas AUP/AUR/I<sub>M</sub>/S<sub>M</sub>). RF es la
+        pieza que sostiene el avance principal actual (DynaMask no corre en RF,
+        el framework sí).
+      </p>
+      <p>
+        La usuaria decidió NO sacrificar RF del alcance &mdash; por eso el plan es
+        delimitar a RF específicamente (no a LSTM+Transformer como se pensó al
+        inicio de la sesión), y sumar la descomposición por árbol como la
+        "consideración extra" que pide la profesora, más los 2 puntos nuevos de
+        DynaMask (validación financiera, costo/hiperparámetros) como refuerzo.
+      </p>
+    </div>
+  </section>
+
+  <section id="proximo-paso">
+    <h2>Próximo paso <span style="text-transform:none; letter-spacing:0; font-weight: 500; color: var(--ink-faint);">(sin decidir aún cuál ir primero)</span></h2>
+    <div class="next-options">
+      <div class="option">
+        <span class="letter">A</span>
+        <p>Explorar si la descomposición por árbol es viable con <code>saved_models/rf_logret.pkl</code> ya entrenado (implementar, correr, ver si reduce la sensibilidad &rho;=0.81 hacia algo más cercano a 0.99).</p>
+      </div>
+      <div class="option">
+        <span class="letter">B</span>
+        <p>Medir el costo computacional real de DynaMask vs FO (usando el README/código de <a href="https://github.com/JonathanCrabbe/Dynamask">Dynamask</a>) para tener el número concreto del punto 2 de limitaciones.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">
+    No se ha escrito ni modificado nada en <code>paper.tex</code> todavía &mdash; toda esta sesión fue exploración/investigación, ningún cambio de contenido aplicado.
+  </footer>
+
+</div>

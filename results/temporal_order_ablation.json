@@ -1,0 +1,155 @@
+{
+  "synthetic": {
+    "rare_feature": {
+      "FO": {
+        "AUP": {
+          "mean": 0.995959595959596,
+          "std": 1.1102230246251565e-16
+        },
+        "AUR": {
+          "mean": 0.16175028058361396,
+          "std": 0.006228259255655143
+        },
+        "IM_A": {
+          "mean": 30.485349210103358,
+          "std": 0.7775805463760688
+        },
+        "SM_A": {
+          "mean": 4.4209631596459076e-05,
+          "std": 0.0
+        },
+        "AUROC": {
+          "mean": 0.9991111111111113,
+          "std": 0.00027216552697589
+        },
+        "AUPRC": {
+          "mean": 0.9985777777777779,
+          "std": 0.00043546484316142863
+        }
+      },
+      "Shuffled": {
+        "AUP": {
+          "mean": 0.995959595959596,
+          "std": 1.1102230246251565e-16
+        },
+        "AUR": {
+          "mean": 0.21329573512906846,
+          "std": 0.00802555701969887
+        },
+        "IM_A": {
+          "mean": 36.870151068369545,
+          "std": 0.9694266094936184
+        },
+        "SM_A": {
+          "mean": 4.4209631596459076e-05,
+          "std": 0.0
+        },
+        "AUROC": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "AUPRC": {
+          "mean": 1.0,
+          "std": 0.0
+        }
+      }
+    },
+    "rare_time": {
+      "FO": {
+        "AUP": {
+          "mean": 0.995959595959596,
+          "std": 1.1102230246251565e-16
+        },
+        "AUR": {
+          "mean": 0.1543855218855219,
+          "std": 0.005453921466712604
+        },
+        "IM_A": {
+          "mean": 29.82412322362264,
+          "std": 0.6490932104393401
+        },
+        "SM_A": {
+          "mean": 4.4209631596459076e-05,
+          "std": 0.0
+        },
+        "AUROC": {
+          "mean": 0.9993611111111111,
+          "std": 0.00035246048723469576
+        },
+        "AUPRC": {
+          "mean": 0.9989777777777779,
+          "std": 0.0005639367795755179
+        }
+      },
+      "Shuffled": {
+        "AUP": {
+          "mean": 0.995959595959596,
+          "std": 1.1102230246251565e-16
+        },
+        "AUR": {
+          "mean": 0.18225364758698095,
+          "std": 0.0077585817664613714
+        },
+        "IM_A": {
+          "mean": 32.33818714777629,
+          "std": 0.8324126519442901
+        },
+        "SM_A": {
+          "mean": 4.4209631596459076e-05,
+          "std": 0.0
+        },
+        "AUROC": {
+          "mean": 1.0,
+          "std": 0.0
+        },
+        "AUPRC": {
+          "mean": 1.0,
+          "std": 0.0
+        }
+      }
+    }
+  },
+  "real_sp500": {
+    "n_instances": 100,
+    "consistency_fo": {
+      "LSTM_Transformer": 0.7480652180085918,
+      "LSTM_RandomForest": 0.2549469845075966,
+      "Transformer_RandomForest": 0.38198987547763125
+    },
+    "consistency_shuffled": {
+      "LSTM_Transformer": 0.4873635143997705,
+      "LSTM_RandomForest": -0.054808913262630564,
+      "Transformer_RandomForest": 0.2509173501871468
+    },
+    "faithfulness_alpha_0.3": {
+      "FO": {
+        "LSTM": 0.5032982230186462,
+        "Transformer": 0.45177748799324036,
+        "RandomForest": 0.30465200543403625
+      },
+      "Shuffled": {
+        "LSTM": 0.30197179317474365,
+        "Transformer": 0.1894678920507431,
+        "RandomForest": 0.007927815429866314
+      }
+    },
+    "reliability_shuffled_across_seeds": {
+      "LSTM": {
+        "mean_spearman_between_seeds": 0.5714960952264578,
+        "std_spearman_between_seeds": 0.06540356853233867,
+        "n_seeds": 5
+      },
+      "Transformer": {
+        "mean_spearman_between_seeds": 0.5204164396066665,
+        "std_spearman_between_seeds": 0.06591755925051841,
+        "n_seeds": 5
+      },
+      "RandomForest": {
+        "mean_spearman_between_seeds": 0.5600405762846782,
+        "std_spearman_between_seeds": 0.07025185333346223,
+        "n_seeds": 5
+      }
+    },
+    "fo_determinism": "1.000 por construcci\u00f3n (misma ventana, misma referencia fija, sin aleatoriedad)"
+  }
+}

@@ -1,0 +1,42 @@
+\chapter{Resultados y/o Evaluaciones}
+\hrule \bigskip \vspace*{1cm}
+%------------------------------------------------------------------------
+\label{chap:resultados}
+
+Este capítulo presenta los resultados obtenidos tras implementar el framework descrito en el Capítulo~4 y entrenar los tres modelos sobre el S\&P~500.
+
+\section{Pruebas}
+
+Se realizaron dos tipos de prueba. La primera, sobre un banco de pruebas sintético con ground truth conocido (entradas AR(1), $T{=}20$, $V{=}15$, escenarios \emph{rare feature} y \emph{rare time}, 10 repeticiones), donde la predicción del modelo depende únicamente de un subconjunto de celdas salientes, lo que permite medir con exactitud si el método identifica las celdas correctas. La segunda, sobre 100 instancias reales del conjunto de prueba del S\&P~500 (731 ventanas de prueba en total, período 2022-01-04 a 2024-12-30), comparando las matrices de importancia $\hat{\alpha}$ producidas por el framework entre LSTM, Transformer y Random Forest.
+
+Adicionalmente se realizaron pruebas de robustez sin reentrenar ningún modelo, exactitud direccional, sensibilidad al vector de referencia, estabilidad por régimen de mercado (bajista 2022 frente a alcista 2023--2024), y la investigación de una referencia condicionada a la hoja específica para Random Forest.
+
+\section{Estadística de los resultados}
+
+\subsection{Desempeño predictivo}
+
+Los tres modelos se entrenan sobre el mismo conjunto de datos y el mismo split temporal. El desempeño predictivo no es el objeto de esta tesis, se reporta solo como contexto necesario para interpretar las explicaciones producidas, y se contrasta contra un baseline de persistencia ingenua ($f(x)=x_{t,\text{Close}}$) para descartar que las métricas midan únicamente autocorrelación trivial del precio.
+
+\subsection{Validación con ground truth sintético}
+
+Sobre el banco de pruebas sintético, el método propuesto (FO) alcanza $AUP=0{,}9960$, igualando a Shapley Value Sampling (SVS), Integrated Gradients (IG) y Feature Permutation (FP), y superando el $AUP=0{,}97$ reportado por DynaMask en su propio benchmark, sin requerir gradientes y ejecutándose también sobre Random Forest.
+
+\subsection{Verificación de agnosticidad sobre el S\&P 500}
+
+La consistencia de Spearman entre las matrices $\hat{\alpha}$ es $\rho=0{,}748$ entre LSTM y Transformer, frente a $\rho=0{,}255$ (LSTM-RF) y $\rho=0{,}382$ (Transformer-RF). El patrón neuronal-neuronal mayor que neuronal-ensamble es estadísticamente significativo frente a un baseline aleatorio ($p<10^{-300}$ en los tres modelos).
+
+\subsection{Robustez}
+
+Bajo retorno logarítmico como target alternativo, que rompe la autocorrelación trivial del precio, el patrón de consistencia se reproduce ($\rho=0{,}541$ LSTM-Transformer frente a $\rho=0{,}187$ y $\rho=0{,}311$ con Random Forest). Frente a referencias alternativas (mediana, cero), LSTM y Transformer son altamente estables ($\rho>0{,}88$), mientras Random Forest es notablemente más sensible ($\rho$ entre 0{,}666 y 0{,}813).
+
+La investigación de una referencia condicionada a la hoja para Random Forest (Sección~\ref{sec:leaf_reference_propuesta}) dio el siguiente resultado. Sobre el banco sintético, el AUP y el AUR no cambian de forma relevante frente a la referencia media global ($AUP=0{,}9376\pm0{,}0029$ contra $0{,}9374\pm0{,}0027$, promedio de 5 repeticiones). Sobre el S\&P~500 real, el efecto no es neutro sino negativo, la consistencia con LSTM y Transformer cae de $\rho=0{,}184$ y $\rho=0{,}311$ con la referencia media, a $\rho=-0{,}111$ y $\rho=-0{,}232$ con la referencia condicionada a la hoja.
+
+\section{Análisis de los resultados}
+
+\subsection{Comparación con el estado del arte}
+
+Bajo condiciones idénticas, el método propuesto (FO) se compara contra SVS, el único otro método agnóstico que produce una matriz $T \times V$ ejecutable sobre los tres modelos. FO supera a SVS en fidelidad sobre los modelos neuronales, mientras se ejecuta entre $22$ y $30$ veces más rápido, requiriendo exactamente $T{\cdot}V{+}1=301$ pasadas hacia adelante frente a miles de evaluaciones para SVS. SVS supera a FO específicamente en Random Forest, donde el muestreo de coaliciones captura mejor las interacciones combinatorias entre árboles. Frente a TimeSHAP y GS-SHAP, cuyas cifras de tiempo provienen de una fuente externa provisional, FO resulta uno o dos órdenes de magnitud más rápido.
+
+\subsection{Interpretación del hallazgo negativo sobre Random Forest}
+
+El experimento de referencia condicionada a la hoja descarta la hipótesis de que promediar sin distinguir vecinos dentro de la hoja explicara el resultado, ponderar por cercanía apenas modifica los números frente a un promedio simple. La explicación más plausible es estructural. La referencia media que usan los tres modelos es externa a cada uno, proviene de los datos y no de cómo cada modelo particiona internamente el espacio de entrada. La referencia condicionada a la hoja es interna, se construye a partir de la estructura de árboles del propio Random Forest que se está explicando, lo que rompe el criterio común entre modelos del que depende la comparación de agnosticismo. Además, con $T \cdot V = 300$ celdas aplanadas y árboles de profundidad acotada, la mayoría de las celdas ocluidas no participa en el camino de decisión de la mayoría de los árboles, sin importar qué valor de referencia se use ahí. El framework mantiene, por esta razón, una referencia externa e idéntica en su naturaleza para los tres modelos, la alternativa evaluada empeora la comparabilidad en lugar de mejorarla.

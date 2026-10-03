@@ -1,0 +1,562 @@
+<title>Guía de estudio · Resultados Experimentales</title>
+<style>
+  :root {
+    --bg: #FAFAFC;
+    --surface: #FFFFFF;
+    --surface-2: #F3F1F9;
+    --ink: #201E29;
+    --ink-muted: #5B5868;
+    --ink-faint: #8B87A0;
+    --rule: #E7E5EF;
+    --lstm: #6C5CE7;
+    --lstm-tint: #EDEAFC;
+    --transformer: #049873;
+    --transformer-tint: #E1F5EF;
+    --rf: #D8562F;
+    --rf-tint: #FCEAE3;
+    --code-bg: #F3F1F9;
+    --shadow: 0 1px 2px rgba(32, 30, 41, 0.04), 0 4px 16px rgba(32, 30, 41, 0.05);
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #15141C;
+    --surface: #1D1C27;
+    --surface-2: #262433;
+    --ink: #EEECF5;
+    --ink-muted: #A9A5BC;
+    --ink-faint: #746F8A;
+    --rule: #322F40;
+    --lstm: #9C8CFB;
+    --lstm-tint: #2A2447;
+    --transformer: #2FD3A3;
+    --transformer-tint: #163A31;
+    --rf: #F0916A;
+    --rf-tint: #3D251C;
+    --code-bg: #262433;
+    --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15141C;
+      --surface: #1D1C27;
+      --surface-2: #262433;
+      --ink: #EEECF5;
+      --ink-muted: #A9A5BC;
+      --ink-faint: #746F8A;
+      --rule: #322F40;
+      --lstm: #9C8CFB;
+      --lstm-tint: #2A2447;
+      --transformer: #2FD3A3;
+      --transformer-tint: #163A31;
+      --rf: #F0916A;
+      --rf-tint: #3D251C;
+      --code-bg: #262433;
+      --shadow: 0 1px 2px rgba(0,0,0,0.2), 0 4px 20px rgba(0,0,0,0.3);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-serif, Charter, "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .sans {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  .mono {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  header.masthead {
+    padding: 2.6rem 1.4rem 1.6rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--lstm);
+    font-weight: 700;
+    margin: 0 0 0.6rem;
+  }
+
+  h1.title {
+    font-size: 1.9rem;
+    line-height: 1.2;
+    margin: 0 0 0.5rem;
+    text-wrap: balance;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--ink-muted);
+    font-size: 1.02rem;
+    margin: 0 0 1.4rem;
+    max-width: 60ch;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+    padding: 0.7rem 1.4rem;
+  }
+
+  nav.toc .toc-row {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  nav.toc .toc-row::-webkit-scrollbar { display: none; }
+
+  nav.toc a {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 0.32rem 0.6rem;
+    border-radius: 100px;
+    border: 1px solid var(--rule);
+    flex: none;
+  }
+  nav.toc a:active { background: var(--surface-2); }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.6rem 1.4rem 6rem;
+  }
+
+  .legend {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem;
+    margin: 0 0 2.2rem;
+    box-shadow: var(--shadow);
+  }
+  .legend h2 {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 0.7rem;
+  }
+  .legend dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 0.9rem;
+    margin: 0;
+    font-size: 0.92rem;
+  }
+  .legend dt {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .legend dd { margin: 0; color: var(--ink-muted); }
+
+  section.chapter {
+    margin: 0 0 3.2rem;
+    scroll-margin-top: 4rem;
+  }
+
+  .chapter-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    margin: 0 0 0.3rem;
+  }
+
+  .chip {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--surface);
+    background: var(--ink);
+    padding: 0.18rem 0.5rem;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  h2.chapter-title {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+    font-size: 1.32rem;
+    font-weight: 650;
+    margin: 0;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .chapter hr.rule {
+    border: none;
+    border-top: 2px solid var(--rule);
+    margin: 0.9rem 0 1.3rem;
+  }
+
+  h3.beat {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+    font-size: 1.0rem;
+    font-weight: 650;
+    color: var(--ink);
+    margin: 1.6rem 0 0.5rem;
+  }
+
+  p { margin: 0 0 1rem; }
+
+  .callout {
+    border-left: 3px solid var(--lstm);
+    background: var(--lstm-tint);
+    border-radius: 0 10px 10px 0;
+    padding: 0.85rem 1.1rem;
+    margin: 1.1rem 0 1.3rem;
+    font-size: 0.98rem;
+  }
+  .callout.tf { border-color: var(--transformer); background: var(--transformer-tint); }
+  .callout.rf { border-color: var(--rf); background: var(--rf-tint); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .callout-label {
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    color: var(--ink-muted);
+    display: block;
+    margin-bottom: 0.35rem;
+  }
+
+  .tag {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.82em;
+    font-weight: 600;
+    padding: 0.05rem 0.4rem;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+  .tag.lstm { background: var(--lstm-tint); color: var(--lstm); }
+  .tag.tf   { background: var(--transformer-tint); color: var(--transformer); }
+  .tag.rf   { background: var(--rf-tint); color: var(--rf); }
+
+  code, .eq {
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    background: var(--code-bg);
+    padding: 0.08rem 0.35rem;
+    border-radius: 5px;
+    font-size: 0.88em;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 1rem 0 1.4rem;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+    font-size: 0.86rem;
+    min-width: 420px;
+  }
+  th, td {
+    padding: 0.55rem 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid var(--rule);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  th {
+    color: var(--ink-faint);
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--surface-2);
+  }
+  tr:last-child td { border-bottom: none; }
+  td.num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  .divider-end {
+    text-align: center;
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    margin-top: 3rem;
+    font-family: ui-sans-serif, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  ul.plain { padding-left: 1.2rem; margin: 0 0 1rem; }
+  ul.plain li { margin-bottom: 0.4rem; }
+
+  strong { font-weight: 650; }
+</style>
+
+<header class="masthead">
+  <p class="eyebrow">Guía de estudio · no reemplaza al paper</p>
+  <h1 class="title">Resultados Experimentales, explicados a fondo</h1>
+  <p class="subtitle">De la Sección V-B a la V-K, párrafo por párrafo, con el porqué detrás de cada tabla y cada gráfico. Pensada para leer en el celular junto al paper.</p>
+</header>
+
+<nav class="toc">
+  <div class="toc-row">
+    <a href="#leyenda">Notación</a>
+    <a href="#vb">V-B</a>
+    <a href="#vc">V-C</a>
+    <a href="#vd">V-D</a>
+    <a href="#ve">V-E</a>
+    <a href="#vf">V-F</a>
+    <a href="#vg">V-G</a>
+    <a href="#vh">V-H</a>
+    <a href="#vi">V-I</a>
+    <a href="#vj">V-J</a>
+    <a href="#vk">V-K</a>
+  </div>
+</nav>
+
+<main>
+
+  <div class="legend" id="leyenda">
+    <h2>Notación que se repite en todo Resultados</h2>
+    <dl>
+      <dt>α(t,v)</dt><dd>cuánto cambió la predicción al perturbar la celda (paso de tiempo t, variable v).</dd>
+      <dt>α̂</dt><dd>la matriz α ya normalizada (todas sus celdas suman 1). Es la explicación final.</dd>
+      <dt>T × V</dt><dd>forma de la ventana, T = 20 pasos de tiempo, V = 15 variables.</dd>
+      <dt>ρ (rho)</dt><dd>correlación de Spearman entre dos matrices α̂. Mide si dos modelos "miran" lo mismo.</dd>
+      <dt>Δ<sub>α</sub></dt><dd>cuánto cambia la predicción al perturbar el α% de celdas más importantes. Mide fidelidad.</dd>
+      <dt><span class="tag lstm">LSTM</span></dt><dd>recurrente, memoria secuencial.</dd>
+      <dt><span class="tag tf">Transformer</span></dt><dd>atención, ve toda la ventana a la vez.</dd>
+      <dt><span class="tag rf">Random Forest</span></dt><dd>ensamble de árboles, no procesa secuencias.</dd>
+    </dl>
+  </div>
+
+  <section class="chapter" id="vb">
+    <div class="chapter-head"><span class="chip">V-B</span><h2 class="chapter-title">Desempeño Predictivo de los Modelos</h2></div>
+    <hr class="rule">
+
+    <p>La Tabla 1 reporta el error (MSE, MAE, RMSE) de los tres modelos sobre el 20% de prueba, en la escala normalizada [0,1] que produce el MinMax.</p>
+
+    <h3 class="beat">Tres formas de medir el error</h3>
+    <p><strong>MAE</strong> promedia el valor absoluto del error, un error de +0,05 y uno de −0,05 cuentan igual. <strong>MSE</strong> promedia el error <em>al cuadrado</em>, lo que elimina el signo y castiga mucho más fuerte a los errores grandes (un error de 0,5 al cuadrado es 25 veces más grande que uno de 0,1). <strong>RMSE</strong> es la raíz del MSE, para volver a la escala original y poder comparar contra MAE. Si el MSE es desproporcionadamente más grande que el MAE (como en <span class="tag rf">Random Forest</span>), es señal de que hay algunos errores particularmente grandes arrastrando el promedio.</p>
+
+    <div class="callout rf">
+      <span class="callout-label">Hallazgo</span>
+      <p><span class="tag tf">Transformer</span> gana en las tres métricas, <span class="tag lstm">LSTM</span> segundo, <span class="tag rf">Random Forest</span> con un error ~35× mayor en MSE. La razón, los árboles de decisión no pueden predecir un valor más alto que el máximo que vieron en entrenamiento (2010-2021), y el precio siguió subiendo en el período de prueba (2023-2024) por encima de esos máximos. Es como un alumno que solo estudió ejercicios hasta el número 100, no sabe qué responder si le preguntas con el número 500.</p>
+    </div>
+
+    <h3 class="beat">El baseline de persistencia, la primera señal de alerta</h3>
+    <p>"Persistencia ingenua" es la predicción más tonta posible, <code>f(x) = precio de hoy</code>, es decir, copiar el último valor observado. Esta regla obtiene MSE = 0,00016, <strong>diez veces mejor</strong> que los tres modelos entrenados. Si copiar el valor de ayer predice mejor que un modelo "inteligente", es porque el precio cambia tan poco de un día a otro que casi cualquier método le atina con solo no moverse. Es la primera pista de que los modelos podrían estar aprovechando la autocorrelación trivial del precio en vez de aprender algo genuinamente predictivo. Este hilo se retoma en la Sección V-F.</p>
+
+    <h3 class="beat">El problema de escala detrás del ~35×</h3>
+    <p>El escalador MinMax se calibró con datos hasta ~2021, pero el precio siguió subiendo después. El 32,69% de los precios reales de prueba caen fuera del rango [0,1] para el que se calibró la fórmula. Las redes neuronales sí pueden producir salidas fuera de [0,1] (su última capa no tiene tope) y lo hacen en proporción parecida a la realidad (~31%), señal de que siguen bien la tendencia. <span class="tag rf">Random Forest</span> jamás produce una salida fuera de [0,1] (0,00%), y su rango completo de predicciones se comprime a apenas [0,645, 0,657], prueba directa de que se queda pegado cerca de su techo aprendido en vez de seguir subiendo con el precio real.</p>
+
+    <div class="callout">
+      <span class="callout-label">Por qué esto no arruina el resto del paper</span>
+      <p>El error de <span class="tag rf">Random Forest</span> mezcla dos causas que este trabajo no separa, la limitación estructural de los árboles frente a series con tendencia, y el propio escalado MinMax sobre datos no estacionarios. La Sección V-F confirma esto, con un target naturalmente acotado (retorno logarítmico) la brecha baja de 35× a 1,7×. Pero nada de esto afecta la validez del framework de explicabilidad, que solo mide "qué usó el modelo para predecir", sin que importe si predijo bien o mal.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="vc">
+    <div class="chapter-head"><span class="chip">V-C</span><h2 class="chapter-title">Validación con Ground Truth Sintético</h2></div>
+    <hr class="rule">
+
+    <p>Sobre el S&amp;P 500 real nunca puedes estar segura de cuál celda "de verdad" importó, solo puedes inferirlo. Por eso, antes de confiar en el framework sobre datos reales, esta sección lo prueba en un experimento sintético donde <strong>tú misma construyes</strong> la función que genera las predicciones, así sabes con certeza absoluta qué celdas deberían importar.</p>
+
+    <h3 class="beat">"Esto no es una técnica nueva", honestidad sobre AOPC/FeatureAblation</h3>
+    <p>FO (el método propuesto) reemplaza una celda por un valor de referencia y mide cuánto cambia la predicción. Esa idea, "tapar y medir", ya existía desde 2017 (AOPC, para explicaciones en imágenes) y está implementada en Captum (biblioteca de PyTorch) como <code>FeatureAblation</code>. El paper es honesto, el mérito no está en inventar "tapar y medir", está en <strong>adaptarlo a la estructura (T,V) de una serie temporal</strong>, empaquetarlo en un solo batch de inferencia que corre sin gradientes sobre modelos tan distintos (recurrente, atencional, ensamble), y comparar sistemáticamente sus resultados entre esos tres modelos para verificar agnosticismo.</p>
+
+    <h3 class="beat">La brecha con DynaMask</h3>
+    <p>DynaMask es el antecedente más directo en formato de salida (también produce una matriz T×V), pero necesita gradientes para optimizar su máscara, por lo que no puede aplicarse a Random Forest. DynaMask demuestra que el formato T×V es alcanzable y útil, la pregunta que motiva esta propuesta es si se puede lograr ese mismo formato <strong>sin pagar el costo de los gradientes</strong>.</p>
+
+    <h3 class="beat">Ground truth, Rare Feature, Rare Time</h3>
+    <p>La función de caja blanca es <code>f(X) = Σ x²</code> sumada solo sobre un conjunto de celdas 𝒜 que tú eliges de antemano. Por construcción, cualquier celda fuera de 𝒜 tiene efecto cero. Eso es el ground truth, sabes con certeza qué celdas deberían recibir toda la importancia.</p>
+    <ul class="plain">
+      <li><strong>Rare Feature</strong>, eliges 3 variables de 15 para que importen, en los 20 días completos (3 columnas enteras, 60 de 300 celdas).</li>
+      <li><strong>Rare Time</strong>, eliges 4 días de 20 para que importen, con las 15 variables completas (4 filas enteras, también 60 de 300 celdas).</li>
+    </ul>
+    <p>Se prueban ambos arreglos para confirmar que el método no tiene un sesgo oculto hacia un tipo de patrón (columnas vs. filas).</p>
+
+    <h3 class="beat">Leyendo la Tabla 2</h3>
+    <p>FO alcanza <strong>AUP = 0,9960</strong> en ambos escenarios, superando el 0,97 que reporta DynaMask, sin necesitar gradientes y corriendo sobre los tres modelos sin modificación. El valor <code>S_M ≈ 4,4×10⁻⁵</code> no es un error, es un residuo de punto flotante de la normalización L1 (analíticamente debería ser cero). La Figura de <code>lstm_attribution</code> muestra cómo se ve esa matriz T×V en la práctica, sin agrupar ninguna de las 15 variables originales.</p>
+
+    <h3 class="beat">SVS, el único comparador justo</h3>
+    <p>SVS (Muestreo de Valores de Shapley) es el único otro método que, sin gradientes, produce una matriz T×V y corre sobre los tres modelos, por eso es "el comparador válido en condiciones idénticas". FO y SVS empatan en AUP (0,9960) y en AUR (dentro de una desviación estándar), la diferencia real entre ambos no es de precisión sino de <strong>velocidad</strong>, que se cuantifica más adelante en V-I y V-J.</p>
+
+    <p><strong>Cierre.</strong> TimeSHAP no puede evaluarse sobre Random Forest (depende de estructura secuencial); TsSHAP no es comparable porque opera sobre features predefinidas, no por celda (t,v) de la ventana bruta. Con el ground truth ya validado, el resto de Resultados aplica el framework sobre datos reales.</p>
+  </section>
+
+  <section class="chapter" id="vd">
+    <div class="chapter-head"><span class="chip">V-D</span><h2 class="chapter-title">Verificación de Agnosticidad al Modelo</h2></div>
+    <hr class="rule">
+
+    <p>Se explican 100 ventanas de prueba elegidas al azar, <strong>las mismas 100 para los tres modelos</strong>. Cada modelo produce su propia matriz α̂ por instancia, así que terminas con tres conjuntos de 100 matrices, no 300 mezcladas, porque el siguiente paso necesita comparar, ventana por ventana, qué le salió a cada modelo.</p>
+
+    <h3 class="beat">Consistencia inter-modelo</h3>
+    <div class="table-wrap"><table>
+      <tr><th>Par de modelos</th><th>ρ de Spearman</th></tr>
+      <tr><td><span class="tag lstm">LSTM</span>-<span class="tag tf">Transformer</span></td><td class="num">0,748</td></tr>
+      <tr><td><span class="tag lstm">LSTM</span>-<span class="tag rf">Random Forest</span></td><td class="num">0,255</td></tr>
+      <tr><td><span class="tag tf">Transformer</span>-<span class="tag rf">Random Forest</span></td><td class="num">0,382</td></tr>
+    </table></div>
+    <p>La correlación alta entre los dos modelos neuronales, y más baja con el ensamble, es exactamente el patrón que un framework agnóstico <em>debería</em> mostrar. Si diera el mismo patrón sin importar el modelo, sería sospechoso de estar midiendo un artefacto del método y no el comportamiento real de cada modelo (el fallo que documentó Adebayo et al. para otros métodos de saliency).</p>
+
+    <h3 class="beat">Significancia, el test de Mann-Whitney</h3>
+    <p>Se compara la distribución de valores reales de α̂ contra un baseline aleatorio (una matriz del mismo tamaño llena de ruido uniforme, normalizada igual). El resultado (p &lt; 10⁻³⁰⁰ en los tres modelos) confirma que las atribuciones no son ruido disfrazado. Pero con ~30.000 celdas por modelo, esta prueba tiene tanta potencia que un p tan diminuto <strong>no dice cuánto</strong> más informativas son las explicaciones, solo que no son indistinguibles del azar. Por eso V-I complementa esto con Δ<sub>α</sub> (fidelidad), una medida que sí cuantifica el grado.</p>
+  </section>
+
+  <section class="chapter" id="ve">
+    <div class="chapter-head"><span class="chip">V-E</span><h2 class="chapter-title">Resultados Cualitativos sobre S&amp;P 500</h2></div>
+    <hr class="rule">
+
+    <h3 class="beat">Importancia por variable</h3>
+    <p><span class="tag lstm">LSTM</span> y <span class="tag tf">Transformer</span> coinciden en las medias móviles (SMA_5/10/20) y el precio máximo (High); <span class="tag rf">Random Forest</span> concentra todo en Close y Low, casi ignorando los indicadores derivados. Esto es coherente con la Tabla de consistencia de V-D.</p>
+    <div class="callout rf">
+      <span class="callout-label">La ambigüedad honesta</span>
+      <p>El precio de cierre de mañana está muy autocorrelacionado con el de hoy. Que el modelo le dé mucha importancia a Close/High/Low/medias móviles es compatible <strong>tanto</strong> con que aproveche tendencia genuina <strong>como</strong> con que simplemente copie el precio actual por la ruta más fácil. Esta figura sola no distingue entre ambas explicaciones, por eso existe V-F.</p>
+    </div>
+
+    <h3 class="beat">Patrón temporal, tres mecanismos distintos</h3>
+    <ul class="plain">
+      <li><span class="tag lstm">LSTM</span>, importancia decreciente desde el pasado lejano hacia el presente (razón máx/mín 15,7). Coherente con celdas de memoria que integran tendencia acumulada.</li>
+      <li><span class="tag tf">Transformer</span>, perfil casi uniforme (razón 1,5). Su attention pooling pondera toda la secuencia sin sesgo posicional fuerte.</li>
+      <li><span class="tag rf">Random Forest</span>, casi toda la importancia en el día más reciente, lag 0 (razón 860). No modela secuencia, así que solo mira el estado más inmediato.</li>
+    </ul>
+    <p>Los heatmaps (Figura 6) confirman esto visualmente, en LSTM/Transformer las filas de las medias móviles están "calientes" en muchas columnas de tiempo; en Random Forest el calor se concentra en una sola columna (lag 0).</p>
+  </section>
+
+  <section class="chapter" id="vf">
+    <div class="chapter-head"><span class="chip">V-F</span><h2 class="chapter-title">Robustez frente a autocorrelación trivial</h2></div>
+    <hr class="rule">
+
+    <p>Se reentrenan los tres modelos desde cero, mismo split, mismo escalador, mismos hiperparámetros, pero prediciendo <strong>retorno logarítmico</strong> en vez de precio. Predecir "sin cambio" ahora significa retorno = 0, ya no reproducir el nivel de precio. Esto rompe la autocorrelación trivial por construcción.</p>
+
+    <div class="callout">
+      <span class="callout-label">El resultado es contundente</span>
+      <p>Bajo este target, <strong>ningún</strong> modelo entrenado supera a la persistencia (retorno=0). LSTM y Transformer quedan ligeramente peor, Random Forest claramente peor. La ventaja que parecía tener el LSTM/Transformer en la Tabla 1 original desaparece por completo al quitar la autocorrelación trivial. Es consistente con la hipótesis de mercado eficiente en su forma débil, el retorno de un día no se puede predecir con el historial reciente de estas 15 variables.</p>
+    </div>
+
+    <p>Importante, esto <strong>no es una falla del framework de explicabilidad</strong>. El framework explica el comportamiento del modelo entrenado, sea bueno o malo prediciendo. Es una confirmación honesta de que la Tabla 1 medía en gran parte la capacidad de reproducir el precio actual, no de anticipar su variación futura.</p>
+
+    <h3 class="beat">¿Y la consistencia inter-modelo, se sostiene igual?</h3>
+    <p>Sí. Bajo retorno logarítmico, LSTM-Transformer (ρ=0,541) sigue por encima de cualquier par con Random Forest (0,187 y 0,311), aunque los valores absolutos bajen un poco (el retorno es una señal más cercana al ruido). Mann-Whitney sigue rechazando la hipótesis de azar en los tres modelos. Conclusión clave, la verificación de agnosticismo de V-D <strong>no es un artefacto</strong> de la autocorrelación trivial del precio, el framework distingue neuronal de ensamble sin importar qué variable objetivo se use.</p>
+  </section>
+
+  <section class="chapter" id="vg">
+    <div class="chapter-head"><span class="chip">V-G</span><h2 class="chapter-title">Robustez Adicional del Framework</h2></div>
+    <hr class="rule">
+    <p>Tres pruebas más, ninguna requiere reentrenar nada, todas reutilizan los checkpoints ya existentes.</p>
+
+    <h3 class="beat">Exactitud direccional</h3>
+    <p>Más allá del error numérico, ¿el modelo acierta si el precio sube o baja? Los seis valores (3 modelos × 2 targets) caen entre 46,4% y 50,3%, indistinguibles de una moneda al aire (azar=50%). Ningún modelo, bajo ningún target, tiene ventaja predictiva ni en magnitud ni en dirección.</p>
+
+    <h3 class="beat">Sensibilidad al vector de referencia</h3>
+    <p>La referencia r<sub>v</sub> usada en la Ecuación 1 es la media de entrenamiento. ¿Qué pasa si en vez de la media se usa la mediana, o el vector cero? <span class="tag lstm">LSTM</span> y <span class="tag tf">Transformer</span> son muy estables (correlación &gt;0,88 contra la media en casi todos los casos). <span class="tag rf">Random Forest</span> es notablemente más sensible (baja hasta 0,666 contra cero), sugiriendo que sus árboles reaccionan más abruptamente al valor concreto usado para tapar una celda. Lo más importante, bajo las tres referencias, LSTM-Transformer <strong>siempre</strong> supera a cualquier par con Random Forest, la verificación de V-D no depende de haber elegido la media.</p>
+
+    <h3 class="beat">Régimen de mercado</h3>
+    <p>El período de prueba tiene un tramo bajista (2022, 188 ventanas) y uno alcista sostenido (2023-24, 501 ventanas). El patrón neuronal &gt; ensamble se mantiene en ambos, pero las tres correlaciones son sistemáticamente más bajas en el régimen bajista. Los tres modelos concuerdan menos entre sí cuando el mercado es más volátil e incierto. Queda como trabajo futuro correlacionar esto directamente con la volatilidad realizada, celda por celda (usando ATR_14 y Log_Return, que ya están calculados, sin reentrenar nada).</p>
+
+    <div class="callout tf">
+      <span class="callout-label">La figura que junta las tres pruebas</span>
+      <p>El gráfico de consistencia combinada pone lado a lado las 7 condiciones evaluadas (2 targets, 3 referencias, 2 regímenes). En las 7, la barra <span class="tag lstm">LSTM-Transformer</span> es siempre la más alta. Ese es el resumen visual de toda la robustez del framework en un solo vistazo.</p>
+    </div>
+  </section>
+
+  <section class="chapter" id="vh">
+    <div class="chapter-head"><span class="chip">V-H</span><h2 class="chapter-title">Ablación del orden temporal</h2></div>
+    <hr class="rule">
+
+    <p>Todo lo anterior compara FO contra <em>otros métodos</em> (FP, IG, SVS). Esta sección es distinta, aísla <strong>una sola decisión de diseño</strong> del propio FO, perturbar respetando el orden temporal, y pregunta qué pasa si esa decisión se abandona a propósito.</p>
+
+    <h3 class="beat">La variante "shuffled"</h3>
+    <p>En vez de reemplazar la celda (t,v) por la referencia fija r<sub>v</sub>, se reemplaza por el valor de la <strong>misma variable en otro instante al azar de la misma ventana</strong>. Esto es literalmente la crítica que el paper le hace a SHAP/LIME desde la Introducción, tratar los pasos de tiempo como intercambiables. Con ~50% de probabilidad, esto mete un valor "futuro" (más reciente) en una posición "pasada", justo lo que se supone que nunca debe pasar.</p>
+
+    <div class="callout">
+      <span class="callout-label">Hallazgo 1, el benchmark sintético queda ciego</span>
+      <p>Sobre el experimento de caja blanca de V-C, FO y shuffled empatan en AUP (0,9960), y shuffled incluso gana un poco en AUR. Esto <strong>no</strong> significa que violar el orden sea inofensivo, significa que la función sintética (una suma de cuadrados) no tiene ninguna noción de coherencia temporal, cualquier valor distinto perturba igual de bien. Solo un modelo que aprendió dependencias temporales reales (los del S&amp;P 500) puede notar la diferencia.</p>
+    </div>
+
+    <div class="callout rf">
+      <span class="callout-label">Hallazgo 2, sobre datos reales sí importa, y mucho</span>
+      <p>Consistencia inter-modelo, LSTM-Transformer cae de 0,748 a 0,487; LSTM-Random Forest se vuelve <strong>negativa</strong> (−0,055, sin correlación real). Fidelidad (Δ<sub>0,3</sub>), cae en los tres modelos, y en Random Forest colapsa casi a cero (0,3047 → 0,0079, ~38× peor). Los árboles particionan el espacio según umbrales aprendidos sobre valores reales, un valor "ajeno" cae fuera de esos umbrales de forma errática en vez de mover la predicción de manera informativa.</p>
+    </div>
+
+    <p><strong>Hallazgo 3, el determinismo se rompe.</strong> FO siempre da la misma explicación para la misma ventana (referencia fija, sin azar). La variante shuffled es estocástica, repitiendo con 5 semillas distintas, la correlación entre corridas es solo ~0,52-0,57. La misma ventana produce una explicación distinta cada vez que se recalcula, solo porque cambia qué instante ajeno se usó para romper el orden.</p>
+
+    <p><strong>Conclusión de la ablación.</strong> Esto no compara FO contra otro método (ya se hizo antes), aísla el motivo mecánico, respetar el orden temporal es lo que hace que las explicaciones sean reproducibles, consistentes entre arquitecturas y fieles al modelo. Abandonarlo basta para degradar las tres propiedades, aunque el mecanismo de perturbación sea por lo demás idéntico.</p>
+  </section>
+
+  <section class="chapter" id="vi">
+    <div class="chapter-head"><span class="chip">V-I</span><h2 class="chapter-title">Comparación de Fidelidad, FO vs. SVS</h2></div>
+    <hr class="rule">
+
+    <p><strong>El protocolo de fidelidad.</strong> Para cada fracción α (de 0,1 a 0,6), se reemplazan las celdas con mayor atribución por su referencia, y se mide cuánto cambia la predicción, <code>Δ_α = promedio |f(X) − f(X con top-α celdas tapadas)|</code>. Una explicación fiel produce Δ<sub>α</sub> alto, porque tapar las celdas verdaderamente relevantes debería afectar mucho la predicción. A diferencia de V-C (donde se conoce el ground truth), aquí no se conoce, así que esta es la forma de medir calidad de explicación sobre datos reales.</p>
+
+    <p>SVS es otra vez el comparador válido (único método sin gradientes que da matriz T×V y corre en los tres modelos).</p>
+
+    <div class="table-wrap"><table>
+      <tr><th>Modelo</th><th>FO</th><th>FP</th><th>IG</th><th>SVS</th></tr>
+      <tr><td><span class="tag lstm">LSTM</span></td><td class="num">0,5033</td><td class="num">0,4776</td><td class="num">0,5034</td><td class="num">0,4891</td></tr>
+      <tr><td><span class="tag tf">Transformer</span></td><td class="num">0,4518</td><td class="num">0,4320</td><td class="num">0,4565</td><td class="num">0,4352</td></tr>
+      <tr><td><span class="tag rf">Random Forest</span></td><td class="num">0,3047</td><td class="num">0,2723</td><td class="num">†</td><td class="num">0,3212</td></tr>
+    </table></div>
+
+    <div class="callout">
+      <span class="callout-label">Lectura</span>
+      <p>En modelos neuronales, FO empata o supera a los demás mientras es 22-30× más rápido (ver tabla de tiempos). En Random Forest, SVS gana por 0,017, porque su muestreo de coaliciones captura mejor las interacciones combinatorias entre divisiones de árboles que la oclusión celda por celda. IG (gradientes) gana apenas en Transformer, pero no aplica a Random Forest (†). FP queda último siempre, porque tapar con otro valor observado del dataset filtra señal de mercado real, atenuando artificialmente el efecto medido.</p>
+    </div>
+
+    <p><strong>La tabla de tiempos</strong> explica por qué FO es tan rápido, hace exactamente <code>T×V+1 = 301</code> pasadas hacia adelante (determinista, sin muestreo). SVS necesita <code>2×15×T×V ≈ 9.000</code> evaluaciones (15 permutaciones). Esa diferencia estructural es la fuente de la aceleración de 22-30×.</p>
+  </section>
+
+  <section class="chapter" id="vj">
+    <div class="chapter-head"><span class="chip">V-J</span><h2 class="chapter-title">Comparación de Velocidad frente al Estado del Arte</h2></div>
+    <hr class="rule">
+
+    <div class="callout rf">
+      <span class="callout-label">Léelo con cuidado</span>
+      <p>Esta sección es <strong>contexto adicional</strong>, no la evidencia central de velocidad (esa es V-I, medida por la propia autora). TimeSHAP (2,813 ms/muestra) y GS-SHAP (1,194 ms/muestra) se comparan aquí, pero ambas cifras salen de la Tabla C3 de un <strong>preprint de GS-SHAP sin arbitrar</strong> (ni siquiera la cifra de TimeSHAP viene del paper original de Bento et al.). Por eso las reducciones ×159,8 y ×67,8 son provisionales.</p>
+    </div>
+
+    <p>FO alcanza 17,6 ms/muestra (LSTM) bajo el mismo dominio (S&amp;P 500, T=20, CPU). TimeSHAP no puede evaluarse sobre Random Forest (depende de secuencia); GS-SHAP sí es agnóstico pero pierde resolución por variable (produce salida K×J agrupada) y solo se evaluó en un BiLSTM. La Figura de timing usa escala logarítmica para que la brecha se vea sin ambigüedad.</p>
+  </section>
+
+  <section class="chapter" id="vk">
+    <div class="chapter-head"><span class="chip">V-K</span><h2 class="chapter-title">Resumen de Avances frente al Estado del Arte</h2></div>
+    <hr class="rule">
+
+    <p>Tres filas, tres comparaciones concretas. La fila de <strong>DynaMask</strong> es la más sólida éticamente (compara contra un número de un artículo arbitrado, ICML 2021), AUP 0,9960 con soporte Random Forest, contra AUP 0,97 sin soporte Random Forest. Las filas de <strong>TimeSHAP</strong> y <strong>GS-SHAP</strong> dependen del preprint sin arbitrar de V-J, así que léelas como comparación provisional, no como evidencia definitiva, tal como se aclaró ahí.</p>
+
+    <div class="table-wrap"><table>
+      <tr><th>Trabajo previo</th><th>Brecha abierta</th><th>Su resultado</th><th>Este trabajo</th></tr>
+      <tr><td>DynaMask</td><td>Gradientes; sin RF</td><td class="num">AUP 0,97*</td><td class="num">AUP 0,9960, RF ✓</td></tr>
+      <tr><td>TimeSHAP</td><td>Solo secuencial; lento</td><td class="num">2.813 ms†</td><td class="num">17,6 ms‡ (×159,8)</td></tr>
+      <tr><td>GS-SHAP</td><td>Salida agrupada; 1 modelo</td><td class="num">1.194 ms†</td><td class="num">17,6 ms‡; T×V ✓</td></tr>
+    </table></div>
+  </section>
+
+  <p class="divider-end">— fin de la guía · vuelve al paper para las ecuaciones completas y las figuras a color —</p>
+
+</main>

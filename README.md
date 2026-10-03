@@ -243,17 +243,9 @@ Durante el desarrollo se identificaron y corrigieron los siguientes problemas:
 
 ## Trabajo futuro
 
-<<<<<<< HEAD
-- Python 3.10+
-- PyTorch ≥ 2.0
-- scikit-learn ≥ 1.3
-- Ver `requirements.txt` para la lista completa
-- 
-=======
 ### Preprocesamiento y datos
 
-- **Normalización por ventana (within-window normalization):** normalizar cada ventana de T días relativa a su primer elemento elimina la tendencia de largo plazo de forma local, haciendo el problema estacionario sin necesidad de ajustar un scaler global. Es la solución más robusta para series financieras con tendencia fuerte.
-- **Target de retorno logarítmico:** cambiar el objetivo de predicción de `Close` a `Log_Return` haría la variable objetivo estacionaria por definición. Sin embargo, los retornos diarios tienen muy baja autocorrelación (eficiencia de mercado), lo que dificulta el aprendizaje.
+- **Normalización por ventana (within-window normalization):** normalizar cada ventana de T días relativa a su primer elemento eliminaría la tendencia de largo plazo de forma local sin ajustar un scaler global. No se implementó porque el experimento de retorno logarítmico (ver `entregables/paper/paper.tex`, Sección "Robustez frente a autocorrelación trivial") ya resuelve el mismo problema de fondo (target no acotado) con menos cambios al pipeline.
 - **Ampliación del universo de activos:** aplicar el framework a otros índices (NASDAQ, FTSE, Nikkei) o activos (Bitcoin, oro) para evaluar generalización.
 
 ### Modelos
@@ -265,7 +257,6 @@ Durante el desarrollo se identificaron y corrigieron los siguientes problemas:
 
 ### Framework XAI
 
-- **Análisis de sensibilidad al baseline de referencia:** comparar las matrices α obtenidas usando `reference = media`, `reference = mediana`, `reference = 0` y `reference = valor más frecuente`. La elección del baseline tiene impacto en las importancias finales y no está estudiada sistemáticamente en la literatura de XAI temporal.
 - **Comparación con métodos establecidos:** contrastar las matrices α del framework propuesto con SHAP (ShapleyValueSampling) y LIME temporal. Evaluar si el motor de perturbaciones converge a soluciones similares con menor costo computacional.
 - **Análisis de la relación entre pesos de atención y α:** para LSTM y Transformer, los pesos del mecanismo de atención interno son una forma de explicabilidad nativa. Comparar sistemáticamente si esos pesos correlacionan con las α del motor de perturbaciones.
 - **Selección estratificada de muestras para explicar:** en lugar de muestras aleatorias del test set, seleccionar 25 muestras de cada cuartil de error de predicción. Esto permitiría estudiar si el framework genera explicaciones diferentes para predicciones fáciles vs. difíciles.
@@ -273,13 +264,12 @@ Durante el desarrollo se identificaron y corrigieron los siguientes problemas:
 
 ### Evaluación
 
-- **Métricas financieras relevantes:** el MSE en espacio normalizado no es directamente interpretable. Agregar métricas como *directional accuracy* (¿el modelo predice correctamente la dirección del movimiento?), MAPE en puntos del índice y Sharpe ratio simulado.
+- **Métricas financieras relevantes:** el MSE en espacio normalizado no es directamente interpretable. La *directional accuracy* ya se evaluó (ver `entregables/paper/paper.tex`, Sección "Robustez Adicional del Framework"); falta agregar MAPE en puntos del índice y Sharpe ratio simulado.
 - **Corrección de múltiples comparaciones:** con tres tests de significancia paralelos, aplicar corrección de Bonferroni para controlar el FWER (Family-Wise Error Rate).
 - **Análisis de estabilidad temporal (rolling window):** entrenar sobre 2010-2018, evaluar en 2019; luego entrenar sobre 2010-2019, evaluar en 2020; etc. Medir si los patrones de importancia α son estables a lo largo del tiempo o varían con el régimen de mercado.
 
 ### Análisis de resultados
 
-- **Análisis por régimen de mercado:** segmentar el test set en períodos alcistas (*bull market*), bajistas (*bear market*) y de alta volatilidad (p.ej., COVID marzo 2020, caída 2022). Estudiar si las matrices α cambian según el régimen, lo que podría revelar que distintos factores son relevantes en distintos contextos de mercado.
 - **Análisis de redundancia de features:** los indicadores MACD, RSI, BB_width, Log_Return y Volume_ratio muestran importancia casi nula en los tres modelos. Un análisis de correlación e información mutua entre los 15 features podría confirmar si son realmente redundantes dado Close y las SMAs, y justificar una reducción del espacio de features.
 - **Cuantificación del costo computacional vs. calidad de explicaciones:** medir el trade-off entre el número de perturbaciones (T×V) y la estabilidad de las matrices α, para determinar si es posible usar un subconjunto de perturbaciones con pérdida mínima de precisión.
 
@@ -301,4 +291,3 @@ Durante el desarrollo se identificaron y corrigieron los siguientes problemas:
 | TF_NHEAD | 4 | Cabezas de atención |
 | RF_N_ESTIMATORS | 200 | Árboles en el Random Forest |
 | N_EXPLAIN | 100 | Muestras del test a explicar |
->>>>>>> b104700 (Correcciones metodológicas, arquitectónicas y documentación completa)

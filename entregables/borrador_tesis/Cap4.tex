@@ -1,0 +1,57 @@
+\chapter{Propuesta}
+\hrule \bigskip \vspace*{1cm}
+%------------------------------------------------------------------------
+\label{chap:propuesta}
+
+Este trabajo propone un framework de explicabilidad temporal agnóstico al modelo que produce la matriz de importancia $\hat{\alpha} \in \mathbb{R}^{T \times V}$ definida en el Capítulo~2. El flujo completo comprende seis etapas, (1)~los datos de entrada, la serie temporal financiera multivariada, (2)~la preparación de los datos, derivación de variables, normalización y construcción de ventanas deslizantes, (3)~el modelo predictivo, cualquiera de los tres modelos de distinta naturaleza computacional entrenados sobre esas ventanas, (4)~la interfaz uniforme de predicción que desacopla el motor de perturbaciones de cualquier modelo concreto, (5)~el motor de perturbaciones temporales, la contribución principal de este trabajo, y (6)~la matriz de importancia temporal resultante. Las etapas (4) y (5) constituyen el núcleo agnóstico del framework.
+
+\section{Datos de Entrada}
+
+Se usa el índice S\&P~500 (\texttt{\^{}GSPC}, 2010--2024), con $V=15$ variables por paso de tiempo, cinco variables de precio y volumen base (Open, High, Low, Close, Volume) y diez indicadores técnicos derivados (medias móviles SMA\_5/10/20, MACD y su señal, RSI\_14, BB\_width, ATR\_14, Log\_Return, Volume\_ratio). Las ventanas de entrada tienen $T=20$ pasos de tiempo, con horizonte de predicción $H=1$. El split respeta el orden temporal, 80\% para desarrollo y 20\% para prueba, sin mezclar información del futuro hacia el pasado.
+
+\section{Interfaz Uniforme de Predicción}
+
+La agnosticidad del framework respecto al modelo subyacente se implementa mediante un patrón adaptador de dos niveles. El motor de perturbaciones recibe como único punto de contacto con el modelo una función de predicción $f: \mathbb{R}^{N \times T \times V} \rightarrow \mathbb{R}^N$ inyectada en su constructor, el motor nunca accede al modelo directamente. Esta separación garantiza que incorporar un modelo nuevo al framework no requiere modificar ningún componente existente.
+
+\textbf{Nivel 1. Adaptación de firma.} Cada modelo implementa un \emph{wrapper} que estandariza la firma de entrada a $(N,T,V)$ y la salida a $(N,)$. El wrapper de Random Forest aplana cada ventana $(T,V) \rightarrow (T \cdot V)$ antes de invocar al regresor de scikit-learn, los wrappers de LSTM y Transformer convierten el array de NumPy a tensor de PyTorch, ejecutan la inferencia en modo evaluación sin gradientes, y reconvierten la salida a NumPy.
+
+\textbf{Nivel 2. Inyección de la función de predicción.} El explicador construye el callable $f$ a partir del wrapper y lo inyecta en el motor. Para cualquier otro modelo, sea estadístico, propietario o de un framework distinto, el usuario puede inyectar directamente una función con la firma unificada sin modificar ningún componente del framework. Este diseño implementa la inversión de dependencias, el framework no depende de los modelos concretos, cualquier modelo puede conectarse siempre que exponga la firma unificada.
+
+\section{Modelos de Distinta Naturaleza Computacional}
+
+Para verificar la naturaleza agnóstica del framework, se entrenan tres modelos de distinta naturaleza computacional sobre el mismo conjunto de datos y se evalúan bajo la misma interfaz de predicción, sin que el motor acceda a sus pesos, gradientes ni arquitectura interna.
+
+\textbf{LSTM.} Red neuronal recurrente de 2 capas con $\text{hidden}=128$ y dropout de 0.2, entrenada para capturar dependencias temporales a través de sus celdas de memoria.
+
+\textbf{Transformer.} Arquitectura basada en mecanismos de atención con codificación posicional sinusoidal, 2 capas de \texttt{TransformerEncoder} con 4 cabezas de atención, dimensión de feedforward de 256 y dropout de 0.1. Para agregar la secuencia codificada en un vector único se utiliza \emph{attention pooling} aprendido, en vez del esquema de último token, que concentraba artificialmente la importancia en el último paso de tiempo.
+
+\textbf{Random Forest.} Modelo de ensamble de 200 árboles de decisión de scikit-learn. Dado que los árboles no procesan secuencias, el wrapper del modelo aplana cada ventana antes de invocar al modelo, manteniendo la interfaz uniforme. Se incluye como baseline tabular no secuencial para contrastar con los modelos neuronales, y porque sigue siendo estado del arte en datos tabulares de tamaño mediano \cite{grinsztajn2022}.
+
+Los tres modelos se entrenan con el optimizador AdamW ($lr=10^{-3}$, $\text{weight\_decay}=10^{-4}$), reducción de tasa de aprendizaje por meseta, \emph{gradient clipping}, y \emph{early stopping} sobre pérdida de validación.
+
+\section{Motor de Perturbaciones Temporales}
+
+El componente central del framework es el motor de perturbaciones temporales. Para cada posición $(t,v)$ de la ventana de entrada, se reemplaza el valor por la referencia $r_v$ (media de entrenamiento por variable) y se mide el cambio en la predicción,
+\begin{equation}
+    \alpha(t,v) = \left| f(x) - f(x_{-(t,v)}) \right|.
+\end{equation}
+Perturbar una sola celda a la vez preserva el orden y la coherencia temporal del resto de la ventana. El mecanismo no requiere gradientes, lo que permite ejecutarlo también sobre Random Forest.
+
+En vez de $T \times V$ inferencias individuales, se construye un único batch de $T{\cdot}V{+}1$ ventanas evaluado en una sola llamada al modelo, el costo escala $O(T \cdot V)$ y no crece de forma independiente por dimensión. La matriz resultante se normaliza con norma $L_1$,
+\begin{equation}
+    \hat{\alpha}(t,v) = \frac{\alpha(t,v)}{\sum_{t'}\sum_{v'} \alpha(t',v')},
+\end{equation}
+de modo que cada celda represente la proporción del cambio total en la predicción atribuible a esa variable en ese paso de tiempo.
+
+\section{Consideración Específica para Random Forest}
+\label{sec:leaf_reference_propuesta}
+
+La verificación de agnosticismo del Capítulo~5 muestra que Random Forest es notablemente más sensible que LSTM y Transformer al vector de referencia usado para ocluir una celda. Esta sensibilidad plantea una pregunta más específica que la de robustez general, si existe una consideración anclada en la estructura del propio modelo, no solo un valor externo distinto, que la reduzca.
+
+Hooker, Mentch y Zhou \cite{hooker2021} muestran que los métodos de tipo permutar-y-predecir fuerzan al modelo a extrapolar cuando la perturbación rompe la dependencia entre variables, precisamente porque el valor de reemplazo cae fuera de la región de datos que el modelo observó. Para Random Forest existe una forma directa de acotar esa región, cada árbol define hojas, particiones del espacio de entrada donde el modelo trata a las observaciones como equivalentes.
+
+Se implementó y evaluó una referencia condicionada a la hoja, calculada por instancia. Para cada árbol del ensamble se ubica la hoja en la que cae la ventana a explicar, se identifican los ejemplos de entrenamiento que caen en esa misma hoja, y se promedian sus valores, ponderados por cercanía a la ventana completa mediante un núcleo gaussiano de ancho de banda adaptativo, para obtener el valor de reemplazo. El resultado se promedia sobre los 200 árboles. Los resultados de esta investigación, incluyendo el análisis de por qué la hipótesis no se confirmó, se reportan en el Capítulo~5.
+
+\section{Validación del Framework}
+
+El framework se valida en dos etapas. Primero, sobre un banco de pruebas sintético con ground truth conocido, una función de caja blanca cuya predicción depende únicamente de un subconjunto de celdas salientes, lo que permite medir precisión y recall de identificación exactos. Segundo, sobre el S\&P~500 real, comparando las explicaciones que produce el framework entre los tres modelos entrenados, y verificando mediante significancia estadística que las atribuciones no son producto del azar.

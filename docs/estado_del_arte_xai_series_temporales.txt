@@ -1,0 +1,525 @@
+ESTADO DEL ARTE: EXPLICABILIDAD (XAI) EN MODELOS DE SERIES TEMPORALES
+Desde Dynamask (2021) hasta la actualidad
+Documento de investigación para el PFC — generado 2026-09-23
+================================================================================
+
+PROPOSITO DE ESTE DOCUMENTO
+--------------------------------------------------------------------------------
+Recopilación profunda del nicho de explicabilidad post-hoc para modelos de
+series temporales (clasificación, forecasting), tomando Dynamask (Crabbé &
+van der Schaar, ICML 2021) como punto de referencia central porque es el
+método sobre el que ya está pivotando el paper de la tesis (ver
+docs/pivote_dynamask_2026-07-28.md). Se listan trabajos anteriores que
+motivaron a Dynamask, trabajos contemporáneos, y la línea sucesora directa
+que fue corrigiendo sus limitaciones año por año, hasta las propuestas más
+recientes de 2025-2026. Cada entrada incluye: título, autores, año/venue,
+enlace, problema que atacan, y qué proponen como solución.
+
+================================================================================
+PARTE 0 — ANTECEDENTES (PRE-2021): de dónde viene la idea de "máscara" y
+"atribución temporal"
+================================================================================
+
+0.1 RETAIN: An Interpretable Predictive Model for Healthcare using Reverse
+    Time Attention Mechanism
+    Autores: Edward Choi, Mohammad Taha Bahadori, Jimeng Sun, Joshua Kulas,
+             Andy Schuetz, Walter Stewart
+    Año/venue: NeurIPS 2016
+    Link: https://proceedings.neurips.cc/paper/2016/hash/231141b34c82aa95e48810a9d1b33a79-Abstract.html
+          https://arxiv.org/pdf/1608.05745
+    Problema: los modelos recurrentes (RNN) sobre historiales clínicos (EHR)
+    son precisos pero opacos; los médicos necesitan saber qué visitas y qué
+    variables pesaron en la predicción.
+    Solución: un mecanismo de atención de dos niveles (visita y variable)
+    que procesa la secuencia en orden inverso (los eventos recientes reciben
+    más atención, imitando el razonamiento clínico). Es de las primeras
+    propuestas de "interpretabilidad nativa" (by-design) para series
+    temporales, en contraste con los métodos post-hoc que dominarían después.
+    Limitación que abre el nicho: la atención no siempre coincide con la
+    importancia causal real (crítica que se repetiría por años en la
+    literatura de "attention is not explanation").
+
+0.2 Benchmarking Deep Learning Interpretability in Time Series Predictions
+    (introduce Temporal Saliency Rescaling, TSR)
+    Autores: Aya Abdelsalam Ismail, Mohamed Gunady, Hector Corrada Bravo,
+             Soheil Feizi
+    Año/venue: NeurIPS 2020
+    Link: https://arxiv.org/abs/2010.13924
+          https://proceedings.neurips.cc/paper/2020/hash/47a3893cc405396a5c30d91320572d6d-Abstract.html
+          Código: https://github.com/ayaabdelsalam91/TS-Interpretability-Benchmark
+    Problema: los métodos de saliencia (gradientes, SHAP, LIME, etc.)
+    diseñados para imágenes/texto fallan al aplicarse directo a series
+    temporales, porque conflacionan el "eje tiempo" con el "eje feature":
+    no logran identificar de forma fiable CUÁNDO y QUÉ variable importó.
+    Solución: TSR, un procedimiento de dos pasos aplicable sobre cualquier
+    método de saliencia existente: primero calcula la relevancia temporal
+    (enmascarando cada paso de tiempo y midiendo el cambio), luego reescala
+    la importancia por-feature dentro de cada paso relevante. Es el primer
+    trabajo que demuestra empíricamente, con benchmarks sintéticos con
+    ground-truth, que arquitecturas y saliencias estándar "fallan
+    sistemáticamente" en series temporales — este hallazgo es el que
+    justifica, un año después, la aparición de Dynamask.
+
+0.3 (Contexto general, no específico de series temporales) SHAP
+    (Lundberg & Lee, NeurIPS 2017) e Integrated Gradients
+    (Sundararajan et al., ICML 2017) — mencionados como la base teórica de
+    atribución (valores de Shapley / gradientes acumulados) que casi todos
+    los métodos posteriores de esta lista adaptan o comparan contra.
+
+================================================================================
+PARTE 1 — EL PUNTO DE REFERENCIA: DYNAMASK (2021)
+================================================================================
+
+1.1 Explaining Time Series Predictions with Dynamic Masks (Dynamask)
+    Autores: Jonathan Crabbé, Mihaela van der Schaar
+    Año/venue: ICML 2021 (PMLR 139:2166-2177)
+    Link: https://arxiv.org/abs/2106.05303
+          https://proceedings.mlr.press/v139/crabbe21a.html
+          Código: https://github.com/JonathanCrabbe/Dynamask
+    Problema: los métodos de atribución existentes (gradientes, oclusión
+    estática, SHAP/LIME adaptados) no capturan la DEPENDENCIA TEMPORAL del
+    dato: perturbar un timestep de forma aislada, o con una máscara estática,
+    ignora que la relevancia de una variable en t depende de su contexto
+    temporal (t-k, t+k). Además el espacio de búsqueda es enorme (importancia
+    por variable Y por timestep).
+    Solución: ajustar, por instancia, una máscara continua m ∈ [0,1] sobre
+    cada (variable, timestep) mediante descenso de gradiente, usando
+    "operadores de perturbación dinámicos" (blur gaussiano, fade-to-moving-
+    average, fade-to-past) que sí respetan la estructura temporal local
+    (suavidad/estacionariedad en ventana), en vez de un valor de referencia
+    fijo. La máscara se regulariza por área (a, λ_a) y por continuidad
+    temporal (λ_c, penaliza saltos bruscos entre m_t y m_{t+1}).
+    Limitaciones ya verificadas contra el paper original (documentadas en
+    docs/pivote_dynamask_2026-07-28.md, útiles como "gap" a explotar):
+      (a) nunca se valida en datos financieros pese a mencionarlos como
+          motivación (solo ARMA sintético, HMM sintético, MIMIC-III clínico);
+      (b) optimización costosa por instancia (~1000 épocas, 5 hiperparámetros)
+          sin análisis de sensibilidad propio;
+      (c) los 3 operadores de perturbación asumen suavidad/estacionariedad
+          local, lo cual choca con series financieras con saltos de
+          volatilidad.
+
+================================================================================
+PARTE 2 — TRABAJOS CONTEMPORÁNEOS A DYNAMASK (2021)
+================================================================================
+
+2.1 TimeSHAP: Explaining Recurrent Models through Sequence Perturbations
+    Autores: João Bento, Pedro Saleiro, André F. Cruz, Mário A.T. Figueiredo,
+             Pedro Bizarro (Feedzai)
+    Año/venue: KDD 2021
+    Link: https://arxiv.org/abs/2012.00073
+          https://dl.acm.org/doi/10.1145/3447548.3467166
+          Código: https://github.com/feedzai/timeshap
+    Problema: en RNN, la predicción depende no solo del input inmediato sino
+    de todo el historial y del estado oculto; aplicar SHAP/LIME "a ciegas"
+    (tratando cada timestep como feature independiente) ignora esa
+    dependencia y es computacionalmente inviable para secuencias largas
+    (el número de coaliciones crece exponencialmente).
+    Solución: extiende KernelSHAP al dominio recurrente, calculando
+    atribuciones a 3 niveles (feature, timestep, celda/estado oculto) y
+    propone un método de "pruning" que recorta la ventana temporal relevante
+    antes de estimar Shapley, reduciendo drásticamente el costo computacional
+    y la varianza de las atribuciones. Es la línea "Shapley" paralela a la
+    línea "máscara" de Dynamask.
+
+2.2 Temporal Dependencies in Feature Importance for Time Series Predictions
+    (WinIT)
+    Autores: (grupo de Vector Institute / Univ. Toronto, incluye Rahul G.
+             Krishnan y colaboradores)
+    Año/venio: arXiv 2021 (versión extendida publicada después)
+    Link: https://arxiv.org/abs/2107.14317
+    Problema: los métodos de remoción de features (feature-removal), al
+    medir el efecto de quitar una observación puntual, subestiman su
+    importancia real cuando esa información se sigue "filtrando" a través
+    de observaciones pasadas correlacionadas (la red aún puede inferirla del
+    contexto). Es decir, ignoran dependencias entre timesteps al momento de
+    remover.
+    Solución: WinIT calcula la importancia de una observación como la
+    diferencia de importancia agregada sobre una VENTANA de predicciones
+    futuras (no solo la predicción inmediata), usando un modelo generativo
+    para reemplazar la observación por una alternativa "plausible" dado su
+    historial (evitando datos fuera de distribución). Supera a Dynamask y a
+    saliencias estándar en consistencia bajo distintas estrategias de
+    evaluación.
+
+================================================================================
+PARTE 3 — LA LÍNEA SUCESORA DIRECTA DE DYNAMASK (2022-2024): corrigiendo la
+máscara paso a paso
+================================================================================
+
+3.1 TSInterpret: A Unified Framework for Time Series Interpretability
+    Autores: Jacqueline Höllig, Cedric Kulbach, Steffen Thoma
+    Año/venue: JOSS 2023 (Journal of Open Source Software, vol 8, n.85)
+    Link: https://arxiv.org/abs/2208.05280
+          Código: https://github.com/fzi-forschungszentrum-informatik/TSInterpret
+    Problema: no existía un framework unificado en Python que agrupara los
+    métodos dispersos de XAI para clasificación de series temporales
+    (gradientes, Dynamask, contrafactuales, prototipos), dificultando la
+    comparación justa entre métodos.
+    Solución: librería open-source que integra Integrated Gradients,
+    Dynamask, métodos contrafactuales y basados en prototipos sobre los
+    repositorios UCR/UEA, con visualización estándar. Es más una
+    contribución de "infraestructura de benchmark" que un método nuevo, pero
+    marca el momento en que el nicho empieza a exigir comparabilidad
+    rigurosa (survey posterior "Software Frameworks for XAI in TSC: A
+    Systematic Review", arXiv 2608.21449, documenta que para 2026 ya existen
+    ≥6 frameworks de este tipo, frente a 1 en 2022).
+
+3.2 CoRTX: Contrastive Framework for Real-time Explanation
+    Autores: (equipo académico, incluye autores de Rice University /
+             colaboración industrial)
+    Año/venue: ICLR 2023
+    Link: https://arxiv.org/abs/2303.02794
+    Problema: entrenar un "explicador" aprendido (en vez de optimizar una
+    máscara por instancia, como Dynamask) requiere etiquetas de explicación
+    (ground-truth de importancia), que son costosas o inexistentes en la
+    práctica; además, generar explicaciones en tiempo real (sin re-optimizar
+    por cada instancia, como hace Dynamask) es deseable pero poco explorado.
+    Solución: aprendizaje contrastivo auto-supervisado de una representación
+    "orientada a explicación", usando augmentación de datos sintética
+    (positivos/negativos) para no depender de etiquetas reales; luego un
+    "explanation head" liviano se afina con pocas etiquetas. No es
+    específico de series temporales pero es citado como antecedente directo
+    de TimeX (parte 3.3) por resolver el mismo problema de costo/latencia
+    que las máscaras optimizadas por instancia.
+
+3.3 Learning Perturbations to Explain Time Series Predictions
+    (Extremal Mask / ExtrMask — la continuación explícita de Dynamask)
+    Autores: Joseph Enguehard
+    Año/venue: ICML 2023 (PMLR 202)
+    Link: https://arxiv.org/abs/2305.18840
+          https://proceedings.mlr.press/v202/enguehard23a/enguehard23a.pdf
+    Problema: Dynamask fija de antemano el tipo de perturbación (blur,
+    media móvil, fade-to-past) inspirándose en técnicas para datos
+    estáticos, pero el propio autor señala que "hay poca motivación" para
+    fijar la perturbación a priori en datos temporales: la perturbación
+    óptima debería depender del propio dato.
+    Solución: aprender CONJUNTAMENTE la máscara Y la función de perturbación
+    (en vez de fijarla), de forma que la perturbación se adapte a la
+    estructura temporal global de cada instancia. Mejora medible sobre
+    Dynamask en las mismas métricas (AUP/AUR) porque generaliza el operador
+    fijo de Dynamask a uno aprendido. Es, junto con ContraLSP (3.5), la
+    crítica más directa y citable al diseño de Dynamask.
+
+3.4 Encoding Time-Series Explanations through Self-Supervised Model
+    Behavior Consistency (TimeX)
+    Autores: Owen Queen, Tom Hartvigsen, Teddy Koker, Huan He, Theodoros
+             Tsiligkaridis, Marinka Zitnik (Harvard / MIT Lincoln Lab)
+    Año/venue: NeurIPS 2023
+    Link: https://openreview.net/forum?id=yEfmhgwslQ
+          https://zitniklab.hms.harvard.edu/projects/TimeX/
+          Código: https://github.com/mims-harvard/TimeX
+    Problema: los explicadores post-hoc (incluido Dynamask) optimizan una
+    máscara por instancia sin garantía de que el "sustituto" interpretable
+    imite realmente el comportamiento del modelo original en el espacio
+    latente; además producen mapas continuos difíciles de leer como
+    "patrones temporales" discretos e interpretables.
+    Solución: entrena un modelo sustituto ("surrogate") end-to-end con una
+    nueva formulación, "model behavior consistency", que preserva las
+    relaciones del espacio latente del modelo original en el espacio latente
+    del explicador. Usa estimadores straight-through para generar mapas de
+    atribución DISCRETOS (evitando los problemas del enmascaramiento
+    continuo) y aprende un espacio latente de "landmarks" que agrupa
+    patrones temporales informativos recurrentes, algo que Dynamask (que
+    explica instancia por instancia sin memoria entre instancias) no ofrece.
+
+3.5 Explaining Time Series via Contrastive and Locally Sparse Perturbations
+    (ContraLSP)
+    Autores: Zichuan Liu, Yingying Zhang, Tianchun Wang, Zefan Wang, Dongsheng
+             Luo, Mengnan Du, Min Wu, Yi Wang, Chunlin Chen, Lunting Fan,
+             Qingsong Wen
+    Año/venue: ICLR 2024
+    Link: https://arxiv.org/abs/2401.08552
+          https://openreview.net/forum?id=qDdSRaOiyb
+    Problema: los métodos de máscara/perturbación previos (Dynamask,
+    Extremal Mask) no resuelven el "distribution shift": al perturbar,
+    el input resultante puede caer fuera de la distribución que el modelo
+    vio en entrenamiento, especialmente en muestras heterogéneas, lo que
+    invalida la explicación (el modelo reacciona a datos "irreales", no a
+    la ausencia real de la señal).
+    Solución: introduce muestras CONTRAFACTUALES para construir
+    perturbaciones "no informativas" que sí respetan la distribución
+    original (vía aprendizaje contrastivo), más "compuertas dispersas"
+    (sparse gates) específicas por muestra que producen máscaras más
+    binarias y suaves, integrando mejor las tendencias temporales.
+    Supera a Dynamask/ExtrMask en datasets sintéticos y reales.
+
+3.6 TimeX++: Learning Time-Series Explanations with Information Bottleneck
+    Autores: Zichuan Liu, Tianchun Wang, Jimeng Shi, Xu Zheng, Zhuomin Chen,
+             Lei Song, Wenqian Dong, Jayantha Obeysekera, Farhad Shirani,
+             Dongsheng Luo
+    Año/venue: ICML 2024 (PMLR 235)
+    Link: https://arxiv.org/abs/2405.09308
+          Código: https://github.com/zichuan-liu/TimeXplusplus
+    Problema: TimeX (3.4) y otros métodos basados en optimizar una máscara
+    pueden caer en "soluciones triviales" (la red aprende a ignorar la
+    máscara y explica todo/nada) y en el mismo problema de distribution
+    shift que ContraLSP señala, ahora formalizado bajo el principio de
+    Information Bottleneck (IB) clásico.
+    Solución: reformula el objetivo IB para series temporales evitando
+    soluciones triviales y el shift distribucional, usando una red
+    paramétrica que genera instancias "explicación-embebidas" que son a la
+    vez dentro-de-distribución y preservan la etiqueta original. Es, junto
+    con ContraLSP, el estado del arte de referencia en 2024 y la base
+    conceptual (IB) que reaparece en los trabajos de 2026 (parte 4).
+
+3.7 WinTSR: A Windowed Temporal Saliency Rescaling Method for Interpreting
+    Time Series Deep Learning Models
+    Autores: Md Khairul Islam, Judy Fox (University of Virginia)
+    Año/venue: arXiv, diciembre 2024 (preprint, no arbitrado a la fecha de
+               esta investigación)
+    Link: https://arxiv.org/abs/2412.04532
+          Código: https://github.com/UVA-MLSys/Timeseries-Explained
+    Problema: extiende la crítica de TSR (0.2) al contexto de 2024:
+    (a) casi toda la literatura de máscaras (incluido Dynamask) se enfoca en
+    CLASIFICACIÓN, no en forecasting/regresión; (b) los baselines de
+    comparación están desactualizados frente a arquitecturas modernas
+    (Transformers, modelos de lenguaje aplicados a series/foundation
+    models); (c) los datasets sintéticos usados son demasiado simples;
+    (d) muchos métodos (Dynamask entre ellos) requieren entrenar/optimizar
+    un modelo o máscara nueva por cada instancia, lo cual es costoso a
+    escala.
+    Solución: generaliza TSR con una ventana deslizante que captura
+    dependencias temporales entre pasos pasados sin necesidad de entrenar
+    un modelo separado por instancia, y lo valida contra 10 técnicas de
+    interpretación recientes sobre 5 arquitecturas distintas (incluyendo un
+    modelo LLM-based/foundation model: DLinear, SegRNN, MICN, iTransformer,
+    CALF), en tareas de clasificación Y regresión. Es el primer trabajo de
+    esta lista que explícitamente valida sobre foundation models de series
+    temporales.
+    Nota de fiabilidad: preprint sin arbitrar (ya señalado en
+    docs/pivote_dynamask_2026-07-28.md) — útil como respaldo, no como
+    evidencia central por sí solo.
+
+================================================================================
+PARTE 4 — FRONTERA ACTUAL (2025-2026): fallos en producción, necesidad
+causal, y el regreso del Information Bottleneck
+================================================================================
+
+4.1 Failure Modes of Time Series Interpretability Algorithms for Critical
+    Care Applications and Potential Solutions
+    Autores: (grupo de investigación en informática biomédica; incluye
+             Yadav y Subbian entre los autores, según referencia previa del
+             proyecto)
+    Año/venue: AMIA Annual Symposium 2025 / arXiv junio 2025
+    Link: https://arxiv.org/abs/2506.19035
+    Problema: en cuidados críticos (predicción dinámica de fallo de
+    órganos), los métodos de gradiente, oclusión y permutación
+    "generalmente fallan" cuando el objetivo cambia con el tiempo
+    (time-varying target dependency) y cuando se requiere suavidad temporal
+    en la explicación; documentan estos "failure modes" de forma sistemática
+    en un entorno de despliegue real, no solo sintético.
+    Solución: proponen que los frameworks de MÁSCARA APRENDIDA (la familia
+    Dynamask/ExtrMask/ContraLSP) son la alternativa más robusta si se les
+    añaden restricciones explícitas de continuidad temporal y consistencia
+    de etiqueta, validando esta recomendación en el dominio clínico dinámico.
+    Relevancia directa: es evidencia externa e independiente (dominio
+    clínico) de que las mismas limitaciones de Dynamask que ya identificó
+    el proyecto (costo, falta de restricciones robustas) aparecen también
+    en producción real, fuera del dominio financiero.
+
+4.2 Position: Interpretability in Deep Time Series Models Demands Semantic
+    Alignment
+    Autores: Giovanni De Felice, Riccardo D'Elia, Alberto Termine, Pietro
+             Barbiero, Giuseppe Marra, Silvia Santini
+    Año/venue: arXiv, febrero 2026 (v3 agosto 2026); ICML 2026 (position
+               paper track)
+    Link: https://arxiv.org/abs/2602.02239
+    Problema (crítica conceptual, no metodológica): sostiene que TODA la
+    familia de métodos basados en enmascaramiento/atribución (Dynamask,
+    ExtrMask, ContraLSP, TimeX, TimeX++) reduce la explicación a un escalar
+    de importancia por (variable, tiempo), sin garantizar que ese escalar
+    esté alineado con variables o mecanismos SEMÁNTICAMENTE significativos
+    para el usuario final, ni que esa alineación se preserve bajo evolución
+    temporal (problema sin análogo en dominios estáticos como imágenes).
+    Propuesta: formaliza el concepto de "alineación semántica" como
+    requisito de diseño y da un "blueprint" para futuros modelos
+    interpretables por diseño, no post-hoc. No propone un método
+    específico ni menciona a Dynamask por nombre, pero es la crítica de más
+    alto nivel del nicho a 2026: cuestiona si "atribución numérica" (el
+    paradigma completo de la Parte 3) es la pregunta correcta.
+
+4.3 Beyond Sufficiency: Time Series Explanation with Counterfactual
+    Necessity (TimePNS)
+    Autores: Hongnan Ma, Yiwei Shi, Mengyue Yang, Weiru Liu
+    Año/venue: arXiv, julio 2026
+    Link: https://arxiv.org/abs/2607.21573
+    Problema: los métodos "sufficiency-oriented" (casi toda la Parte 3,
+    incluido Dynamask: buscan la subsecuencia mínima que basta para
+    mantener la predicción) pueden asignar alta importancia a subsecuencias
+    espurias que "acompañan" la predicción sin ser realmente necesarias
+    para ella; separado de esto, los métodos contrafactuales existentes son
+    inestables (producen ruido tipo adversarial en vez de explicaciones
+    con sentido).
+    Solución: TimePNS, inspirado en la noción de necesidad contrafactual de
+    Pearl: interviene sobre un factor temporal y mide si al removerlo se
+    ROMPE la predicción original (necesidad), no solo si al preservarlo la
+    predicción se mantiene (suficiencia). Diseño en 2 etapas: (I) proceso
+    generativo causal identificable + máscara de suficiencia; (II)
+    intervenciones contrafactuales en el espacio latente que producen
+    señales de necesidad, usadas para refinar la máscara inicial mediante
+    una compuerta temporal. Es la primera propuesta de esta lista que
+    formaliza "necesidad" (no solo "suficiencia") como criterio de
+    fidelidad para series temporales.
+
+4.4 Information Bottleneck Learning for Faithful Time Series Forecasting
+    Explanations (IB-Forecast)
+    Autores: (Florida International University, NEC Laboratories America,
+             University of Houston, Singapore Management University)
+    Año/venue: arXiv, julio 2026
+    Link: https://arxiv.org/abs/2607.28124
+    Problema: casi toda la Parte 3 (y Dynamask) se diseñó para
+    CLASIFICACIÓN; los forecasters interpretables-por-diseño existentes
+    revelan su estructura interna pero no GARANTIZAN que esa estructura
+    refleje fielmente la evidencia real detrás de la predicción, mientras
+    que los métodos orientados a fidelidad (como los de la Parte 3) casi
+    no se han aplicado a forecasting.
+    Solución: IB-Forecast, un framework de forecasting interpretable "por
+    diseño" que descompone la predicción en un componente periódico
+    aprendido y un residuo calculado con máscaras explicables sobre tokens
+    de entrada, con un Information Bottleneck restringido por presupuesto
+    que permite controlar directamente la dispersión (sparsity) de la
+    explicación de forma end-to-end. Igual el error de forecasting de
+    modelos caja negra líderes mientras da explicaciones fieles SIN costo
+    de inferencia adicional, superando a baselines de gradiente, oclusión
+    y optimización (bajo presupuesto de dispersión igualado) en forecasting
+    — el hueco exacto que Dynamask deja abierto (validación limitada a
+    clasificación/ARMA sintético).
+
+4.5 Towards A Unified Information Bottleneck Framework for Time Series
+    Explanations
+    Autores/venue: arXiv, agosto 2026 (preprint)
+    Link: https://arxiv.org/abs/2608.25897
+    Problema: constata que el nicho se ha dividido en dos líneas que no se
+    hablan entre sí: (i) atribución (identificar regiones temporales
+    responsables, toda la Parte 3) que carece de validación CAUSAL, y
+    (ii) explicación contrafactual (cómo modificar el input para cambiar la
+    decisión) que sufre de inestabilidad severa (ruido tipo adversarial).
+    Solución: unifica ambas bajo el principio de Information Bottleneck:
+    una red paramétrica de transformación construye instancias
+    "explicación-embebidas" donde la información PRESERVADA da la
+    atribución y la remoción CONTROLADA de información da el contrafactual
+    estable. Es la consolidación más reciente (2026) de la línea IB
+    iniciada por TimeX++ (3.6) y continuada por IB-Forecast (4.4).
+
+4.6 TimeSAE: Causal Sparse Decoding for Faithful Explanations of Black-Box
+    Time Series Models
+    Autores/venue: arXiv, enero 2026; ICML 2026
+    Link: https://arxiv.org/abs/2601.09776
+    Problema: los métodos de explicación (incluidos los de máscara) siguen
+    siendo sensibles a shifts distribucionales (el mismo problema que
+    ContraLSP y TimeX++ ya habían señalado), lo que limita su fiabilidad en
+    escenarios reales fuera del set de validación.
+    Solución: combina Sparse Autoencoders (SAE, con activación JumpReLU)
+    con intervención causal: aprende un conjunto disperso de "conceptos"
+    interpretables y genera explicaciones interviniendo sobre esos
+    conceptos para producir contrafactuales, en vez de perturbar
+    directamente el input crudo como hace toda la familia Dynamask/ExtrMask.
+    Es el primer trabajo de esta lista que introduce autoencoders dispersos
+    (una técnica tomada de interpretabilidad mecanística de LLMs) al dominio
+    de series temporales.
+
+================================================================================
+PARTE 5 — RECURSOS DE SÍNTESIS / SURVEYS Y HERRAMIENTAS DE COMPARACIÓN
+================================================================================
+
+5.1 Awesome-Time-Series-Explainability (lista curada, mantenimiento continuo)
+    Autor: Jacqueline Höllig (JHoelli)
+    Link: https://github.com/JHoelli/Awesome-Time-Series-Explainability
+    Repositorio de referencia con la lista más completa y actualizada de
+    métodos post-hoc de XAI para series temporales; útil como punto de
+    partida para verificar si algún método nuevo apareció después de esta
+    investigación.
+
+5.2 Software Frameworks for Explainable AI in Time Series Classification:
+    A Systematic Review
+    Año/venue: arXiv, agosto 2026 (preprint)
+    Link: https://arxiv.org/abs/2608.21449
+    Documenta el crecimiento de frameworks de software (TSInterpret y
+    sucesores) para XAI en clasificación de series temporales: de 1
+    framework en 2022 a al menos 6 identificados en 2026, evidencia directa
+    de la maduración/comercialización del nicho.
+
+5.3 A Comprehensive Analysis of Perturbation Methods in Explainable AI
+    Feature Attribution Validation for Neural Time Series Classifiers
+    Año/venue: Scientific Reports 2025
+    Link: https://www.nature.com/articles/s41598-025-09538-2
+          https://pmc.ncbi.nlm.nih.gov/articles/PMC12284047/
+    Evalúa comparativamente GradCAM, Saliency, Integrated Gradients,
+    DeepLIFT, InputXGradient, GuidedGradCAM, KernelSHAP, LIME, Feature
+    Ablation, Deconvolution y Guided Backprop sobre clasificadores neuronales
+    de series temporales, introduciendo el "Consistency-Magnitude-Index"
+    como métrica de fidelidad; sirve como mapa comparativo transversal a
+    toda la Parte 3.
+
+================================================================================
+PARTE 6 — LÍNEA DE TIEMPO Y EVOLUCIÓN DEL NICHO (SÍNTESIS)
+================================================================================
+
+2016-2017  Interpretabilidad "por diseño" (RETAIN) y las bases teóricas de
+           atribución de propósito general (SHAP, Integrated Gradients),
+           aún no específicas de series temporales.
+
+2020       Se diagnostica formalmente el problema central del nicho: los
+           métodos de atribución genéricos CONFLACIONAN tiempo y feature y
+           fallan en series temporales (TSR / Ismail et al., NeurIPS 2020).
+           Esto motiva directamente la aparición de métodos "temporal-aware".
+
+2021       Explosión de propuestas específicas para el problema diagnosticado
+           en 2020: Dynamask (máscara continua + operadores de perturbación
+           dinámicos), TimeSHAP (Shapley recurrente con pruning), WinIT
+           (importancia por ventana con modelo generativo). Tres enfoques
+           distintos (máscara/gradiente, Shapley, remoción por ventana)
+           coexisten sin que ninguno domine claramente.
+
+2022-2023  Consolidación de infraestructura (TSInterpret) y primera ola de
+           correcciones directas a Dynamask: se identifica que su
+           perturbación fija es arbitraria (Extremal Mask/Enguehard, ICML
+           2023) y que entrenar explicadores por instancia es costoso
+           (CoRTX, TimeX — ambos empiezan a mover el problema hacia
+           "explicadores aprendidos/amortizados" en vez de optimización
+           por instancia).
+
+2024       Año de mayor refinamiento técnico directo sobre la familia
+           Dynamask: ContraLSP ataca el distribution shift con contrafactuales
+           + aprendizaje contrastivo; TimeX++ reformula el objetivo bajo
+           Information Bottleneck para evitar soluciones triviales y el
+           mismo distribution shift. Aparece también la primera extensión
+           seria a forecasting/regresión y a foundation models (WinTSR,
+           preprint). El "paradigma de máscara" madura pero sigue casi
+           exclusivamente centrado en clasificación y en dominios
+           clínico/sintético — el financiero permanece prácticamente vacío
+           (el hueco que la tesis explota).
+
+2025       El nicho empieza a auditarse en producción real (AMIA 2025,
+           fallos de interpretabilidad en cuidados críticos dinámicos) y a
+           consolidarse como área de benchmarking maduro (Scientific
+           Reports 2025, comparación sistemática de 11 métodos).
+
+2026       Dos movimientos simultáneos y algo divergentes:
+           (a) Técnico/incremental: la línea Information Bottleneck se
+               generaliza a forecasting (IB-Forecast) y se unifica con
+               contrafactuales (Unified IB Framework); aparece la noción de
+               "necesidad" causal (TimePNS) como refinamiento de
+               "suficiencia"; llegan los sparse autoencoders causales
+               (TimeSAE), importados de interpretabilidad mecanística de
+               LLMs.
+           (b) Conceptual/crítico: un position paper (ICML 2026) cuestiona
+               si el paradigma completo de "atribución escalar por
+               (variable, tiempo)" — la base de Dynamask y de TODA la Parte
+               3 — es la pregunta correcta, proponiendo en su lugar
+               "alineación semántica" como criterio de diseño.
+
+CONCLUSIÓN PARA LA TESIS: Dynamask (2021) sigue siendo, 5 años después, la
+referencia citada como punto de partida de casi toda la línea de máscaras
+aprendidas (Extremal Mask, ContraLSP, TimeX++), y ninguno de sus sucesores
+directos valida en datos financieros ni resuelve de forma central el costo
+computacional por instancia — ambos huecos siguen abiertos en 2026 y
+son defendibles como contribución específica y delimitada del framework de
+la tesis, en línea con lo que ya identificó la profesora (pivote hacia una
+limitación concreta de Dynamask, no una comparación amplia contra ~15
+trabajos).
+
+================================================================================
+FIN DEL DOCUMENTO
+================================================================================

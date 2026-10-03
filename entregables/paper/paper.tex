@@ -1,0 +1,2375 @@
+%% bare_conf.tex
+%% V1.3
+%% 2007/01/11
+%% by Michael Shell
+%% See:
+%% http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.7 or later) with an IEEE conference paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/tex-archive/macros/latex/contrib/IEEEtran/
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% User assumes all risk.
+%% In no event shall IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%
+%% File list of work: IEEEtran.cls, IEEEtran_HOWTO.pdf, bare_adv.tex,
+%%                    bare_conf.tex, bare_jrnl.tex, bare_jrnl_compsoc.tex
+%%*************************************************************************
+
+% *** Authors should verify (and, if needed, correct) their LaTeX system  ***
+% *** with the testflow diagnostic prior to trusting their LaTeX platform ***
+% *** with production work. IEEE's font choices can trigger bugs that do  ***
+% *** not appear when using other class files.                            ***
+% The testflow support page is at:
+% http://www.michaelshell.org/tex/testflow/
+
+
+
+% Note that the a4paper option is mainly intended so that authors in
+% countries using A4 can easily print to A4 and see how their papers will
+% look in print - the typesetting of the document will not typically be
+% affected with changes in paper size (but the bottom and side margins will).
+% Use the testflow package mentioned above to verify correct handling of
+% both paper sizes by the user's LaTeX system.
+%
+% Also note that the "draftcls" or "draftclsnofoot", not "draft", option
+% should be used if it is desired that the figures are to be displayed in
+% draft mode.
+%
+\documentclass[conference, letterpaper]{IEEEtran}
+% Add the compsoc option for Computer Society conferences.
+%
+% If IEEEtran.cls has not been installed into the LaTeX system files,
+% manually specify the path to it like:
+% \documentclass[conference]{../sty/IEEEtran}
+
+
+
+
+\usepackage{amssymb}
+
+% Some very useful LaTeX packages include:
+% (uncomment the ones you want to load)
+
+
+% *** MISC UTILITY PACKAGES ***
+%
+%\usepackage{ifpdf}
+% Heiko Oberdiek's ifpdf.sty is very useful if you need conditional
+% compilation based on whether the output is pdf or dvi.
+% usage:
+% \ifpdf
+%   % pdf code
+% \else
+%   % dvi code
+% \fi
+% The latest version of ifpdf.sty can be obtained from:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/oberdiek/
+% Also, note that IEEEtran.cls V1.7 and later provides a builtin
+% \ifCLASSINFOpdf conditional that works the same way.
+% When switching from latex to pdflatex and vice-versa, the compiler may
+% have to be run twice to clear warning/error messages.
+
+
+
+
+
+
+% *** CITATION PACKAGES ***
+%
+%\usepackage{cite}
+% cite.sty was written by Donald Arseneau
+% V1.6 and later of IEEEtran pre-defines the format of the cite.sty package
+% \cite{} output to follow that of IEEE. Loading the cite package will
+% result in citation numbers being automatically sorted and properly
+% "compressed/ranged". e.g., [1], [9], [2], [7], [5], [6] without using
+% cite.sty will become [1], [2], [5]--[7], [9] using cite.sty. cite.sty's
+% \cite will automatically add leading space, if needed. Use cite.sty's
+% noadjust option (cite.sty V3.8 and later) if you want to turn this off.
+% cite.sty is already installed on most LaTeX systems. Be sure and use
+% version 4.0 (2003-05-27) and later if using hyperref.sty. cite.sty does
+% not currently provide for hyperlinked citations.
+% The latest version can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/cite/
+% The documentation is contained in the cite.sty file itself.
+
+
+
+
+
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+  % \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  % \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  % \DeclareGraphicsExtensions{.eps}
+\fi
+% graphicx was written by David Carlisle and Sebastian Rahtz. It is
+% required if you want graphics, photos, etc. graphicx.sty is already
+% installed on most LaTeX systems. The latest version and documentation can
+% be obtained at: 
+% http://www.ctan.org/tex-archive/macros/latex/required/graphics/
+% Another good source of documentation is "Using Imported Graphics in
+% LaTeX2e" by Keith Reckdahl which can be found as epslatex.ps or
+% epslatex.pdf at: http://www.ctan.org/tex-archive/info/
+%
+% latex, and pdflatex in dvi mode, support graphics in encapsulated
+% postscript (.eps) format. pdflatex in pdf mode supports graphics
+% in .pdf, .jpeg, .png and .mps (metapost) formats. Users should ensure
+% that all non-photo figures use a vector format (.eps, .pdf, .mps) and
+% not a bitmapped formats (.jpeg, .png). IEEE frowns on bitmapped formats
+% which can result in "jaggedy"/blurry rendering of lines and letters as
+% well as large increases in file sizes.
+%
+% You can find documentation about the pdfTeX application at:
+% http://www.tug.org/applications/pdftex
+
+
+
+
+
+% *** MATH PACKAGES ***
+%
+%\usepackage[cmex10]{amsmath}
+% A popular package from the American Mathematical Society that provides
+% many useful and powerful commands for dealing with mathematics. If using
+% it, be sure to load this package with the cmex10 option to ensure that
+% only type 1 fonts will utilized at all point sizes. Without this option,
+% it is possible that some math symbols, particularly those within
+% footnotes, will be rendered in bitmap form which will result in a
+% document that can not be IEEE Xplore compliant!
+%
+% Also, note that the amsmath package sets \interdisplaylinepenalty to 10000
+% thus preventing page breaks from occurring within multiline equations. Use:
+%\interdisplaylinepenalty=2500
+% after loading amsmath to restore such page breaks as IEEEtran.cls normally
+% does. amsmath.sty is already installed on most LaTeX systems. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/required/amslatex/math/
+
+
+
+
+
+% *** SPECIALIZED LIST PACKAGES ***
+%
+%\usepackage{algorithmic}
+% algorithmic.sty was written by Peter Williams and Rogerio Brito.
+% This package provides an algorithmic environment fo describing algorithms.
+% You can use the algorithmic environment in-text or within a figure
+% environment to provide for a floating algorithm. Do NOT use the algorithm
+% floating environment provided by algorithm.sty (by the same authors) or
+% algorithm2e.sty (by Christophe Fiorio) as IEEE does not use dedicated
+% algorithm float types and packages that provide these will not provide
+% correct IEEE style captions. The latest version and documentation of
+% algorithmic.sty can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/algorithms/
+% There is also a support site at:
+% http://algorithms.berlios.de/index.html
+% Also of interest may be the (relatively newer and more customizable)
+% algorithmicx.sty package by Szasz Janos:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/algorithmicx/
+
+
+
+
+% *** ALIGNMENT PACKAGES ***
+%
+%\usepackage{array}
+% Frank Mittelbach's and David Carlisle's array.sty patches and improves
+% the standard LaTeX2e array and tabular environments to provide better
+% appearance and additional user controls. As the default LaTeX2e table
+% generation code is lacking to the point of almost being broken with
+% respect to the quality of the end results, all users are strongly
+% advised to use an enhanced (at the very least that provided by array.sty)
+% set of table tools. array.sty is already installed on most systems. The
+% latest version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/required/tools/
+
+
+%\usepackage{mdwmath}
+%\usepackage{mdwtab}
+% Also highly recommended is Mark Wooding's extremely powerful MDW tools,
+% especially mdwmath.sty and mdwtab.sty which are used to format equations
+% and tables, respectively. The MDWtools set is already installed on most
+% LaTeX systems. The lastest version and documentation is available at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/mdwtools/
+
+
+% IEEEtran contains the IEEEeqnarray family of commands that can be used to
+% generate multiline equations as well as matrices, tables, etc., of high
+% quality.
+
+
+%\usepackage{eqparbox}
+% Also of notable interest is Scott Pakin's eqparbox package for creating
+% (automatically sized) equal width boxes - aka "natural width parboxes".
+% Available at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/eqparbox/
+
+
+
+
+
+% *** SUBFIGURE PACKAGES ***
+%\usepackage[tight,footnotesize]{subfigure}
+% subfigure.sty was written by Steven Douglas Cochran. This package makes it
+% easy to put subfigures in your figures. e.g., "Figure 1a and 1b". For IEEE
+% work, it is a good idea to load it with the tight package option to reduce
+% the amount of white space around the subfigures. subfigure.sty is already
+% installed on most LaTeX systems. The latest version and documentation can
+% be obtained at:
+% http://www.ctan.org/tex-archive/obsolete/macros/latex/contrib/subfigure/
+% subfigure.sty has been superceeded by subfig.sty.
+
+
+
+%\usepackage[caption=false]{caption}
+%\usepackage[font=footnotesize]{subfig}
+% subfig.sty, also written by Steven Douglas Cochran, is the modern
+% replacement for subfigure.sty. However, subfig.sty requires and
+% automatically loads Axel Sommerfeldt's caption.sty which will override
+% IEEEtran.cls handling of captions and this will result in nonIEEE style
+% figure/table captions. To prevent this problem, be sure and preload
+% caption.sty with its "caption=false" package option. This is will preserve
+% IEEEtran.cls handing of captions. Version 1.3 (2005/06/28) and later 
+% (recommended due to many improvements over 1.2) of subfig.sty supports
+% the caption=false option directly:
+%\usepackage[caption=false,font=footnotesize]{subfig}
+%
+% The latest version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/subfig/
+% The latest version and documentation of caption.sty can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/caption/
+
+
+
+
+% *** FLOAT PACKAGES ***
+%
+%\usepackage{fixltx2e}
+% fixltx2e, the successor to the earlier fix2col.sty, was written by
+% Frank Mittelbach and David Carlisle. This package corrects a few problems
+% in the LaTeX2e kernel, the most notable of which is that in current
+% LaTeX2e releases, the ordering of single and double column floats is not
+% guaranteed to be preserved. Thus, an unpatched LaTeX2e can allow a
+% single column figure to be placed prior to an earlier double column
+% figure. The latest version and documentation can be found at:
+% http://www.ctan.org/tex-archive/macros/latex/base/
+
+
+
+%\usepackage{stfloats}
+% stfloats.sty was written by Sigitas Tolusis. This package gives LaTeX2e
+% the ability to do double column floats at the bottom of the page as well
+% as the top. (e.g., "\begin{figure*}[!b]" is not normally possible in
+% LaTeX2e). It also provides a command:
+%\fnbelowfloat
+% to enable the placement of footnotes below bottom floats (the standard
+% LaTeX2e kernel puts them above bottom floats). This is an invasive package
+% which rewrites many portions of the LaTeX2e float routines. It may not work
+% with other packages that modify the LaTeX2e float routines. The latest
+% version and documentation can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/sttools/
+% Documentation is contained in the stfloats.sty comments as well as in the
+% presfull.pdf file. Do not use the stfloats baselinefloat ability as IEEE
+% does not allow \baselineskip to stretch. Authors submitting work to the
+% IEEE should note that IEEE rarely uses double column equations and
+% that authors should try to avoid such use. Do not be tempted to use the
+% cuted.sty or midfloat.sty packages (also by Sigitas Tolusis) as IEEE does
+% not format its papers in such ways.
+
+
+
+
+
+% *** PDF, URL AND HYPERLINK PACKAGES ***
+%
+%\usepackage{url}
+% url.sty was written by Donald Arseneau. It provides better support for
+% handling and breaking URLs. url.sty is already installed on most LaTeX
+% systems. The latest version can be obtained at:
+% http://www.ctan.org/tex-archive/macros/latex/contrib/misc/
+% Read the url.sty source comments for usage information. Basically,
+% \url{my_url_here}.
+
+
+
+
+
+% *** Do not adjust lengths that control margins, column widths, etc. ***
+% *** Do not use packages that alter fonts (such as pslatex).         ***
+% There should be no need to do such things with IEEEtran.cls V1.6 and later.
+% (Unless specifically asked to do so by the journal or conference you plan
+% to submit to, of course. )
+
+
+% correct bad hyphenation here
+\hyphenation{op-tical net-works semi-conduc-tor}
+
+%\usepackage{subcaption}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\ifCLASSINFOpdf
+   \usepackage[pdftex]{graphicx}
+\else
+\fi
+
+% *** MATH PACKAGES ***
+%
+\usepackage[cmex10]{amsmath}
+\usepackage{color}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\usepackage{fancyhdr}
+\usepackage[caption=false,font=footnotesize]{subfig}
+
+
+\usepackage{booktabs}
+\usepackage{threeparttable}   % para tablenotes
+\newcommand{\cmark}{\checkmark}
+\newcommand{\xmark}{$\times$}
+
+
+\renewcommand{\thispagestyle}[2]{} 
+
+
+\fancypagestyle{plain}{
+        \fancyhead{}
+        \fancyhead[C]{first page center header}
+        \fancyfoot{}
+        \fancyfoot[C]{first page center footer}
+}
+\pagestyle{fancy}
+
+
+\headheight 20pt
+\footskip 20pt
+
+\rhead{}
+
+%Enter the first page number of your paper below
+\setcounter{page}{1}
+
+%Header
+\fancyhead[R]{\textit{Journal de ejemplo}}
+\renewcommand{\headrulewidth}{0pt}
+
+%Footer
+\fancyfoot[C]{www.ijacsa.thesai.org}
+\renewcommand{\footrulewidth}{0.5pt}
+\fancyfoot[R]{\thepage \  $|$ P a g e }
+
+
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, fit, backgrounds}
+
+\begin{document}
+
+%
+% paper title
+% can use linebreaks \\ within to get better formatting as desired
+\title{Framework de explicabilidad agnóstica al modelo para la predicción de series temporales financieras}
+
+\author{
+\IEEEauthorblockN{Rushell Vanessa Zavalaga Orozco}
+\IEEEauthorblockA{Escuela de Ciencia de la Computación\\
+Universidad Nacional de San Agustín - Arequipa\\
+Email: rzavalaga@unsa.edu.pe}
+\and
+\IEEEauthorblockN{Juan Carlos Gutiérrez Cáceres}
+\IEEEauthorblockA{Escuela de Ciencia de la Computación\\
+Universidad Nacional de San Agustín - Arequipa\\
+Email: jgutierrezca@unsa.edu.pe}
+\and
+\IEEEauthorblockN{Ana María Cuadros Valdivia}
+\IEEEauthorblockA{Escuela de Ciencia de la Computación\\
+Universidad Nacional de San Agustín - Arequipa\\
+Email: acuadrosv@unsa.edu.pe}
+}
+
+% \and
+% \IEEEauthorblockN{James Kirk\\ and Montgomery Scott}
+% \IEEEauthorblockA{Starfleet Academy\\
+% San Francisco, California 96678-2391\\
+% Telephone: (800) 555--1212\\
+% Fax: (888) 555--1212}}
+
+% conference papers do not typically use \thanks and this command
+% is locked out in conference mode. If really needed, such as for
+% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
+% after \documentclass
+
+% for over three affiliations, or if they all won't fit within the width
+% of the page, use this alternative format:
+% 
+%\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
+%Homer Simpson\IEEEauthorrefmark{2},
+%James Kirk\IEEEauthorrefmark{3}, 
+%Montgomery Scott\IEEEauthorrefmark{3} and
+%Eldon Tyrell\IEEEauthorrefmark{4}}
+%\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
+%Georgia Institute of Technology,
+%Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
+%\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
+%Email: homer@thesimpsons.com}
+%\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
+%Telephone: (800) 555--1212, Fax: (888) 555--1212}
+%\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
+
+
+
+
+% use for special paper notices
+%\IEEEspecialpapernotice{(Invited Paper)}
+
+
+
+
+% make the title area
+\maketitle
+
+% =======================================================
+% Abstract
+% =======================================================
+
+
+\begin{abstract}
+Los modelos de aprendizaje profundo para predicción de series 
+temporales financieras logran alta precisión pero no revelan 
+qué información del historial determinó cada predicción. Los 
+métodos de explicabilidad existentes, como SHAP y LIME, fueron 
+formulados para variables independientes y producen explicaciones 
+inconsistentes al ignorar la dependencia temporal de la serie. 
+Este trabajo propone un framework de explicabilidad temporal 
+agnóstico al modelo que, dada una ventana de entrada 
+$x \in \mathbb{R}^{T \times V}$, produce una matriz de importancia 
+$\hat{\alpha} \in \mathbb{R}^{T \times V}$ indicando cuánto 
+contribuyó cada variable en cada momento del historial a la 
+predicción analizada. El framework opera mediante perturbaciones 
+temporalmente ordenadas y se comunica con cualquier modelo 
+únicamente a través de su función de predicción, sin acceder a 
+pesos, gradientes ni arquitectura interna. Se evalúa sobre tres 
+modelos de distinta naturaleza computacional (LSTM, Transformer
+y Random Forest), entrenados sobre datos históricos del índice
+S\&P~500. Los resultados muestran que el framework identifica correctamente
+las entradas relevantes cuando el ground truth es conocido
+(AUP\,=\,0{,}9960), ejecuta cada explicación en 17{,}6\,ms,
+entre $22{\times}$ y $30{\times}$ más rápido que Shapley Value
+Sampling bajo las mismas condiciones experimentales (mismos datos,
+mismos modelos, mismo hardware),
+y produce atribuciones estadísticamente no triviales
+($p < 10^{-300}$) con diferenciación apropiada entre tipos de
+modelo (Spearman $\rho = 0{,}748$ entre modelos neuronales vs.\
+$\rho < 0{,}40$ frente al modelo de ensamble), confirmando que
+el framework captura el comportamiento específico de cada modelo
+y no artefactos del procedimiento de explicación.
+
+
+\noindent \textbf{Palabras clave:} series temporales financieras, 
+explicabilidad post-hoc, agnóstico al modelo, perturbaciones 
+temporales, importancia de variables, LSTM, Transformer, 
+Random Forest.
+\end{abstract}
+% ==============================================
+\section{Introducción}
+\label{sec:introduccion}
+
+
+La predicción de series temporales es una tarea central en la gestión de riesgos financieros, donde cada decisión basada en una predicción incorrecta puede tener consecuencias cuantificables sobre portafolios e instituciones \cite{arsenault2025}. Estas consecuencias no son solo teóricas. Cohen et al.~\cite{cohen2023blackbox} documentan que la opacidad de los modelos de aprendizaje automático usados en el mercado financiero constituye una fuente de riesgo distinta del error de predicción, porque impide validar si el modelo aprendió una relación económica real o solo una coincidencia sin significado presente en los datos de entrenamiento.
+
+En los últimos años, los modelos de aprendizaje profundo han reducido el error de predicción sobre este tipo de datos frente a métodos estadísticos clásicos \cite{bhandari2022, abdulquadir2023}. Sin embargo, estos modelos no explican por qué llegan a cada resultado, y esa falta de explicación ya tiene consecuencias regulatorias concretas. El SR 11-7 de la Reserva Federal estadounidense~\cite{sr117} obliga a los bancos a demostrar que entienden las capacidades y los límites de cada modelo antes de usarlo. El Reglamento de Inteligencia Artificial de la Unión Europea~\cite{euaiact2024} va más allá para ciertos usos financieros, como la evaluación crediticia, y exige que el modelo sea lo bastante transparente para que quien lo usa pueda interpretar sus resultados. Pese a estas exigencias, Sovrano et al.~\cite{sovrano2026} muestran que los métodos de explicabilidad actuales todavía no las cumplen de forma sistemática.
+
+
+Construir un framework de explicabilidad para este dominio conlleva responsabilidades éticas concretas, no solo declarativas. Un modelo entrenado sobre datos financieros históricos hereda los sesgos de ese historial, un régimen de mercado específico, la composición cambiante del índice, la autocorrelación trivial del precio, y una explicación poco fiel puede ocultar esos sesgos en vez de exponerlos. Por esta razón, este trabajo reporta también los resultados que no favorecen a la propuesta, que ningún modelo entrenado supera el baseline de persistencia ingenua (Sección~\ref{sec:logreturn}), y que una consideración específica investigada para Random Forest no confirmó la hipótesis inicial (Sección~\ref{sec:leaf_reference}), en vez de omitirlos. Además, al no requerir gradientes ni una optimización costosa por instancia (Sección~\ref{sec:avance2}), el framework reduce la barrera computacional y de infraestructura para auditar modelos financieros, una consideración de acceso equitativo relevante para instituciones o reguladores sin la capacidad de cómputo que exigen métodos como Shapley Value Sampling o las máscaras aprendidas por gradiente, y reduce a la vez el costo energético asociado a esa auditoría.
+
+Para abordar esta opacidad, el campo de la Inteligencia Artificial Explicable (XAI) agrupa métodos que permiten identificar qué factores influyeron en una predicción. Estos métodos se organizan en familias según su mecanismo. Los basados en gradientes, como DeepLIFT \cite{shrikumar2017}, requieren acceso a la estructura interna del modelo; los basados en atención dependen de la arquitectura utilizada; y los basados en perturbación, como SHAP y LIME, son agnósticos al modelo porque generan explicaciones observando cómo cambia la salida al modificar partes de la entrada \cite{arsenault2025}. Esta propiedad se traduce además en mayor estabilidad empírica entre arquitecturas. Schlegel et al.~\cite{schlegel2019} mostraron que SHAP produce atribuciones más consistentes entre modelos que DeepLIFT. No obstante, estos métodos de perturbación fueron formulados bajo el supuesto de que las variables de entrada son independientes entre sí. Al aplicarse sobre series temporales, tratan cada paso de tiempo como si fuera una variable aislada, ignorando que las observaciones forman una secuencia con dependencias estructurales \cite{tonekaboni2020, huang2025}. En el dominio financiero, donde la dinámica del mercado depende de patrones acumulados en el tiempo, esta omisión puede producir explicaciones que no reflejan el comportamiento real del modelo \cite{yadav2025, crabbe2021}.
+
+
+Entre las familias XAI mencionadas, los mecanismos de atención capturan la temporalidad pero están ligados a una arquitectura específica. Los pesos de atención de un Transformer no pueden usarse para explicar un Random Forest \cite{arsenault2025}. Esto deja a los métodos de perturbación como la única familia aplicable a cualquier modelo; sin embargo, al perturbar variables sin respetar el orden de la secuencia, pueden generar entradas que nunca ocurrirían en datos reales \cite{tonekaboni2020, huang2025}.
+
+Frente a esta necesidad, existen métodos que respetan el orden temporal de la serie y pueden aplicarse sin acceder a la estructura interna del modelo, como las máscaras dinámicas \cite{crabbe2021} y los frameworks basados en ventanas de perturbación \cite{roshinta2026}. Sin embargo, ninguno satisface simultáneamente las dos condiciones necesarias para verificar la naturaleza agnóstica a resolución de variable individual. Las máscaras dinámicas ajustan la perturbación resolviendo, para cada instancia, un problema de optimización no convexo mediante descenso de gradiente (hasta mil épocas y cinco hiperparámetros en la formulación original), lo que además de un costo computacional considerable les impide operar sobre modelos no diferenciables como Random Forest. Los dos trabajos que extendieron directamente esta idea corrigiendo sus perturbaciones fijas, ya sea aprendiendo la perturbación con una red adicional \cite{enguehard2023} o incorporando aprendizaje contrastivo \cite{liu2024contralsp}, mantienen la misma dependencia del gradiente y agregan parámetros propios que optimizar, sin acercarse a un mecanismo agnóstico a la diferenciabilidad del modelo. Los frameworks basados en ventanas de perturbación, por su parte, producen importancia a nivel de segmento temporal, sin resolución por variable individual dentro de la ventana. Esta ausencia de un método simultáneamente agnóstico a cualquier arquitectura, de costo fijo por instancia y capaz de atribuir importancia a nivel de variable y paso de tiempo individual motiva el framework propuesto en este trabajo.
+
+Este trabajo propone un framework de explicabilidad temporal agnóstico al modelo que identifica qué variables y en qué momento del historial fueron más relevantes para una predicción, sin depender de la estructura interna del modelo utilizado. El framework opera mediante perturbaciones temporalmente ordenadas sobre la ventana de entrada, produciendo una matriz de importancia por variable y momento temporal que puede calcularse sobre cualquier modelo de predicción. Su naturaleza agnóstica se demuestra entrenando modelos de distinta naturaleza computacional sobre series temporales financieras y verificando que las explicaciones generadas capturan el comportamiento específico de cada modelo, en lugar de ser independientes del modelo explicado. Adebayo et al.~\cite{adebayo2018} documentaron este fallo en otros métodos, varios métodos de saliency producen explicaciones casi idénticas incluso cuando los pesos del modelo se aleatorizan por completo, es decir, atribuciones que no reflejan ni el modelo ni los datos con los que se entrenó.
+
+La especificidad al dominio financiero no es incidental. La motivación de este trabajo surge de la gestión de riesgos financieros y del requisito regulatorio de transparencia descritos al inicio de esta sección \cite{arsenault2025}, y la validación empírica se limita al S\&P~500. La agnosticidad mecánica de un método no garantiza que sus atribuciones sean válidas fuera del contexto en que fue evaluado \cite{adebayo2018}; por esta razón, este trabajo restringe sus afirmaciones al dominio efectivamente probado en lugar de reclamar una generalidad no verificada. Las series financieras introducen además retos propios, como la tendencia no estacionaria, los cambios de régimen de mercado y la autocorrelación trivial del precio, que la evaluación experimental de este trabajo aborda de forma explícita. Para comprobar que el framework funciona como se espera, primero se verifica sobre datos sintéticos donde se conoce de antemano qué celdas deberían importar, y luego se aplica sobre el S\&P~500 comparando las explicaciones que produce entre los tres modelos entrenados.
+% ==============================================
+\section{Trabajos Relacionados}
+\label{sec:trabajos_relacionados}
+
+Los trabajos relacionados se organizan en dos ejes temáticos. El primero agrupa métodos XAI que incorporan la dimensión temporal en la explicación; el segundo, frameworks de explicabilidad temporalmente conscientes y agnósticos al modelo.
+% --- Eje 1 ---
+\subsection{Métodos XAI que incorporan la dimensión temporal en la explicación}
+
+Los primeros trabajos en aplicar XAI a series temporales trasladaron técnicas diseñadas para imágenes y texto al dominio temporal. Huang et al.~\cite{huang2025} propusieron ShapeX, un framework que en lugar de atribuir importancia paso a paso segmenta la serie en subsecuencias llamadas shapelets y calcula valores de Shapley sobre ellas. Esto permite capturar patrones temporales más amplios que un único instante. ShapeX fue diseñado para clasificación, donde un patrón reconocible sobre una subsecuencia es en sí mismo la evidencia que sustenta la etiqueta predicha. Esta propuesta aborda en cambio la predicción continua sobre una ventana multivariada, donde esa premisa no se sostiene de la misma forma. Dos variables registradas en el mismo instante pueden tener roles causales independientes sobre la predicción aunque coincidan temporalmente, y agruparlas en un segmento compartido diluiría esa distinción. Esto motiva una atribución de importancia por celda, a nivel de variable y paso de tiempo individuales, en lugar de por segmento.
+
+
+Yadav y Subbian~\cite{yadav2025} analizaron sistemáticamente por qué tres familias de métodos fallan ante tareas de predicción dinámica. En los métodos basados en gradiente, como Saliency y DeepLIFT~\cite{shrikumar2017}, la sensibilidad se calcula de forma local en un único instante, por lo que no captura cómo debería evolucionar la importancia de una variable a medida que cambia el contexto temporal. En los métodos basados en oclusión, enmascarar el valor de una variable en un instante asume independencia entre observaciones y rompe la continuidad y la autocorrelación propias de la serie, generando una perturbación artificial que no corresponde a una variación real de la señal. En los métodos basados en permutación, como SHAP~\cite{lundberg2017}, barajar valores asume que las muestras son intercambiables, una suposición que el orden secuencial de una serie temporal viola directamente. Señalan que, en conjunto, estos tres mecanismos no se adaptan a que la relación entre las variables y el objetivo cambia con el tiempo, y producen atribuciones que saltan de forma abrupta entre pasos de tiempo consecutivos en lugar de variar gradualmente junto con la señal.
+
+Como solución proponen frameworks de máscaras aprendibles que imponen esa continuidad optimizando la máscara mediante gradientes, lo que limita la solución a modelos diferenciables. El diagnóstico de Yadav y Subbian corresponde a un escenario de predicción dinámica, donde el modelo genera una predicción nueva en cada instante a medida que llega información, y ocluir una observación corrompe la autocorrelación de la que dependen las predicciones de los instantes siguientes en esa cadena, produciendo los saltos abruptos que ellos documentan. Este trabajo evalúa en cambio una única ventana de entrada que produce una única predicción final, sin una cadena de predicciones sucesivas que pueda desestabilizarse de esa forma. Por esta razón, la propuesta no necesita gradientes, no porque ofrezca una alternativa equivalente a las máscaras aprendibles, sino porque el problema específico que esas máscaras corrigen no se presenta de la misma manera en este escenario. Comparte con Yadav y Subbian el diagnóstico de que romper la independencia entre pasos de tiempo genera perturbaciones artificiales, y lo aborda perturbando una única celda a la vez, dejando el resto de la ventana exactamente en su valor y posición temporal observados, sin barajar ni reordenar ningún paso de tiempo. Esta perturbación celda por celda es, en concreto, la solución que propone este trabajo frente al diagnóstico compartido.
+
+Independientemente de esa diferencia de escenario, este framework tampoco impone una restricción de suavidad sobre la matriz de importancia resultante, una decisión de diseño aparte del punto anterior. Forzar continuidad entre pasos consecutivos añadiría un supuesto adicional sobre la forma de la explicación, que puede no corresponder con discontinuidades genuinas del dominio financiero. Por ejemplo, un reporte de resultados o un anuncio macroeconómico puede cambiar de golpe la importancia real de una variable de un día a otro.
+
+
+Este patrón no es exclusivo de dominios genéricos. Se repite igual en aplicaciones financieras que combinan SHAP o LIME con arquitecturas LSTM/CNN para auditoría, apoyo a decisiones de usuarios no técnicos o clasificación de tendencias \cite{gupta2025, sathyampeth2025, manikrao2026, jagannathan2025, kumar2024, singh2025, muhammad2024}, aplicando estos métodos directamente sobre la serie sin adaptar su mecanismo de perturbación al orden temporal.
+
+% --- Eje 2 ---
+\subsection{Frameworks de explicabilidad temporalmente conscientes y agnósticos al modelo}
+
+El segundo eje agrupa los trabajos más cercanos a esta propuesta. Son métodos que respetan el orden temporal de los datos y pueden aplicarse sobre cualquier modelo sin acceder a su estructura interna.
+
+
+Tonekaboni et al.~\cite{tonekaboni2020} introdujeron FIT (Feature Importance in Time), un framework que cuantifica la importancia de cada observación midiendo la divergencia KL entre la distribución predictiva del modelo y una distribución contrafactual construida al asumir que esa observación no fue vista. Su aporte central es controlar un problema propio de tareas de predicción en línea, donde el modelo genera una nueva predicción en cada instante a medida que llega información adicional, evaluada sobre datos clínicos. En ese escenario, la distribución de predicción cambia de forma natural con cada nueva observación, y sin ese control el cambio natural se confundiría con la importancia real de la variable recién llegada. Este trabajo evalúa en cambio una única ventana de entrada que produce una única predicción final, sin una cadena de predicciones sucesivas cuya distribución deba controlarse a lo largo del tiempo, por lo que el problema que FIT resuelve con tanto cuidado no se presenta de la misma forma en este escenario. El mecanismo de FIT solo requiere las predicciones del modelo, sin acceder a gradientes ni a su arquitectura interna, por lo que en principio podría aplicarse a cualquier modelo, pero fue evaluado únicamente sobre un modelo recurrente.
+
+
+Bento et al.~\cite{bento2021} propusieron TimeSHAP, un explicador
+agnóstico al modelo que extiende KernelSHAP al dominio secuencial y
+calcula atribuciones a nivel de feature, paso de tiempo y celda sobre
+modelos recurrentes. Fue evaluado sobre modelos de detección de fraude
+bancario, lo que lo sitúa entre los trabajos más directamente
+comparables a esta propuesta en cuanto a dominio y salida. No obstante,
+su mecanismo de perturbación estima el valor de Shapley por muestreo
+de coaliciones, subconjuntos aleatorios de posiciones que se
+mantienen en su valor real mientras el resto se reemplaza por una
+secuencia de referencia construida a partir del dataset, en vez de
+calcularlo de forma exacta. Esto en la práctica restringe su
+aplicación a modelos que procesan
+secuencias de forma nativa; su uso directo sobre modelos de ensamble
+como Random Forest no es posible sin modificar el método. Adicionalmente,
+el coste computacional del muestreo de Shapley escala de forma
+desfavorable con el número de pasos de tiempo y variables.
+
+Raykar et al.~\cite{raykar2023} propusieron TsSHAP, un método
+agnóstico al modelo para predicción de series temporales que aplica
+TreeSHAP sobre un modelo sustituto entrenado con features
+interpretables definidas a priori por el usuario, sin acceder a la
+estructura interna del modelo original. Su limitación principal es
+que la calidad de la explicación está condicionada por la elección de
+features interpretables y fue diseñado para predicción univariada,
+sin atribuir importancia a variables individuales dentro de una
+ventana multivariada.
+
+Crabbé y Van Der Schaar~\cite{crabbe2021} propusieron DynaMask, un método que ajusta una máscara de perturbación sobre la secuencia de entrada y penaliza los saltos abruptos en esa máscara para garantizar coherencia temporal en las atribuciones. Produce una puntuación de importancia por variable y por paso de tiempo, el mismo formato $T\times V$ que produce este framework, lo que lo convierte en el antecedente más directo de este trabajo. Sin embargo, DynaMask requiere acceso a los gradientes del modelo para optimizar la máscara, lo que lo restringe a redes neuronales y le impide operar sobre modelos como Random Forest. DynaMask demuestra que ese formato de salida es alcanzable y útil. La pregunta que motiva esta propuesta es si el mismo formato puede obtenerse sin depender de gradientes, de modo que el método pueda aplicarse también sobre un modelo no diferenciable como Random Forest.
+
+Dos trabajos posteriores extendieron directamente el mecanismo de DynaMask señalando que sus perturbaciones fijas (difuminado gaussiano, promedio móvil) no capturan dependencias de largo plazo en la serie. Enguehard~\cite{enguehard2023} reemplaza la perturbación fija por una perturbación aprendida mediante una red recurrente adicional, entrenada junto con la máscara. Liu et al.~\cite{liu2024contralsp} incorporan aprendizaje contrastivo para evitar que la perturbación saque a la entrada de la distribución original. Ambos trabajos mejoran la calidad de la atribución sobre el mecanismo de DynaMask, pero ninguno relaja el requisito de acceso a gradientes, y ambos agregan parámetros propios a optimizar por instancia. Cinco años después de DynaMask, y con dos extensiones directas publicadas en ICML y ICLR, la restricción a modelos diferenciables permanece intacta en toda esta línea de trabajo; ninguno de los tres evalúa además sobre series financieras pese a mencionarlas como motivación.
+
+Leung et al.~\cite{leung2023winit} propusieron WinIT, que extiende
+FIT~\cite{tonekaboni2020} para capturar efectos retrasados, un
+cambio en una variable observado en el instante $a$ puede no
+afectar la predicción sino hasta un instante posterior $b$, algo
+que FIT no captura porque solo compara el efecto en el mismo
+instante en que ocurrió la observación. WinIT aísla ese efecto
+retrasado comparando el impacto de remover una observación sobre
+una ventana de predicciones futuras. Al igual que FIT, y por el
+mismo motivo señalado para ese trabajo, este mecanismo solo tiene
+sentido en un escenario donde el modelo genera predicciones
+sucesivas a lo largo del tiempo. WinIT fue evaluado sobre datos
+sintéticos y sobre predicción de mortalidad en un dataset clínico
+(MIMIC-III), una tarea de clasificación, no de regresión continua
+como la de este trabajo. Su mecanismo se basa en remover
+observaciones y medir el efecto sobre la predicción, sin acceder
+a gradientes ni a la arquitectura del modelo, por lo que en
+principio es agnóstico al modelo, pero fue evaluado únicamente bajo
+modelos recurrentes, sin verificar si las atribuciones producidas
+son consistentes al comparar modelos de distinta naturaleza
+computacional.
+
+
+Roshinta et al.~\cite{roshinta2026} propusieron un framework de perturbación por ventanas dinámicas que reduce la redundancia entre variables correlacionadas mediante PCA antes de perturbar, y luego reconstruye las atribuciones en el espacio de variables original. Su diseño es el más cercano en mecanismo al framework propuesto en este trabajo, ya que tampoco requiere valores de Shapley ni acceso a la estructura interna del modelo. Sin embargo, un componente principal es una combinación lineal de varias variables originales correlacionadas, no una variable individual, de modo que repartir la importancia de un componente de vuelta a las variables que lo componen es una estimación indirecta y no una medición directa de cuánto importó cada variable por sí sola; si dos variables están fuertemente correlacionadas y solo una de ellas es la causa real, este reparto puede asignarle importancia a ambas por igual. Este framework evita ese paso intermedio perturbando cada variable original directamente, celda por celda. Además, la evaluación de Roshinta et al.\ se limita a arquitecturas recurrentes (GRU y LSTM), sin verificar si las explicaciones son consistentes al comparar modelos de distinta naturaleza computacional.
+
+Kim y Park~\cite{gsshap2026} propusieron GroupSegment-SHAP (GS-SHAP), el trabajo más cercano en dominio a esta propuesta. Su motivación es que los métodos SHAP existentes para series temporales tratan el eje de variables y el eje de tiempo de forma independiente, fragmentando señales estructurales que en realidad forman varias variables actuando juntas sobre un intervalo específico, por ejemplo un movimiento conjunto de varias medias móviles durante un cambio de régimen de mercado. Es un framework de explicabilidad para series temporales multivariadas financieras que produce valores de Shapley a nivel de grupo de variables y segmento temporal para preservar esas interacciones conjuntas. Su pipeline opera en dos fases. Primero, agrupa variables correlacionadas mediante el criterio HSIC y detecta puntos de cambio en cada grupo mediante divergencia MMD recursiva, produciendo segmentos específicos por grupo $\mathcal{S}^{(k)}$. Segundo, define jugadores estructurados $p_{k,j} = G_k \times S_j^{(k)}$ y calcula valores de Shapley sobre ellos mediante muestreo de permutaciones con enmascaramiento por media. Su contribución principal es mejorar la coherencia estructural de las atribuciones explotando la correlación entre variables. Esta propuesta toma la apuesta contraria, mantiene resolución completa por celda en vez de agrupar variables, y deja que la evaluación experimental verifique si esa resolución produce igualmente atribuciones coherentes sin necesidad de agrupar nada de antemano. No obstante, GS-SHAP presenta dos limitaciones respecto al framework propuesto. La primera es que su evaluación se realiza sobre un único modelo por tarea, sin verificar si las atribuciones son consistentes al comparar modelos de distinta naturaleza computacional. La segunda es que su granularidad de salida opera a nivel de \emph{grupo} de variables ($K$ grupos $\times$ $J$ segmentos), perdiendo la resolución por variable individual que el framework propuesto produce directamente en la matriz $\hat{\alpha} \in \mathbb{R}^{T \times V}$ con $V$ variables originales sin agrupar.
+
+Los trabajos de este eje comparten una limitación común. Ninguno
+evalúa sus explicaciones sobre modelos de distinta naturaleza
+computacional entrenados sobre los mismos datos. TimeSHAP y DynaMask
+no pueden aplicarse sobre modelos de ensamble como Random Forest, el
+primero por su dependencia en la estructura secuencial del modelo y
+el segundo por requerir gradientes. TsSHAP opera sobre features
+predefinidas y no atribuye importancia por celda individual. FIT,
+WinIT, Roshinta et al.\ y GS-SHAP evalúan sobre un único tipo de
+modelo, lo que impide descartar el fallo documentado por Adebayo et
+al.~\cite{adebayo2018}, atribuciones que reflejan el método de
+perturbación y no el comportamiento del modelo explicado. GS-SHAP
+agrega variables en grupos y Roshinta et al.\ las reconstruye
+indirectamente vía PCA. Ambos pierden la resolución directa por
+variable individual que produce este framework. Este trabajo
+propone un framework de perturbación temporal agnóstico al modelo
+que produce importancias a resolución completa $(T \times V)$ sin
+agrupamiento previo, puede operar sobre cualquier modelo mediante
+una función de predicción inyectable, y cuya naturaleza agnóstica
+queda demostrada evaluando modelos de distinta naturaleza
+computacional sobre los mismos datos.
+
+% --- Tabla comparativa ---
+\begin{table*}[ht]
+\centering
+\caption{Comparación de trabajos relacionados según 
+dimensiones clave del problema}
+\label{tab:trabajos_relacionados}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccccccc}
+\toprule
+\textbf{Trabajo} & 
+\textbf{XAI} & 
+\textbf{Resp. tiempo} & 
+\textbf{Agnóstico} & 
+\textbf{Imp. temporal} & 
+\textbf{Imp. variables} & 
+\textbf{Agn. verificado} & 
+\textbf{Tipo} \\
+\midrule
+\multicolumn{8}{l}{\textit{Eje 1 (Métodos XAI con dimensión temporal)}} \\
+\midrule
+Huang et al.~\cite{huang2025}
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark 
+& ShapeX \\
+Yadav y Subbian~\cite{yadav2025}  
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark 
+& Eval. máscaras \\
+\midrule
+\multicolumn{8}{l}{\textit{Eje 2 (XAI temporal agnóstico)}} \\
+\midrule
+Tonekaboni et al.~\cite{tonekaboni2020}  
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark 
+& FIT \\
+Leung et al.~\cite{leung2023winit}  
+& \cmark & \cmark & \cmark & \cmark & \cmark & \xmark 
+& WinIT \\
+Crabbé y Van Der Schaar~\cite{crabbe2021}  
+& \cmark & \cmark & $\sim$ & \cmark & \cmark & \xmark 
+& DynaMask \\
+Bento et al.~\cite{bento2021}
+& \cmark & \cmark & $\sim$ & \cmark & \cmark & \xmark
+& TimeSHAP \\
+Raykar et al.~\cite{raykar2023}
+& \cmark & \cmark & \cmark & \xmark & $\sim$ & \xmark
+& TsSHAP \\
+Roshinta et al.~\cite{roshinta2026}
+& \cmark & \cmark & \cmark & \cmark & $\sim$ & \xmark
+& Ventanas dinámicas \\
+Kim y Park~\cite{gsshap2026}
+& \cmark & \cmark & \cmark & \cmark & $\sim$ & \xmark
+& GS-SHAP \\
+\midrule
+\textbf{Este trabajo}  
+& \cmark & \cmark & \cmark & \cmark & \cmark & \cmark 
+& Framework agnóstico \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \cmark~=~sí;\quad \xmark~=~no;\quad $\sim$~=~parcialmente.
+\item Columnas.
+Resp. tiempo = las explicaciones respetan el orden temporal;
+Agnóstico = no requiere acceso a la estructura interna del 
+modelo; 
+Imp. temporal = atribuye importancia por ventana de tiempo; 
+Imp. variables = atribuye importancia por variable de 
+entrada; 
+Agn. verificado = el mismo método de atribución propuesto por 
+el trabajo fue evaluado sobre modelos de distinta naturaleza 
+computacional (p.\ ej., neuronal vs.\ ensamble); no se marca 
+cuando el trabajo es un survey que compara métodos ya 
+existentes entre sí, ni cuando la evaluación se limita a un 
+único tipo de modelo.
+\end{tablenotes}
+\end{table*}
+
+
+\section{Fundamentos Teóricos}
+\label{sec:fundamentos}
+
+\subsection{Explicabilidad Post-hoc}
+
+Un método de explicabilidad es post-hoc cuando opera sobre un modelo ya entrenado, sin modificar su estructura ni su proceso de entrenamiento \cite{arsenault2025}. A diferencia de los modelos interpretables por diseño, como los árboles de decisión, los métodos post-hoc pueden aplicarse sobre cualquier modelo independientemente de su complejidad interna. Dado un modelo entrenado y una predicción específica, el método post-hoc produce una atribución de importancia sobre las variables de entrada, indicando cuánto contribuyó cada una a esa predicción.
+
+
+\subsection{Agnóstico al Modelo}
+
+Un método post-hoc es agnóstico al modelo cuando no requiere acceso a la estructura interna del modelo para generar una explicación. Puede aplicarse sobre redes neuronales, modelos de ensamble o modelos estadísticos sin necesidad de conocer sus pesos, gradientes ni arquitectura \cite{arsenault2025}. En contraste, métodos como DeepLIFT o los mecanismos de atención están ligados a una arquitectura específica y no pueden transferirse a modelos de distinta naturaleza \cite{schlegel2019}. Esta propiedad es la que permite comparar explicaciones entre modelos bajo las mismas condiciones.
+
+Que un método sea agnóstico por diseño no garantiza que sus atribuciones reflejen el comportamiento real del modelo explicado. Adebayo et al.~\cite{adebayo2018} mostraron que varios métodos de saliency producen explicaciones prácticamente idénticas incluso cuando los pesos del modelo se aleatorizan, es decir, atribuciones independientes tanto del modelo como de los datos que lo entrenaron. Esto implica que la agnosticidad mecánica de un método debe verificarse empíricamente, y no puede darse por probada solo a partir de su diseño.
+
+
+\subsection{Métodos de Perturbación}
+
+Los métodos de perturbación estiman la importancia de una variable observando cómo cambia la predicción del modelo cuando dicha variable es modificada o eliminada de la entrada \cite{arsenault2025}. SHAP formaliza esta idea con valores de Shapley de la teoría de juegos cooperativos: calcula la contribución promedio de cada variable considerando todas las combinaciones posibles de variables presentes y ausentes. LIME sigue una estrategia distinta: genera perturbaciones en torno a la instancia que se desea explicar y entrena un modelo lineal sobre ellas, aproximando el comportamiento local del modelo original \cite{arsenault2025}.
+
+
+Como se discutió en la Sección~\ref{sec:introduccion}, ambos métodos asumen independencia entre variables de entrada, supuesto que no se sostiene en series temporales y motiva la explicabilidad temporal descrita a continuación.
+
+
+\subsection{Explicabilidad Temporal}
+La explicabilidad temporal extiende la atribución de importancia 
+a la dimensión del tiempo, reconociendo que una misma variable 
+puede ser determinante en un momento del historial e irrelevante 
+en otro \cite{tonekaboni2020}. Formalmente, dado un modelo 
+entrenado y una ventana de entrada de $T$ pasos de tiempo y $V$ 
+variables, la explicabilidad temporal produce una matriz 
+$\hat{\alpha} \in \mathbb{R}^{T \times V}$, donde cada celda 
+$\hat{\alpha}(t, v)$ representa la relevancia de la variable $v$ 
+en el paso de tiempo $t$ para la predicción analizada. Esta 
+representación permite responder simultáneamente dos preguntas: 
+qué variable influyó en la predicción y en qué momento del 
+historial lo hizo.
+
+
+Para que una explicación temporal sea válida, las perturbaciones sobre la serie deben respetar el orden temporal: no puede modificarse información futura para explicar un instante pasado, ya que esto introduce situaciones que no ocurren en los datos reales \cite{tonekaboni2020, crabbe2021}.
+
+% % % =======================================================
+\section{Propuesta}
+\label{sec:propuesta}
+
+Este trabajo propone el framework de explicabilidad temporal
+agnóstico al modelo introducido en la
+Sección~\ref{sec:introduccion}, que produce la matriz de
+importancia $\hat{\alpha} \in \mathbb{R}^{T \times V}$ definida en
+la Sección~\ref{sec:fundamentos}. La Figura~\ref{fig:arquitectura}
+ilustra el flujo completo en seis etapas. Son (1)~los datos de
+entrada, la serie temporal financiera multivariada, (2)~la
+preparación de los datos, derivación de variables, normalización y
+construcción de ventanas deslizantes, (3)~el modelo predictivo,
+cualquiera de los tres modelos de distinta naturaleza computacional
+entrenados sobre esas ventanas, (4)~la interfaz uniforme de
+predicción que desacopla el motor de perturbaciones de cualquier
+modelo concreto, (5)~el motor de perturbaciones temporales, la
+contribución principal de este trabajo, y (6)~la matriz de
+importancia temporal resultante. Las etapas (4) y (5) constituyen el
+núcleo agnóstico del framework. La etapa (4) garantiza que cualquier
+modelo puede conectarse sin modificar el motor, y la etapa (5)
+garantiza que las perturbaciones son temporalmente coherentes
+independientemente del modelo conectado.
+
+
+\begin{figure*}[ht]
+    \centering
+    \includegraphics[width=1\linewidth]{PIPELINE.png}
+    \caption{Pipeline del framework de explicabilidad temporal
+    agnóstico al modelo. El flujo comprende seis etapas.
+    (1)~Datos de entrada, la serie temporal financiera multivariada
+    del S\&P~500 con $V=15$ variables.
+    (2)~Preparación de los datos, derivación de las variables,
+    normalización MinMax y construcción de ventanas deslizantes de
+    forma $(N, 20, 15)$.
+    (3)~Modelo predictivo, cualquiera de los tres modelos de
+    distinta naturaleza computacional (LSTM, Transformer, Random
+    Forest) entrenados bajo la misma interfaz.
+    (4)~Interfaz de predicción, la función $f$ que recibe ventanas
+    de forma $(N, T, V)$ y devuelve una predicción escalar por
+    ventana $(N)$, sin exponer al motor la estructura interna del
+    modelo.
+    (5)~Motor de perturbación temporal, la contribución principal de
+    este trabajo, que perturba cada celda $(t,v)$ reemplazándola por
+    su referencia $r_v$, evalúa la predicción resultante y calcula el
+    desplazamiento $\alpha(t,v)$ (Ecuación~1), normalizado después
+    por la norma $L_1$ (Ecuación~3).
+    (6)~Matriz de importancia temporal $\hat{\alpha} \in
+    \mathbb{R}^{20 \times 15}$ resultante.}
+    \label{fig:arquitectura}
+\end{figure*}
+
+\subsection{Datos de entrada}
+\label{sec:datos_entrada}
+
+El framework recibe como entrada una serie temporal multivariada 
+organizada en ventanas deslizantes de longitud fija. En este 
+trabajo se utilizan datos históricos del índice S\&P~500 
+(\texttt{\^{}GSPC}) para el período 2010--2024, obtenidos 
+mediante la biblioteca \textit{yfinance}, con un total de 3{,}754 
+días hábiles de cotización. A partir de las cinco variables base 
+de precio y volumen (Open, High, Low, Close, Volume) se derivan
+diez indicadores técnicos, entre ellos medias móviles simples de 5, 10 y 20
+días (SMA\_5, SMA\_10, SMA\_20), MACD y su señal 
+(MACD, MACD\_Signal), índice de fuerza relativa de 14 períodos 
+(RSI\_14), ancho de banda de Bollinger (BB\_width), rango 
+verdadero promedio de 14 períodos (ATR\_14), retorno logarítmico 
+(Log\_Return) y volumen relativo (Volume\_ratio), conformando un 
+espacio de $V=15$ variables.
+
+Los datos se particionaron respetando el orden temporal en 
+período de desarrollo (80\%) y prueba (20\%). El escalador MinMax
+se ajustó sobre el período de desarrollo completo para cubrir el 
+rango de precios del S\&P~500 a lo largo de todo el período 
+analizado y evitar fuga de información hacia el conjunto de 
+prueba. Sobre los datos escalados se construyeron ventanas 
+deslizantes de $T=20$ días con horizonte de predicción $H=1$ día, 
+donde la variable objetivo es el precio de cierre normalizado del 
+día siguiente. Cada ventana tiene forma $(T, V) = (20, 15)$ y el 
+conjunto completo de ventanas tiene forma $(N, T, V)$.
+
+\subsection{Interfaz Uniforme de Predicción}
+
+La agnósticidad del framework respecto al modelo subyacente se
+implementa mediante un patrón adaptador de dos niveles. El
+\texttt{TemporalPerturbationEngine} recibe como único punto de
+contacto con el modelo una función de predicción $f:
+\mathbb{R}^{N \times T \times V} \rightarrow \mathbb{R}^N$
+inyectada en su constructor; el motor nunca accede al modelo
+directamente. Esta separación garantiza que incorporar un modelo
+nuevo al framework no requiere modificar ningún componente
+existente.
+
+\textbf{Nivel 1. Adaptación de firma.} Cada modelo implementa
+un wrapper que estandariza la firma de entrada a $(N, T, V)$ y
+la salida a $(N,)$. La adaptación específica ocurre íntegramente
+dentro del wrapper y es transparente para el motor. El wrapper de
+Random Forest aplana cada ventana $(T, V) \rightarrow (T \cdot V)$
+antes de invocar al regresor de scikit-learn; los wrappers de LSTM
+y Transformer convierten el array NumPy a tensor PyTorch, ejecutan
+la inferencia en modo evaluación sin gradientes, y reconvierten la
+salida a NumPy. Desde la perspectiva del motor, cualquier modelo
+se comporta de forma idéntica.
+
+\textbf{Nivel 2. Inyección de la función de predicción.} El
+\texttt{ModelAgnosticExplainer} construye el callable $f$ a partir
+del wrapper y lo inyecta en el motor. Para los backends PyTorch y
+scikit-learn, esta construcción está automatizada. Para cualquier
+otro modelo, sea estadístico, propietario o de un framework distinto,
+el usuario puede inyectar directamente una función con la firma
+$(N, T, V) \rightarrow (N,)$ en el \texttt{TemporalPerturbationEngine}
+sin modificar ningún componente del framework. Este diseño implementa
+la inversión de dependencias. El framework no depende de los modelos
+concretos, sino que cualquier modelo puede conectarse al framework
+siempre que exponga la firma unificada.
+
+
+\subsection{Modelos de distinta naturaleza}
+\label{sec:modelos_naturaleza}
+
+Para verificar la naturaleza agnóstica del framework, se
+entrenan tres modelos de distinta naturaleza computacional
+sobre el mismo conjunto de datos y se evalúan bajo la misma
+interfaz de predicción $(N, T, V) \rightarrow (N,)$, sin que
+el motor de perturbaciones acceda a sus pesos, gradientes ni
+arquitectura interna.
+
+\textbf{LSTM.} Red neuronal recurrente de 2 capas con
+$\text{hidden}=128$ y dropout de 0.2, entrenada para capturar
+dependencias temporales a través de sus celdas de memoria.
+Recibe ventanas de forma $(T, V)$ y produce una predicción
+escalar por ventana.
+
+\textbf{Transformer.} Arquitectura basada en mecanismos de
+atención con codificación posicional sinusoidal, 2 capas de
+TransformerEncoder con 4 cabezas de atención, dimensión de
+feedforward de 256 y dropout de 0.1. Para agregar la secuencia
+codificada en un vector único se utiliza attention pooling
+aprendido, definido como $\mathbf{w} = \text{softmax}(\text{Linear}(\mathbf{h}))$,
+$\mathbf{z} = \sum_t w_t \mathbf{h}_t$, donde $\mathbf{h}_t$ es
+la representación codificada en el paso $t$. Esta decisión
+reemplaza el esquema last-token, que concentraba artificialmente
+la importancia en el último paso de tiempo e interfería con la
+evaluación de explicabilidad temporal.
+
+\textbf{Random Forest.} Modelo de ensamble de 200 árboles de
+decisión (scikit-learn \texttt{RandomForestRegressor}). Dado que
+los árboles no procesan secuencias, el wrapper del modelo aplana
+cada ventana de forma $(T, V) \rightarrow (T \times V)$ antes de
+invocar al modelo, manteniendo la interfaz uniforme exigida por
+el framework. Se incluye como baseline tabular no secuencial para
+contrastar con los modelos neuronales.
+
+Los hiperparámetros de LSTM y Transformer no se obtuvieron mediante
+una búsqueda exhaustiva. Se fijaron en valores estándar para esta
+escala de datos (15 variables, ventanas de 20 pasos, del orden de
+miles de instancias de entrenamiento), y se igualó deliberadamente
+la profundidad de ambas arquitecturas en 2 capas, de modo que la
+comparación entre ellas aísle el efecto del mecanismo recurrente
+frente al de atención, y no una diferencia de capacidad por tener
+más o menos capas. La dimensión de feedforward del Transformer
+(256) sigue la convención estándar de fijarla en cuatro veces la
+dimensión del modelo ($4 \times 64$), y su dropout (0.1) es el
+valor usual reportado para esa arquitectura, menor que el de LSTM
+(0.2) porque los mecanismos de atención suelen requerir menos
+regularización que las celdas recurrentes. El número de árboles de
+Random Forest (200) es una elección estándar de la práctica común,
+mayor que el valor por defecto de scikit-learn (100) para reducir
+varianza, sin que aporte mejoras adicionales relevantes más allá de
+ese punto para este tamaño de datos.
+
+Los tres modelos se entrenaron con el optimizador AdamW
+($lr=10^{-3}$, $\text{weight\_decay}=10^{-4}$), reducción de 
+tasa de aprendizaje por meseta (factor~0.5, paciencia~5), 
+gradient clipping (norma máxima~1.0) y early stopping 
+(paciencia~15 sobre pérdida de validación).
+
+\subsection{Motor de perturbaciones temporales}
+
+El componente central del framework es el motor de perturbaciones 
+temporales. Dada una ventana de entrada $x \in \mathbb{R}^{T 
+\times V}$ y un modelo $f$, el motor construye una matriz de 
+importancia $\alpha \in \mathbb{R}^{T \times V}$ donde cada celda 
+$\alpha(t, v)$ cuantifica cuánto cambia la predicción del modelo
+al reemplazar el valor de la variable $v$ en el paso de tiempo
+$t$ por un valor de referencia neutro, según la Ecuación~1.
+
+\begin{equation}
+    \alpha(t, v) = \left| f(x) - f(x_{-(t,v)}) \right|
+\end{equation}
+
+donde $x_{-(t,v)}$ denota la ventana original con la posición 
+$(t, v)$ reemplazada por $r_v$, el valor de referencia de la 
+variable $v$ definido como su media sobre el conjunto de 
+entrenamiento en escala normalizada. El vector de referencia 
+$\mathbf{r} \in \mathbb{R}^V$ se calcula una sola vez antes de 
+la evaluación y se mantiene fijo durante todo el proceso de 
+explicación.
+
+La Ecuación~1 reporta el valor absoluto del desplazamiento de
+predicción, por lo que $\hat{\alpha}(t,v)$ cuantifica \emph{cuánto}
+influye una celda pero no \emph{en qué dirección} lo hace. Esta
+elección es adecuada para el objetivo de este trabajo, que es
+identificar qué variables y qué instantes concentran la capacidad
+explicativa del modelo y comparar esa concentración entre
+arquitecturas, pero descarta información potencialmente relevante
+para un analista financiero, que además de saber qué celda importa
+querría saber si su efecto fue hacia una predicción mayor o menor.
+Retener el signo requiere resolver antes una ambigüedad de dirección.
+El signo de $f(x)-f(x_{-(t,v)})$ depende de si la referencia $r_v$
+queda por encima o por debajo del valor observado en esa celda, y esa
+dirección es arbitraria porque $r_v$ es una media fija sin significado
+financiero propio. Una extensión concreta para resolver esta
+ambigüedad, planificada como trabajo futuro para el siguiente
+semestre, es perturbar cada celda en ambas direcciones, una vez hacia
+un valor por encima de $r_v$ y otra hacia uno por debajo en magnitud
+simétrica, y reportar el promedio con signo de ambos desplazamientos
+en lugar de una única perturbación hacia la media. La función
+\texttt{direction\_consistency}, ya implementada en
+\texttt{evaluation/saliency\_metrics.py}, permite validar si ese
+signo coincide con la dirección real del movimiento del precio,
+reutilizando las mismas 731 ventanas de prueba y los tres modelos ya
+entrenados, sin reentrenamiento adicional.
+
+Las perturbaciones se aplican respetando el orden temporal de
+la serie. Cada posición $(t, v)$ se enmascara de forma
+independiente sin modificar ningún otro valor de la ventana, 
+lo que garantiza que las secuencias perturbadas sean 
+temporalmente coherentes y no introduzcan información futura 
+en instantes pasados \cite{tonekaboni2020, crabbe2021}.
+
+Para eficiencia computacional, el motor no realiza $T \times V$
+llamadas individuales al modelo. En su lugar, construye un batch
+único de $T \times V + 1$ ventanas, la ventana original más una
+ventana perturbada por cada posición $(t, v)$, y obtiene todas
+las predicciones en una sola inferencia, según la Ecuación~2.
+
+\begin{equation}
+    \text{batch} = \left[ x,\; x_{-(0,0)},\; \ldots,\; 
+    x_{-(T-1,V-1)} \right] \in 
+    \mathbb{R}^{(TV+1) \times T \times V}
+\end{equation}
+
+En esta implementación con $T=20$ y $V=15$, el batch tiene
+301 ventanas por predicción explicada. Una vez obtenidas las
+predicciones, los valores de importancia se calculan
+vectorialmente y se normalizan por la norma L1 para que sean
+comparables entre distintas predicciones y distintos modelos,
+según la Ecuación~3.
+
+\begin{equation}
+    \hat{\alpha}(t, v) = \frac{\alpha(t, v)}
+    {\sum_{t'}\sum_{v'} \alpha(t', v')}
+\end{equation}
+
+La matriz resultante $\hat{\alpha} \in \mathbb{R}^{T \times V}$ 
+constituye la explicación de la predicción. Cada celda indica 
+la proporción del cambio total en la predicción atribuible a 
+la variable $v$ en el paso de tiempo $t$.
+
+\textbf{Escalabilidad.} El tamaño del batch por instancia
+explicada es $T \cdot V + 1$, de modo que el costo computacional
+del motor crece linealmente con el producto $T \times V$, no de
+forma independiente con cada dimensión. En la configuración
+evaluada en este trabajo ($T{=}20$, $V{=}15$), el batch tiene 301
+ventanas, lo que se ejecuta en una sola pasada de inferencia sin
+dificultad. Para ventanas más largas ($T \gg 20$, por ejemplo
+históricos intradía con cientos de pasos) o espacios de variables
+más grandes ($V \gg 15$), el batch puede crecer a un tamaño que
+exceda la memoria disponible para una única pasada, obligando a
+fragmentar la inferencia en múltiples sub-batches secuenciales; el
+costo total de cómputo sigue siendo $O(TV)$ llamadas al modelo,
+pero el tiempo de pared ya no se beneficia de una única inferencia
+en batch. Para esos regímenes, una extensión natural del framework
+es perturbar bloques de celdas contiguas (por ejemplo, agrupando
+pasos de tiempo consecutivos o variables correlacionadas, en la
+línea de GS-SHAP~\cite{gsshap2026}) en lugar de celdas
+individuales, sacrificando resolución por una reducción del número
+de perturbaciones evaluadas. Esta extensión no se explora en este
+trabajo, cuyo alcance experimental se limita a $T{=}20$ y $V{=}15$.
+
+\subsection{Validación del framework}
+
+La validación del framework se realiza en dos dimensiones que 
+verifican propiedades del motor de perturbaciones, no del 
+modelo subyacente.
+
+\textbf{Consistencia inter-modelo.} Se verifica que el framework
+produce explicaciones que reflejan el comportamiento específico
+de cada modelo y no son un artefacto del método de perturbación,
+en el sentido señalado por Adebayo et al.~\cite{adebayo2018} para
+métodos de saliency independientes del modelo explicado.
+Para cada par de modelos se calcula la correlación de Spearman
+$\rho$ entre los vectores aplanados de sus matrices
+$\hat{\alpha}$, promediada sobre $N=100$ instancias del conjunto
+de prueba seleccionadas aleatoriamente, según la Ecuación~4.
+
+\begin{equation}
+    \rho_{\text{inter}} = \frac{1}{N} \sum_{i=1}^{N} 
+    \rho\!\left( 
+    \text{vec}(\hat{\alpha}_i^{(A)}),\; 
+    \text{vec}(\hat{\alpha}_i^{(B)}) 
+    \right)
+\end{equation}
+
+donde $\hat{\alpha}_i^{(A)}$ y $\hat{\alpha}_i^{(B)}$ son las 
+matrices de importancia producidas por los modelos $A$ y $B$ 
+sobre la misma instancia $i$. Una correlación alta entre modelos 
+de la misma familia (neuronales) y más baja entre familias 
+distintas (neuronal vs.\ ensamble) indica que las explicaciones 
+capturan el comportamiento del modelo y no son un artefacto del 
+método.
+
+\textbf{Significancia estadística.} Se verifica que las 
+explicaciones generadas son estadísticamente distintas de 
+asignaciones aleatorias de importancia. El baseline aleatorio 
+se construye generando matrices de la misma forma $(T, V)$ con 
+valores extraídos de una distribución uniforme y normalizados 
+por L1, manteniendo la misma escala que las matrices 
+$\hat{\alpha}$ reales. La prueba Mann-Whitney U no paramétrica 
+se aplica entre la distribución de valores de $\hat{\alpha}$ 
+reales y la distribución del baseline aleatorio, sin asumir 
+normalidad en ninguna de las dos \cite{schlegel2019}.
+
+% =======================================================
+\section{Resultados Experimentales}
+
+En esta sección se reportan los resultados del framework propuesto
+sobre los tres modelos entrenados. La organización sigue el orden
+lógico de validación. Primero se establece el desempeño predictivo
+de los modelos (Sección~\ref{sec:desempeno_predictivo}); luego se
+verifica que el framework identifica correctamente las celdas
+relevantes cuando el ground truth es conocido
+(Sección~\ref{sec:avance1}), antes de aplicarlo sobre datos reales
+donde no existe ground truth; después se aplica esa verificación al
+S\&P~500 (Secciones~\ref{sec:verificacion_agnosticidad}
+a~\ref{sec:logreturn}) y se somete a pruebas adicionales de robustez
+(Sección~\ref{sec:robustez_adicional}); y finalmente se cuantifican
+los avances frente al estado del arte en fidelidad y velocidad
+(Secciones~\ref{sec:benchmark_fo_svs} a~\ref{sec:avance2}).
+
+\subsection{Configuración Experimental}
+
+Datos históricos del S\&P~500 (\texttt{\^{}GSPC}) para 2010--2024
+(3{,}754 días hábiles, $V{=}15$ variables entre 5 series base de
+precio/volumen y 10 indicadores técnicos derivados) fueron
+particionados respetando el orden temporal en desarrollo (80\%) y
+prueba (20\%). Ventanas deslizantes de $T{=}20$ días con horizonte
+de predicción de un día se construyeron (forma $(T,V){=}(20,15)$);
+un escalador MinMax ajustado sobre el conjunto de desarrollo se
+aplicó para evitar fuga de información. El vector de referencia
+$\mathbf{r}{\in}\mathbb{R}^{15}$ es la media por variable sobre el
+conjunto de entrenamiento en escala normalizada, fijo para todas las
+evaluaciones.
+
+Se entrenaron tres modelos de distinta naturaleza computacional sobre
+los mismos datos bajo condiciones idénticas.
+
+\begin{itemize}
+  \item \textbf{LSTM.} Red neuronal recurrente de 2 capas
+    ($\text{hidden}{=}128$, dropout~0.2).
+  \item \textbf{Transformer.} Codificador de 2 capas con 4 cabezas
+    de atención, dimensión feedforward 256, codificación posicional
+    sinusoidal y attention pooling aprendido sobre la secuencia completa.
+  \item \textbf{Random Forest.} 200 árboles de decisión
+    (\texttt{RandomForestRegressor}), baseline tabular no secuencial.
+\end{itemize}
+
+Todos los modelos neuronales se entrenaron con AdamW ($lr{=}10^{-3}$),
+reducción de tasa de aprendizaje por meseta (factor~0.5,
+paciencia~5), gradient clipping (norma~1.0) y early stopping
+(paciencia~15). El MSE sobre el conjunto de prueba fue LSTM~$0{,}00342$,
+Transformer~$0{,}00284$ y RF~$0{,}12131$ (el mayor error del RF se
+atribuye a la extrapolación de precios fuera del máximo histórico
+del período de entrenamiento durante la tendencia alcista 2023--2024).
+
+\subsection{Desempeño Predictivo de los Modelos}
+\label{sec:desempeno_predictivo}
+
+La Tabla~\ref{tab:metricas} reporta el error de predicción de los
+tres modelos sobre el conjunto de prueba, calculado en el espacio
+normalizado $[0, 1]$.
+
+\begin{table}[h]
+\centering
+\caption{Error de predicción sobre el conjunto de prueba
+(espacio normalizado $[0,1]$)}
+\label{tab:metricas}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{MSE} & \textbf{MAE} & \textbf{RMSE} \\
+\midrule
+LSTM            & 0.00342 & 0.04676 & 0.05851 \\
+Transformer     & 0.00284 & 0.04342 & 0.05332 \\
+Random Forest   & 0.12131 & 0.30004 & 0.34830 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{results/metrics_barplot.png}
+\caption{Representación visual de la Tabla~\ref{tab:metricas}. El
+error de Random Forest domina la escala de los tres paneles, la
+misma brecha de MSE de aproximadamente $35{\times}$ discutida en el
+texto.}
+\label{fig:metrics_barplot}
+\end{figure}
+
+El Transformer obtuvo el menor error en las tres métricas (Figura~\ref{fig:metrics_barplot}), seguido
+del LSTM. El Random Forest presentó un error sustancialmente mayor,
+atribuible a que el 32.7\% del conjunto de prueba (período
+2023--2024) corresponde a precios que superan el máximo histórico
+del período de entrenamiento. Los árboles de decisión no extrapolan
+fuera del rango visto durante el entrenamiento, lo que genera
+predicciones truncadas durante la tendencia alcista de ese período.
+
+Como referencia adicional, un baseline de persistencia ingenua
+$f(x) = x_{t,\text{Close}}$ (predecir que el precio de mañana es
+igual al de hoy) obtiene MSE\,$=0{,}00016$, MAE\,$=0{,}00953$,
+RMSE\,$=0{,}01270$ sobre el mismo conjunto de prueba, un orden de
+magnitud menor que los tres modelos entrenados de la
+Tabla~\ref{tab:metricas}. Esto no invalida la comparación entre
+LSTM, Transformer y Random Forest entre sí, ya que el objetivo de
+este trabajo es verificar el agnosticismo del framework de
+explicabilidad y no optimizar la capacidad predictiva; sin embargo,
+advierte que ninguno de los tres modelos supera la hipótesis de
+camino aleatorio en la tarea de predecir el precio nominal. Se
+retoma en la Sección~\ref{sec:limitaciones} y se aborda directamente
+en la Sección~\ref{sec:logreturn} mediante un target que rompe esta
+autocorrelación trivial.
+
+Este mismo hecho advierte sobre un límite en la comparabilidad de
+la Tabla~\ref{tab:metricas}. El escalador MinMax se ajustó sobre el
+período de desarrollo (2010--2021, aproximadamente) y el S\&P~500
+alcanzó nuevos máximos históricos durante buena parte del período de
+prueba (2022--2024), de modo que una fracción no menor de las
+observaciones de prueba cae fuera del rango $[0,1]$ sobre el que se
+calibró el escalador. Concretamente, el 32{,}69\% de los valores
+reales de \texttt{Close} normalizado en el conjunto de prueba cae
+fuera de $[0,1]$. Los modelos neuronales sí pueden producir salidas
+fuera de $[0,1]$ (su capa final no está acotada) y de hecho lo hacen
+en una proporción similar (LSTM con 30{,}92\%, Transformer con 31{,}19\%
+de sus predicciones fuera de $[0,1]$), mientras que Random Forest
+está limitado por diseño al rango de valores objetivo observado en
+entrenamiento y no puede extrapolar por encima de él. El 0{,}00\% de
+sus predicciones cae fuera de $[0,1]$, y su rango completo de salida
+sobre las 731 ventanas de prueba se colapsa a
+$[0{,}645,\ 0{,}657]$, un intervalo de apenas $0{,}012$, evidencia
+directa de que el modelo satura cerca del techo de su rango de
+entrenamiento en lugar de seguir la tendencia alcista real. Por esta
+razón, el error sustancialmente mayor del
+Random Forest en la Tabla~\ref{tab:metricas} combina dos efectos que
+este trabajo no separa. Son (1)~una limitación estructural conocida de
+los árboles de decisión frente a series con tendencia, y (2)~una
+desventaja introducida por el propio escalado MinMax sobre datos no
+estacionarios, que no habría surgido con un target naturalmente
+acotado. La Sección~\ref{sec:logreturn} evalúa precisamente esa
+alternativa, prediciendo el retorno logarítmico en lugar del nivel
+de precio, y confirma que la brecha de MSE entre Random Forest y los
+modelos neuronales se reduce de un factor de aproximadamente
+$35{\times}$ a uno de aproximadamente $1{,}7{\times}$ bajo ese
+target. En consecuencia, las métricas de la
+Tabla~\ref{tab:metricas} deben interpretarse como una comparación
+aproximada de desempeño predictivo entre familias de modelos, no
+como una medida estrictamente homogénea; esto no afecta la validez
+de las matrices $\hat{\alpha}$ como verificación de agnosticismo del
+framework, que opera igual sobre las predicciones de cualquier
+modelo con independencia de su error absoluto.
+
+
+Los tres modelos constituyen una muestra heterogénea de naturalezas
+computacionales sobre la que se aplica el framework de
+explicabilidad.
+
+\subsection{Validación con Ground Truth Sintético. Atribución a nivel de celda sin acceso a gradientes}
+\label{sec:avance1}
+
+Antes de aplicar el framework sobre el S\&P~500, donde no existe un
+ground truth conocido contra el cual comparar las atribuciones
+producidas, esta subsección lo evalúa sobre un benchmark sintético
+en el que se conoce de antemano exactamente qué celdas $(t, v)$
+deberían recibir importancia. Solo tras establecer que el método
+recupera correctamente ese ground truth tiene sentido interpretar
+cualitativamente lo que produce sobre datos reales (Secciones
+subsiguientes).
+
+\textbf{Relación con AOPC y FeatureAblation.}
+El mecanismo de perturbación FO, que reemplaza una celda por un valor
+de referencia y mide el desplazamiento absoluto de la
+predicción, no es en sí mismo una técnica nueva. Es la
+instanciación por celda del principio de oclusión de primer orden
+formalizado por AOPC (\emph{Area Over the Perturbation Curve})
+de~\cite{samek2017aopc} y implementado de forma equivalente como
+\texttt{FeatureAblation} en la biblioteca Captum~\cite{captum2020}.
+Ambos antecedentes ocluyen una unidad de entrada a la vez y miden
+el cambio en la salida del modelo; el framework propuesto aplica
+exactamente este principio a la celda $(t, v)$ de una ventana
+temporal en lugar de a un píxel o a una característica tabular
+independiente. Por tanto, la contribución de este trabajo no reside
+en el mecanismo de perturbación en sí, que es AOPC/FeatureAblation
+de primer orden, sino en (1)~su adaptación explícita a la estructura
+$(T, V)$ de una serie temporal, (2)~su empaquetado en un único batch
+de inferencia que lo hace ejecutable sin gradientes sobre modelos
+de naturaleza computacional heterogénea (recurrente, atencional y de
+ensamble) bajo una interfaz común, y (3)~la comparación sistemática
+de sus atribuciones frente a las de los tres modelos, que es lo que
+permite verificar agnosticismo.
+
+\textbf{Brecha con DynaMask.}
+DynaMask~\cite{crabbe2021} es el antecedente más directo en formato de
+salida. Produce una matriz de importancia $T{\times}V$ mediante una
+máscara de perturbación optimizada con gradientes, reportando
+AUP\,$=0{,}97\pm0{,}01$ en un benchmark sintético (entradas AR(1),
+$f{=}\Sigma x^2$, $T{=}50$, $V{=}4$; su Tabla~1). La restricción
+fundamental es que el acceso a gradientes del modelo objetivo es
+obligatorio; DynaMask no puede aplicarse a modelos sin gradientes
+como Random Forest.
+
+\textbf{Este trabajo.}
+Para verificar que el framework recupera importancias conocidas, se
+diseñó un experimento controlado análogo al de~\cite{crabbe2021}.
+FO calcula atribuciones mediante una única llamada en batch de
+$T{\times}V{+}1{=}301$ ventanas perturbadas, requiriendo únicamente
+acceso a la función de predicción. Se replica la familia de benchmark
+($T{=}20$, $V{=}15$, $n{=}10$ repeticiones) bajo dos escenarios
+de ground truth.
+
+\begin{itemize}
+  \item \textit{Rare Feature (RF).} $|\mathcal{A}_V|{=}3$ variables
+    salientes, todos los $T$ pasos relevantes.
+  \item \textit{Rare Time (RT).} $|\mathcal{A}_T|{=}4$ pasos de
+    tiempo salientes, todas las $V$ variables relevantes.
+\end{itemize}
+
+El objetivo de caja blanca es $f(\mathbf{X}) = \sum_{(t,v)\in\mathcal{A}}
+x_{t,v}^{2}$; las entradas son AR(1) independiente por variable.
+Las métricas siguen la convención de~\cite{crabbe2021}, que son AUP
+($\uparrow$), AUR ($\uparrow$), contenido de información de la
+máscara $I_M$ ($\uparrow$) y entropía de la máscara $S_M$
+($\downarrow$).
+
+\begin{table*}[ht]
+\centering
+\caption{Validación sintética de caja blanca ($n{=}10$ repeticiones,
+         $N{=}30$; SVS con $N{=}5$\textsuperscript{$\star$}).}
+\label{tab:exp1_synthetic}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccccc}
+\toprule
+& \multicolumn{4}{c}{\textbf{Rare Feature (RF)}}
+& \multicolumn{4}{c}{\textbf{Rare Time (RT)}} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+\textbf{Método} & \textbf{AUP} & \textbf{AUR}
+  & $I_M$ & $S_M$
+  & \textbf{AUP} & \textbf{AUR}
+  & $I_M$ & $S_M$ \\
+\midrule
+FO (propuesto)
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}16{\pm}0{,}01$ & $30{,}6{\pm}1{,}1$ & $0{,}00{\pm}0{,}00$
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}16{\pm}0{,}01$ & $30{,}0{\pm}0{,}8$ & $0{,}00{\pm}0{,}00$ \\
+FP
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}18{\pm}0{,}01$ & $31{,}9{\pm}1{,}2$ & $0{,}00{\pm}0{,}00$
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}18{\pm}0{,}01$ & $32{,}1{\pm}1{,}6$ & $0{,}00{\pm}0{,}00$ \\
+IG
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}16{\pm}0{,}01$ & $30{,}6{\pm}1{,}1$ & $0{,}00{\pm}0{,}00$
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}16{\pm}0{,}01$ & $30{,}0{\pm}0{,}8$ & $0{,}00{\pm}0{,}00$ \\
+SVS\textsuperscript{$\star$}
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}17{\pm}0{,}01$ & $31{,}2{\pm}0{,}8$ & $0{,}00{\pm}0{,}00$
+  & $0{,}9960{\pm}0{,}0000$ & $0{,}15{\pm}0{,}01$ & $28{,}9{\pm}1{,}5$ & $0{,}00{\pm}0{,}00$ \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{figure*}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{results/exp1_rare_feature_barplot.png}\\[4pt]
+\includegraphics[width=0.85\linewidth]{results/exp1_rare_time_barplot.png}
+\caption{Comparación visual de las métricas de la Tabla~\ref{tab:exp1_synthetic}
+para los cuatro métodos (FO, FP, IG, SVS) en los escenarios Rare
+Feature (arriba) y Rare Time (abajo). Las barras de error muestran
+la desviación estándar sobre las $n{=}10$ repeticiones. Los cuatro
+métodos son visualmente indistinguibles en AUP y $S_M(A)$,
+consistente con que el benchmark sintético no discrimina entre ellos
+sobre un objetivo determinista sin ruido (Sección~\ref{sec:limitaciones}).}
+\label{fig:exp1_barplots}
+\end{figure*}
+
+FO alcanza AUP\,$=0{,}9960\pm0{,}0000$ en ambos escenarios (Figura~\ref{fig:exp1_barplots}), superando
+la línea base FO de DynaMask ($0{,}97$) sin requerir acceso a
+gradientes y ejecutándose sobre LSTM, Transformer \emph{y} Random Forest
+sin modificación. $S_M \approx 4{,}4{\times}10^{-5}$ es un residuo de
+punto flotante de la normalización $L_1$ (analíticamente cero, ya que las
+celdas fuera de $\mathcal{A}$ reciben importancia bruta exactamente
+nula). La Figura~\ref{fig:lstm_attribution} muestra la matriz
+$\hat{\alpha}\in\mathbb{R}^{20\times15}$ resultante para LSTM sobre
+100 instancias de prueba, ilustrando la resolución por celda producida
+por el framework sobre las $V{=}15$ variables originales sin
+agrupar, el formato de salida $T{\times}V$ que los métodos previos sin
+gradientes no habían demostrado simultáneamente sobre backends
+neuronales y de ensamble.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{results/lstm_attribution.png}
+\caption{Matriz de importancia media $\hat{\alpha}\in\mathbb{R}^{20\times15}$
+(LSTM, promediada sobre $N{=}100$ instancias de prueba). Cada celda
+muestra el desplazamiento de predicción normalizado al ocluir el par
+(paso de tiempo, variable) correspondiente. Este es el formato de
+salida $T{\times}V$ sin agrupamiento previo que el framework produce
+sobre cualquier modelo.}
+\label{fig:lstm_attribution}
+\end{figure}
+
+SVS (Muestreo de Valores de Shapley) es el único otro método agnóstico
+al modelo que produce una matriz $T{\times}V$, no requiere acceso a
+gradientes y puede ejecutarse sobre los tres modelos, convirtiéndolo
+en el comparador válido en condiciones idénticas. Tanto FO como SVS
+alcanzan AUP\,$=0{,}9960\pm0{,}0000$ en ambos escenarios, confirmando
+precisión de identificación equivalente a Shapley sobre un benchmark
+con ground truth conocido. Las diferencias en AUR se mantienen dentro
+de una desviación estándar. La diferencia sustantiva entre ambos
+métodos es por tanto computacional, cuantificada en las
+Secciones~\ref{sec:benchmark_fo_svs} y~\ref{sec:avance2}.
+
+\textbf{Comparación con el estado del arte.} La diferencia sustantiva
+entre DynaMask y el framework propuesto no es de precisión de
+identificación sino de alcance. DynaMask requiere acceso a los
+gradientes del modelo para optimizar su máscara, lo que le impide
+operar sobre Random Forest; el framework propuesto alcanza la misma
+precisión (AUP $= 0{,}9960$) mediante oclusión por celda sobre los
+tres modelos, incluido el modelo de ensamble, sin acceder a su
+estructura interna. TimeSHAP~\cite{bento2021}, por su dependencia en
+la estructura secuencial del modelo, tampoco puede evaluarse sobre
+Random Forest en este protocolo. TsSHAP~\cite{raykar2023} no es
+directamente comparable porque opera sobre features interpretables
+predefinidas y no atribuye importancia por celda $(t, v)$ de la
+ventana bruta. Con el ground truth sintético establecido, las
+siguientes subsecciones aplican el framework sobre datos reales del
+S\&P~500.
+
+\subsection{Verificación de Agnósticidad al Modelo sobre S\&P~500}
+\label{sec:verificacion_agnosticidad}
+
+El framework generó explicaciones para 100 instancias del conjunto 
+de prueba seleccionadas aleatoriamente. Para cada instancia y cada 
+modelo se obtuvo una matriz $\hat{\alpha} \in \mathbb{R}^{20 \times 
+15}$, resultando en tres conjuntos de 100 matrices.
+
+\subsubsection{Consistencia inter-modelo}
+
+La consistencia se midió mediante la correlación de Spearman $\rho$ 
+entre los vectores aplanados de las matrices $\hat{\alpha}$ de cada 
+par de modelos, promediada sobre las 100 instancias. La 
+Tabla~\ref{tab:consistencia} reporta los resultados.
+
+\begin{table}[h]
+\centering
+\caption{Consistencia inter-modelo (correlación de Spearman $\rho$, 
+media sobre 100 instancias)}
+\label{tab:consistencia}
+\begin{tabular}{lc}
+\toprule
+\textbf{Par de modelos} & \textbf{$\rho$ de Spearman} \\
+\midrule
+LSTM -- Transformer          & 0.748 \\
+LSTM -- Random Forest        & 0.255 \\
+Transformer -- Random Forest & 0.382 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La correlación elevada entre LSTM y Transformer ($\rho = 0.748$) 
+indica que ambos modelos neuronales coinciden en los patrones de 
+importancia más salientes a pesar de diferir en su arquitectura 
+interna. Las correlaciones más bajas con Random Forest ($\rho = 
+0.255$ y $\rho = 0.382$) reflejan que el modelo de ensamble procesa 
+la información de forma cualitativamente distinta, lo que se 
+manifiesta en matrices de importancia parcialmente divergentes. Este 
+patrón es consistente con el comportamiento esperado de un framework
+agnóstico. Las explicaciones capturan el comportamiento específico
+de cada modelo y no son un artefacto del método de perturbación.
+
+\subsubsection{Significancia estadística}
+
+Para verificar que las matrices $\hat{\alpha}$ no son equivalentes 
+a asignaciones aleatorias de importancia, se aplicó la prueba 
+Mann-Whitney U entre la distribución de valores reales y la del 
+baseline aleatorio descrito en la Sección~\ref{sec:propuesta}. 
+Los resultados se muestran en la Tabla~\ref{tab:significancia}.
+
+\begin{table}[h]
+\centering
+\caption{Prueba Mann-Whitney U vs.\ baseline aleatorio}
+\label{tab:significancia}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Modelo} & \textbf{Estadístico U} & \textbf{Valor $p$} \\
+\midrule
+LSTM          & $3.55 \times 10^{9}$ & $< 10^{-300}$ \\
+Transformer   & $3.59 \times 10^{9}$ & $< 10^{-300}$ \\
+Random Forest & $2.72 \times 10^{8}$ & $< 10^{-300}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+En los tres modelos se rechaza la hipótesis nula de equivalencia 
+con el baseline aleatorio por decenas de órdenes de magnitud. 
+Dado el tamaño muestral empleado ($N \approx 30{,}000$ celdas por 
+modelo), esta prueba tiene potencia estad\'istica extremadamente 
+alta y un valor $p$ tan pequeño aporta poca información adicional 
+más allá de confirmar que las matrices $\hat{\alpha}$ no son 
+indistinguibles de ruido uniforme; no cuantifica \emph{cuánto} más 
+informativas son. La Sección~\ref{sec:benchmark_fo_svs} complementa
+esta prueba con una medida más informativa, el desplazamiento de
+predicción $\Delta_\alpha$ al perturbar las celdas de mayor
+atribución (Ecuación~\ref{eq:faithfulness}), que sí cuantifica el 
+grado de fidelidad de las explicaciones y permite comparar el 
+framework propuesto contra otros métodos de atribución.
+
+\subsection{Resultados Cualitativos sobre S\&P~500}
+\label{sec:resultados_cualitativos}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{results/variable_importance.png}
+    \caption{Importancia media por variable para cada modelo.}
+    \label{fig:var_importance}
+\end{figure}
+
+\subsubsection{Importancia por variable}
+
+La Figura~\ref{fig:var_importance} muestra la importancia media 
+por variable agregada sobre las 100 instancias y los 20 pasos de 
+tiempo de la ventana.
+
+LSTM y Transformer coinciden en identificar las medias móviles 
+(SMA\_5, SMA\_10, SMA\_20) y el precio máximo (High) como las 
+variables de mayor importancia, mientras que Random Forest 
+concentra su importancia en los precios brutos de cierre (Close) 
+y mínimo (Low), asignando importancia marginal a los indicadores 
+derivados. Esta divergencia es coherente con la diferencia en 
+correlación reportada en la Tabla~\ref{tab:consistencia} y 
+confirma que el framework captura el comportamiento específico de
+cada tipo de modelo, que es la propiedad que este trabajo se
+propone verificar. Debe interpretarse con cautela, sin embargo,
+qué representa financieramente esa importancia. La variable
+objetivo es el precio de cierre normalizado del día siguiente,
+una cantidad altamente autocorrelacionada con el precio actual 
+(hipótesis de camino aleatorio); dado que Close, High, Low y las 
+medias móviles están todas fuertemente correlacionadas entre sí 
+en cualquier ventana de 20 días, la alta importancia asignada a 
+estas variables es consistente tanto con que el modelo aproveche 
+información de tendencia genuina como con que simplemente 
+reproduzca el nivel de precio actual a través de la variable 
+correlacionada más accesible. Este trabajo no distingue entre 
+ambas explicaciones únicamente a partir de esta figura; la
+Sección~\ref{sec:logreturn} aborda directamente esta ambigüedad
+repitiendo la evaluación sobre una variable objetivo que rompe la
+autocorrelación trivial (retorno logarítmico). Los indicadores 
+de oscilación y volatilidad (MACD, MACD\_Signal, RSI\_14, 
+BB\_width, ATR\_14, Log\_Return, Volume\_ratio) obtienen 
+importancias cercanas a cero en los tres modelos, lo que sugiere 
+redundancia respecto a las variables base de precio y las medias 
+móviles.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{results/temporal_importance.png}
+    \caption{Importancia temporal media por modelo.}
+    \label{fig:temporal_importance}
+\end{figure}
+
+\subsubsection{Patrón temporal de importancia}
+
+La Figura~\ref{fig:temporal_importance} muestra la importancia 
+media a lo largo de los 20 pasos de tiempo, donde lag~19 
+corresponde a la observación más antigua y lag~0 a la más 
+reciente.
+
+Los tres modelos presentan patrones temporales distintos que 
+reflejan sus mecanismos internos. El LSTM distribuye la 
+importancia de forma decreciente desde el pasado lejano hacia 
+el presente (razón máx/mín de 15.7), coherente con celdas de 
+memoria que integran tendencias acumuladas en el historial. El 
+Transformer presenta un perfil casi uniforme (razón máx/mín de 
+1.5), consistente con su mecanismo de attention pooling que 
+pondera la secuencia completa sin sesgo posicional fuerte. El 
+Random Forest concentra prácticamente toda su importancia en 
+lag~0 (razón máx/mín de 860), lo que refleja que, al no modelar 
+dependencias secuenciales, basa su predicción casi exclusivamente 
+en el estado más inmediato del mercado.
+
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{results/heatmaps_comparison.png}
+    \caption{Matrices de importancia promedio $\hat{\alpha}$ para
+    LSTM, Transformer y Random Forest. El eje horizontal es el paso de
+    tiempo (lag) y el eje vertical es la variable. Escala de color compartida
+    entre los tres paneles.}
+    \label{fig:heatmaps}
+\end{figure*}
+
+\subsubsection{Matrices de importancia comparadas}
+
+La Figura~\ref{fig:heatmaps} presenta las matrices $\hat{\alpha}$ 
+promedio de los tres modelos sobre las mismas 100 instancias, con 
+escala de color compartida para facilitar la comparación directa.
+
+
+Las matrices confirman visualmente los patrones descritos. En LSTM 
+y Transformer, las filas de SMA\_5, SMA\_10 y SMA\_20 presentan 
+los valores más altos con distribución extendida en el eje temporal. 
+En Random Forest, la importancia se concentra en la columna lag~0 
+para Close y Low, mientras las demás celdas permanecen próximas a 
+cero.
+
+\subsection{Robustez frente a autocorrelación trivial. Target de retorno logarítmico}
+\label{sec:logreturn}
+
+Las Secciones~\ref{sec:desempeno_predictivo}
+y~\ref{sec:verificacion_agnosticidad} evalúan los tres modelos sobre
+el precio de cierre normalizado del día siguiente, una variable con
+alta autocorrelación respecto al precio actual (Sección~\ref{sec:limitaciones}).
+Para verificar que los resultados de agnosticismo no dependen de esa
+autocorrelación trivial, se repite el pipeline completo, con el mismo split
+temporal, el mismo escalador y la misma arquitectura e hiperparámetros de
+las Secciones~\ref{sec:datos_entrada} y~\ref{sec:modelos_naturaleza},
+reentrenando los tres modelos desde cero con el retorno logarítmico
+del día siguiente (\texttt{Log\_Return}) como variable objetivo en
+lugar de \texttt{Close}. Esta variable rompe la autocorrelación
+trivial por construcción. Predecir "sin cambio" corresponde a
+retorno~$=0$, no a reproducir el nivel de precio actual.
+
+\begin{table}[h]
+\centering
+\caption{Error de predicción con target\,$=$\,retorno logarítmico
+(espacio normalizado; baseline de persistencia predice retorno$=0$)}
+\label{tab:logreturn_metrics}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{MSE} & \textbf{MAE} & \textbf{RMSE} \\
+\midrule
+Persistencia (retorno$=0$) & 0{,}00257 & 0{,}03728 & 0{,}05067 \\
+LSTM                       & 0{,}00268 & 0{,}03842 & 0{,}05178 \\
+Transformer                & 0{,}00260 & 0{,}03772 & 0{,}05104 \\
+Random Forest              & 0{,}00446 & 0{,}05625 & 0{,}06677 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{results/logreturn_metrics_barplot.png}
+\caption{Representación visual de la Tabla~\ref{tab:logreturn_metrics}.
+La barra de persistencia (gris) queda al nivel de LSTM y Transformer,
+o por debajo, en las tres métricas.}
+\label{fig:logreturn_metrics_barplot}
+\end{figure}
+
+El resultado es contundente (Figura~\ref{fig:logreturn_metrics_barplot}). Bajo esta variable objetivo, \emph{ningún}
+modelo entrenado supera al baseline de persistencia. El LSTM
+(MSE\,$=0{,}00268$) y el Transformer (MSE\,$=0{,}00260$) quedan
+ligeramente por \emph{encima} del error de predecir retorno~$=0$
+(MSE\,$=0{,}00257$), y el Random Forest queda claramente por encima
+(MSE\,$=0{,}00446$). A diferencia de la Tabla~\ref{tab:metricas}, donde
+los modelos neuronales aparentaban una ventaja predictiva sustancial
+sobre la persistencia ingenua, esa ventaja desaparece por completo al
+remover la autocorrelación trivial del precio. Es consistente con la
+hipótesis de mercado eficiente en su forma débil, según la cual el
+retorno de un día no es predecible a partir de su propio historial
+reciente con la información contenida en las 15 variables utilizadas.
+Este resultado no es una falla del framework de explicabilidad, cuyo
+objeto es explicar el comportamiento del modelo entrenado, sea este
+bueno o malo prediciendo, sino una confirmación honesta de que la
+Tabla~\ref{tab:metricas} original medía en gran parte la capacidad de
+los modelos de reproducir el nivel de precio actual, no de anticipar
+su variación futura.
+
+\begin{table}[h]
+\centering
+\caption{Consistencia inter-modelo y significancia con
+target\,$=$\,retorno logarítmico ($N{=}100$ instancias)}
+\label{tab:logreturn_consistency}
+\begin{tabular}{lc}
+\toprule
+\textbf{Par de modelos} & \textbf{$\rho$ de Spearman} \\
+\midrule
+LSTM -- Transformer          & 0{,}541 \\
+LSTM -- Random Forest        & 0{,}187 \\
+Transformer -- Random Forest & 0{,}311 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El patrón cualitativo de consistencia inter-modelo de la
+Tabla~\ref{tab:consistencia} se reproduce bajo este target. Los
+modelos neuronales entre sí ($\rho{=}0{,}541$) siguen siendo más
+consistentes que cualquiera de ellos con Random Forest
+($\rho{=}0{,}187$ y $\rho{=}0{,}311$), aunque con correlaciones
+absolutas menores que con \texttt{Close}, lo cual es esperable dado que el
+retorno logarítmico es una señal más cercana a ruido y con menor
+estructura temporal compartida entre arquitecturas que el nivel de
+precio. La prueba de Mann-Whitney U rechaza la hipótesis de
+equivalencia con el baseline aleatorio para los tres modelos
+($p\approx 0$ en los tres casos), confirmando que las matrices
+$\hat{\alpha}$ producidas siguen siendo no triviales incluso cuando
+el modelo subyacente no logra superar la persistencia ingenua. En
+conjunto, esto indica que la verificación de agnosticismo de las
+Secciones~\ref{sec:verificacion_agnosticidad}
+y~\ref{sec:benchmark_fo_svs} no es un artefacto de la autocorrelación
+trivial del precio. El framework diferencia modelos neuronales de
+modelos de ensamble de forma consistente independientemente de la
+variable objetivo evaluada.
+
+\subsection{Robustez Adicional del Framework}
+\label{sec:robustez_adicional}
+
+Las Secciones anteriores verifican el agnosticismo bajo una única
+elección de vector de referencia y sobre una muestra aleatoria del
+conjunto de prueba completo. Esta subsección somete al framework a
+tres pruebas adicionales sin reentrenar ningún modelo, reutilizando
+los checkpoints ya descritos.
+
+\subsubsection{Exactitud direccional}
+
+Más allá del error cuadrático, se evalúa si los modelos aciertan la
+\emph{dirección} del movimiento (subida o bajada) respecto al precio
+del día anterior, tanto para el target original (\texttt{Close})
+como para el retorno logarítmico de la Sección~\ref{sec:logreturn}.
+La Tabla~\ref{tab:dir_accuracy} reporta el porcentaje de aciertos
+sobre las 731 ventanas de prueba.
+
+\begin{table}[h]
+\centering
+\caption{Exactitud direccional sobre el conjunto de prueba
+(azar $=50\%$)}
+\label{tab:dir_accuracy}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Modelo} & \textbf{Target Close} & \textbf{Target Log\_Return} \\
+\midrule
+LSTM          & 47{,}1\% & 46{,}6\% \\
+Transformer   & 46{,}4\% & 50{,}3\% \\
+Random Forest & 48{,}0\% & 47{,}5\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{results/dir_accuracy_barplot.png}
+\caption{Representación visual de la Tabla~\ref{tab:dir_accuracy}.
+Las seis barras se agrupan alrededor de la línea de azar (50\%,
+discontinua), sin que ningún modelo ni target se aleje de forma
+consistente.}
+\label{fig:dir_accuracy}
+\end{figure}
+
+Los seis valores caen dentro de un margen estrecho alrededor del
+50\%, indistinguibles del azar (Figura~\ref{fig:dir_accuracy}). Este resultado es consistente con el
+hallazgo de la Sección~\ref{sec:logreturn}. Ningún modelo entrenado,
+bajo ninguna de las dos formulaciones del target, logra una ventaja
+predictiva sobre una moneda al aire, ni en magnitud (MSE) ni en
+dirección.
+
+\subsubsection{Sensibilidad al vector de referencia}
+
+La Ecuación~1 define $r_v$ como la media de cada variable sobre el
+conjunto de entrenamiento. Para verificar que las conclusiones no
+dependen de esa elección particular, se repite la explicación de las
+mismas 100 instancias con dos referencias alternativas, la mediana y
+el vector cero, y se mide la correlación de Spearman entre las
+matrices $\hat{\alpha}$ obtenidas con cada referencia y las obtenidas
+con la media.
+
+\begin{table}[h]
+\centering
+\caption{Estabilidad de $\hat{\alpha}$ frente al vector de
+referencia (correlación de Spearman contra la referencia media)}
+\label{tab:ref_stability}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Modelo} & \textbf{Media vs.\ mediana} & \textbf{Media vs.\ cero} \\
+\midrule
+LSTM          & 0{,}995 & 0{,}965 \\
+Transformer   & 0{,}994 & 0{,}883 \\
+Random Forest & 0{,}813 & 0{,}666 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+LSTM y Transformer son altamente estables frente al cambio de
+referencia. Random Forest es notablemente más sensible, lo que
+sugiere que sus árboles de decisión reaccionan de forma más abrupta
+al valor concreto usado para enmascarar una celda que los modelos
+neuronales. Más importante que la estabilidad absoluta es si el
+patrón cualitativo central del framework, mayor consistencia entre
+modelos neuronales que con el modelo de ensamble, se mantiene bajo
+las tres referencias.
+
+\begin{table}[h]
+\centering
+\caption{Consistencia inter-modelo bajo cada vector de referencia}
+\label{tab:consistencia_por_referencia}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Referencia} & \textbf{LSTM-Transf.} & \textbf{LSTM-RF} & \textbf{Transf.-RF} \\
+\midrule
+Media (Sección~\ref{sec:verificacion_agnosticidad}) & 0{,}748 & 0{,}255 & 0{,}382 \\
+Mediana & 0{,}750 & 0{,}332 & 0{,}475 \\
+Cero    & 0{,}587 & 0{,}255 & 0{,}370 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Bajo las tres referencias, la correlación LSTM-Transformer supera
+siempre a las correlaciones que involucran a Random Forest. La
+verificación de agnosticismo de la Sección~\ref{sec:verificacion_agnosticidad}
+no depende de haber elegido la media como referencia.
+
+\subsubsection{Consideración específica para Random Forest: referencia condicionada a la hoja}
+\label{sec:leaf_reference}
+
+La sensibilidad de Random Forest al vector de referencia
+(Tabla~\ref{tab:ref_stability}) motiva una pregunta más específica que
+la de robustez general, si existe una consideración anclada en la
+estructura del propio modelo, no solo un valor externo distinto, que
+reduzca esa sensibilidad. Hooker, Mentch y Zhou~\cite{hooker2021}
+muestran que los métodos de tipo permutar-y-predecir fuerzan al
+modelo a extrapolar cuando la perturbación rompe la dependencia entre
+variables, precisamente porque el valor de reemplazo cae fuera de la
+región de datos que el modelo observó. Para Random Forest existe una
+forma directa de acotar esa región, cada árbol define hojas,
+particiones del espacio de entrada donde el modelo trata a las
+observaciones como equivalentes.
+
+Se probó una referencia condicionada a la hoja, calculada por
+instancia. Para cada árbol del ensamble se ubica la hoja en la que
+cae la ventana a explicar, se identifican los ejemplos de
+entrenamiento que caen en esa misma hoja, y se promedian sus valores,
+ponderados por cercanía a la ventana completa mediante un núcleo
+gaussiano de ancho de banda adaptativo, para obtener el valor de
+reemplazo; el resultado se promedia sobre los 200 árboles
+(implementación en \texttt{framework/leaf\_reference.py}, sin
+reentrenar el modelo).
+
+Sobre un banco de pruebas sintético análogo al de la
+Sección~\ref{sec:benchmark_fo_svs} pero con un Random Forest real
+entrenado sobre los mismos datos, en vez de la función de caja blanca
+evaluada directamente, el AUP y el AUR no cambian de forma relevante
+frente a la referencia media global
+($AUP=0{,}9376\pm0{,}0029$ contra $0{,}9374\pm0{,}0027$;
+$AUR=0{,}0780\pm0{,}0050$ contra $0{,}0775\pm0{,}0052$; media de 5
+repeticiones). Sobre el S\&P~500 real, reutilizando
+\texttt{rf\_logret.pkl} sin reentrenar, el efecto no es neutro sino
+negativo. La consistencia con LSTM y Transformer, cercana a la ya
+reportada en la Tabla~\ref{tab:logreturn_consistency}
+($\rho=0{,}184$ y $\rho=0{,}311$ respectivamente en esta medición),
+cae a $\rho=-0{,}111$ y $\rho=-0{,}232$ con la referencia condicionada
+a la hoja. La propia atribución de Random Forest cambia
+sustancialmente respecto a la que produce la referencia media
+($\rho=0{,}285$ entre ambas versiones), y ese cambio va en la
+dirección contraria a la buscada.
+
+Esto descarta la hipótesis de que promediar sin distinguir vecinos
+dentro de la hoja explicara el resultado, ponderar por cercanía apenas
+modifica los números. La explicación más plausible es estructural. La
+referencia media que usan los tres modelos es externa a cada uno,
+proviene de los datos y no de cómo cada modelo particiona internamente
+el espacio de entrada. La referencia condicionada a la hoja es
+interna, se construye a partir de la estructura de árboles del propio
+Random Forest que se está explicando, lo que rompe el criterio común
+entre modelos del que depende la comparación de agnosticismo. Además,
+con $T \cdot V = 300$ celdas aplanadas y árboles de profundidad
+acotada, la mayoría de las celdas ocluidas no participa en el camino
+de decisión de la mayoría de los árboles, sin importar qué valor de
+referencia se use ahí. La sensibilidad de Random Forest, entonces, no
+se explica por una elección de referencia insuficientemente
+sofisticada, sino por cómo evalúa la oclusión de una celda a la vez
+frente a un modelo neuronal. El framework mantiene, por esta razón,
+una referencia externa e idéntica en su naturaleza para los tres
+modelos, la alternativa evaluada empeora la comparabilidad en lugar de
+mejorarla.
+
+\subsubsection{Estabilidad por régimen de mercado}
+
+El período de prueba (2022-01-04 a 2024-12-30) comprende un mercado
+bajista (aproximadamente enero a octubre de 2022, 188 ventanas) y un
+mercado alcista sostenido (2023 a 2024, 501 ventanas). Se explican
+por separado las ventanas correspondientes a cada régimen para
+verificar si la consistencia inter-modelo es estable frente al
+contexto de mercado.
+
+\begin{table}[h]
+\centering
+\caption{Consistencia inter-modelo por régimen de mercado}
+\label{tab:regimen}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Régimen} & \textbf{LSTM-Transf.} & \textbf{LSTM-RF} & \textbf{Transf.-RF} \\
+\midrule
+Bajista 2022 (188 ventanas)        & 0{,}703 & 0{,}173 & 0{,}287 \\
+Alcista 2023--2024 (501 ventanas)  & 0{,}764 & 0{,}278 & 0{,}404 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+El patrón neuronal-neuronal mayor que neuronal-ensamble se mantiene
+en ambos regímenes, lo que confirma nuevamente que no es un artefacto
+de la muestra evaluada. Sin embargo, las tres correlaciones son
+sistemáticamente menores durante el régimen bajista que durante el
+alcista. Esto sugiere que los tres modelos concuerdan menos entre sí
+sobre qué información es relevante cuando el mercado es más volátil
+e incierto, y concuerdan más cuando la tendencia es sostenida y
+predecible en su dirección aunque no en su magnitud. La comparación
+actual es agregada por régimen, dos números de consistencia contra
+188 y 501 ventanas respectivamente, lo que no permite distinguir si
+la caída de consistencia se debe a la volatilidad del período o a
+algún otro factor asociado al régimen bajista. Una extensión concreta
+planificada para el siguiente semestre es calcular la volatilidad
+realizada por ventana, la desviación estándar móvil del retorno
+logarítmico sobre los mismos 20 días de cada ventana de entrada, y
+correlacionar esa volatilidad instancia por instancia contra la
+concordancia de $\hat{\alpha}$ entre modelos para esa misma ventana,
+en lugar de solo comparar el promedio de dos regímenes. Esto no
+requiere reentrenar ningún modelo, ya que \texttt{ATR\_14} y
+\texttt{Log\_Return} ya forman parte de las $V{=}15$ variables
+descritas en la Sección~\ref{sec:datos_entrada} y las 731 explicaciones
+de prueba ya fueron calculadas.
+
+La Figura~\ref{fig:consistency_robustness} resume en un solo lugar
+las tres pruebas de robustez de consistencia inter-modelo presentadas
+hasta aquí, variable objetivo (Tablas~\ref{tab:consistencia}
+y~\ref{tab:logreturn_consistency}), vector de referencia
+(Tabla~\ref{tab:consistencia_por_referencia}) y régimen de mercado
+(Tabla~\ref{tab:regimen}).
+
+\begin{figure*}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{results/consistency_robustness.png}
+\caption{Consistencia inter-modelo (Spearman $\rho$) bajo las tres
+pruebas de robustez. En los tres paneles, LSTM-Transformer
+(morado) se mantiene por encima de LSTM-Random Forest (verde azulado) y
+Transformer-Random Forest (naranja), sin excepción.}
+\label{fig:consistency_robustness}
+\end{figure*}
+
+\subsection{Comparación de Fidelidad en Condiciones Idénticas. FO vs.\ SVS}
+\label{sec:benchmark_fo_svs}
+
+Con el ground truth sintético y la agnosticidad sobre datos reales ya
+establecidos, esta subsección cuantifica qué tan \emph{fieles} son las
+atribuciones de FO frente al comparador agnóstico más cercano. Para
+cuantificar la calidad de las atribuciones en ausencia de
+ground truth (como ocurre sobre el S\&P~500), se aplica el protocolo de fidelidad
+(\textit{faithfulness}) de~\cite{crabbe2021}. Para cada fracción
+$\alpha{\in}\{0{,}1,\ldots,0{,}6\}$, las
+$\lfloor\alpha{\cdot}T{\cdot}V\rfloor$ celdas con mayor atribución
+se reemplazan por su valor de referencia y se mide el desplazamiento
+absoluto medio de la predicción, según la Ecuación~5.
+
+\begin{equation}
+    \Delta_\alpha = \frac{1}{N}\sum_{i=1}^{N}
+        \left|f(\mathbf{X}_i) - f(\tilde{\mathbf{X}}_i^{(\alpha)})\right|
+    \label{eq:faithfulness}
+\end{equation}
+
+Una explicación fiel produce $\Delta_\alpha$ elevado, porque perturbar
+las celdas verdaderamente relevantes afecta significativamente las
+predicciones del modelo.
+
+SVS (Muestreo de Valores de Shapley, 15 permutaciones) es el único
+otro método agnóstico al modelo que produce una matriz $T{\times}V$
+y puede ejecutarse sobre los tres modelos, convirtiéndolo en el
+comparador válido en condiciones idénticas. La evaluación usa el
+mismo conjunto de prueba S\&P~500 ($N{=}100$; SVS sobre $N{=}10$
+por coste computacional), el mismo vector de referencia y los mismos
+tres modelos.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=\linewidth]{results/exp3_mae_shift.png}
+    \caption{Curvas de fidelidad $\Delta_\alpha$
+    (Ec.~\ref{eq:faithfulness}) para LSTM, Transformer y Random Forest.
+    Mayor $\Delta_\alpha$ indica explicaciones más fieles.
+    FO e IG son los métodos más fieles para LSTM;
+    IG supera a FO en Transformer;
+    SVS supera a FO en Random Forest, donde IG no aplica.}
+    \label{fig:exp3_shift}
+\end{figure}
+
+\begin{table*}[h]
+\centering
+\caption{Desplazamiento de predicción $\Delta_{0{,}3}$ con
+         $\alpha{=}0{,}3$. IG no aplica a Random Forest ($\dagger$).
+         SVS con $N{=}10$, 15 permutaciones. En negrita, el mejor por modelo.}
+\label{tab:exp3_shift}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modelo} & \textbf{FO} & \textbf{FP}
+                & \textbf{IG} & \textbf{SVS} \\
+\midrule
+LSTM          & \textbf{0.5033} & 0.4776 & \textbf{0.5034} & 0.4891 \\
+Transformer   & 0.4518          & 0.4320 & \textbf{0.4565} & 0.4352 \\
+Random Forest & 0.3047          & 0.2723 & $\dagger$        & \textbf{0.3212} \\
+\midrule
+\multicolumn{5}{l}{\small Diferencia FO$-$SVS por modelo, LSTM $+0{,}0142$ (FO mejor)\quad
+  Transformer $+0{,}0166$ (FO mejor)\quad RF $-0{,}0165$ (SVS mejor)} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\begin{table}[h]
+\centering
+\caption{Tiempo de ejecución por muestra (ms, CPU, media$\,\pm\,$std
+         sobre 5 ejecuciones de 50 muestras).
+         FO usa $T{\times}V{+}1{=}301$ pasadas hacia adelante.
+         SVS usa $2{\times}15{\times}T{\times}V{=}9{.}000$ evaluaciones.}
+\label{tab:timing}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{FO (ms)} & \textbf{SVS (ms)}
+               & \textbf{Aceleración FO} \\
+\midrule
+LSTM          & $17{,}6\pm0{,}9$   & $469{,}1\pm3{,}1$   & ${\times}26{,}6$ \\
+Transformer   & $13{,}8\pm0{,}3$   & $413{,}5\pm15{,}9$  & ${\times}30{,}0$ \\
+Random Forest & $112{,}0\pm3{,}9$  & $2519{,}4\pm82{,}4$ & ${\times}22{,}5$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+En modelos neuronales, FO supera a SVS en fidelidad ($\Delta_{0{,}3}$
+$+0{,}014$ LSTM, $+0{,}017$ Transformer) mientras se ejecuta
+$22$--$30{\times}$ más rápido. En Random Forest, SVS supera a FO en
+$0{,}017$, porque el muestreo de coaliciones captura mejor las interacciones
+combinatorias entre divisiones de árboles de decisión que la oclusión
+por celda individual. La fuente estructural de la ventaja de velocidad
+de FO es que emite exactamente una llamada de inferencia en batch de
+tamaño $T{\times}V{+}1{=}301$, mientras SVS emite
+$2{\times}n_{\text{perms}}{\times}T{\times}V{=}9{.}000$ evaluaciones
+a 15 permutaciones. IG supera a FO en Transformer en $0{,}005$ al
+costo del acceso a gradientes (que impide su uso sobre RF). FP
+consistentemente ocupa el último lugar, porque sustituir una celda por otro
+valor observado introduce señal de mercado explotable, atenuando
+artificialmente el impacto de perturbación medido.
+
+\subsection{Ablación del orden temporal}
+\label{sec:ablacion_temporal}
+
+Las secciones anteriores comparan FO contra otros métodos de
+perturbación (FP, IG, SVS), todos agnósticos al modelo pero con
+mecanismos internos distintos. Esta subsección aísla en cambio una
+sola decisión de diseño del propio FO, perturbar cada celda en su
+lugar usando una referencia fija sin modificar el resto de la
+ventana, y mide qué ocurre si esa decisión se abandona a propósito.
+Se construye una variante deliberadamente incorrecta, llamada
+\emph{shuffled}, que sustituye la celda $(t,v)$ por el valor de la
+misma variable $v$ en otro instante $t' \neq t$ de la misma ventana,
+elegido al azar, en lugar de la referencia fija $r_v$. Esto
+implementa directamente la crítica de la Sección~\ref{sec:introduccion}
+a SHAP y LIME, tratar los pasos de tiempo como variables
+intercambiables, y con aproximadamente 50\% de probabilidad sustituye
+un instante pasado por el valor de uno más reciente, es decir, usa
+información futura para explicar un instante pasado. Ningún modelo
+se reentrena para esta ablación, se reutilizan los mismos checkpoints
+y las mismas 100 instancias de prueba de la
+Sección~\ref{sec:verificacion_agnosticidad}.
+
+\textbf{El benchmark sintético no distingue las dos variantes.}
+Repitiendo el experimento de caja blanca de la
+Sección~\ref{sec:avance1} con la variante \emph{shuffled} en lugar de
+FO, el AUP se mantiene en $0{,}9960$ en ambos escenarios, idéntico al
+de FO. En AUR, $I_M$ y AUROC/AUPRC, \emph{shuffled} incluso supera
+ligeramente a FO (por ejemplo, AUR $0{,}21$ vs.\ $0{,}16$ en
+\textit{rare feature}). Esto no es evidencia de que violar el orden
+temporal sea inofensivo. Es evidencia de que la función objetivo
+sintética $f(\mathbf{X}) = \sum_{(t,v)\in\mathcal{A}} x_{t,v}^2$ no
+tiene ninguna noción de coherencia temporal entre instantes, cualquier
+valor distinto del observado en la celda $(t,v)$ perturba la
+predicción de forma comparable, sea ese valor la referencia fija o el
+valor de otro instante de la misma serie AR(1). El benchmark sintético,
+precisamente por ser una función puntual sin dependencia entre pasos
+de tiempo, es ciego a esta forma específica de violación del orden.
+Solo un modelo que haya aprendido dependencias temporales reales,
+como los evaluados sobre el S\&P~500, puede exhibir sensibilidad a
+que una celda se sustituya por un valor temporalmente incoherente.
+
+\textbf{Sobre datos reales, la variante que viola el orden degrada
+las tres propiedades que el framework verifica.}
+
+\begin{table}[h]
+\centering
+\caption{Consistencia inter-modelo, FO frente a la variante
+\emph{shuffled} que viola el orden temporal (Spearman $\rho$, misma
+muestra de 100 instancias que la Tabla~\ref{tab:consistencia})}
+\label{tab:ablacion_consistencia}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Par de modelos} & \textbf{FO} & \textbf{Shuffled} \\
+\midrule
+LSTM -- Transformer          & 0{,}748 & 0{,}487 \\
+LSTM -- Random Forest        & 0{,}255 & $-0{,}055$ \\
+Transformer -- Random Forest & 0{,}382 & 0{,}251 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{results/ablation_consistency_barplot.png}
+\caption{Representación visual de la Tabla~\ref{tab:ablacion_consistencia}.
+Violar el orden temporal (rojo) reduce la consistencia inter-modelo
+frente a FO (azul) en los tres pares, y vuelve negativa la
+consistencia LSTM-Random Forest.}
+\label{fig:ablation_consistency}
+\end{figure}
+
+Bajo la variante \emph{shuffled} (Figura~\ref{fig:ablation_consistency}), la consistencia LSTM-Transformer
+cae de $0{,}748$ a $0{,}487$, y la consistencia LSTM-Random Forest se
+vuelve prácticamente nula ($-0{,}055$, sin correlación apreciable).
+La comparación de fidelidad muestra el mismo deterioro. Con
+$\alpha=0{,}3$ (Ecuación~\ref{eq:faithfulness}), $\Delta_\alpha$ de FO
+es $0{,}5033$ (LSTM), $0{,}4518$ (Transformer) y $0{,}3047$ (Random
+Forest); bajo \emph{shuffled}, cae a $0{,}3020$, $0{,}1895$ y
+$0{,}0079$ respectivamente. La caída es más severa en Random Forest,
+donde la fidelidad se reduce en un factor de aproximadamente
+$38{\times}$, consistente con que los árboles de decisión particionan
+el espacio de entrada según umbrales aprendidos sobre valores
+realistas, y una celda sustituida por un valor de otro instante de la
+misma serie cae con más frecuencia fuera de esos umbrales de forma
+errática en lugar de desplazar la predicción de manera informativa.
+
+Finalmente, a diferencia de FO, que es determinista por construcción
+porque la referencia $r_v$ es fija, la variante \emph{shuffled} es
+estocástica. Repitiendo la explicación de las mismas 100 instancias
+con 5 semillas distintas, la correlación de Spearman entre pares de
+corridas es $0{,}571\pm0{,}065$ (LSTM), $0{,}520\pm0{,}066$
+(Transformer) y $0{,}560\pm0{,}070$ (Random Forest), muy por debajo
+de la reproducibilidad exacta de FO. La misma ventana produce una
+explicación distinta cada vez que se recalcula, únicamente porque
+cambia qué instante ajeno se usó para violar el orden temporal en
+cada celda.
+
+En conjunto, este experimento no evalúa si FO es mejor que otro
+método de perturbación, ya establecido en las secciones anteriores,
+sino que aísla el motivo mecánico. Respetar el orden temporal al
+perturbar es lo que hace que las explicaciones producidas sean
+reproducibles, consistentes entre arquitecturas y fieles al
+comportamiento del modelo. Abandonarlo, aunque el mecanismo de
+perturbación sea por lo demás idéntico, basta para degradar las tres
+propiedades.
+
+\subsection{Comparación de Velocidad frente al Estado del Arte}
+\label{sec:avance2}
+
+La comparación de velocidad con evidencia propia y verificable de
+este trabajo es la de la Sección~\ref{sec:benchmark_fo_svs} (FO
+frente a SVS), medida por esta autora bajo condiciones idénticas
+para los tres modelos. Lo que sigue es contexto adicional frente a
+dos trabajos que reportan cifras de tiempo de ejecución sobre el
+mismo dominio, y debe leerse con la salvedad indicada a
+continuación, no como evidencia central de la contribución de
+velocidad de este trabajo.
+
+\textbf{Brecha con TimeSHAP y GS-SHAP.}
+Dos trabajos previos comparten el dominio S\&P~500, $T{=}20$ y
+reportan tiempos de ejecución por muestra bajo un presupuesto
+controlado de $M{=}50$ permutaciones (Kim y
+Park~\cite{gsshap2026}, Tabla~C3, CPU).\footnote{Al momento de
+escribir este trabajo, \cite{gsshap2026} está disponible
+únicamente como preprint de arXiv (enero de 2026), sin versión
+arbitrada publicada. Las cifras de $2{.}813$\,ms/muestra atribuidas
+a TimeSHAP y de $1{.}194$\,ms/muestra atribuidas a GS-SHAP provienen
+ambas de la Tabla~C3 de ese preprint, no del artículo original de
+Bento et al.~\cite{bento2021} sobre TimeSHAP, que no reporta un
+tiempo de ejecución comparable bajo este dominio. En consecuencia,
+las reducciones de ${\times}159{,}8$ y ${\times}67{,}8$ reportadas
+más abajo dependen de una fuente sin arbitrar y deben tratarse como
+provisionales hasta que exista una versión revisada por pares de
+\cite{gsshap2026}.}
+\begin{itemize}
+  \item TimeSHAP~\cite{bento2021} usa \textbf{2.813\,ms/muestra},
+    porque requiere una secuencia de referencia y asume estructura de modelo
+    secuencial, impidiendo su uso sobre Random Forest.
+  \item GS-SHAP~\cite{gsshap2026} usa \textbf{1.194\,ms/muestra}.
+    Es agnóstico al modelo, pero produce salida $K{\times}J$ agrupada,
+    perdiendo resolución por variable, y fue evaluado sobre un único
+    BiLSTM.
+\end{itemize}
+Ambos tiempos escalan con el número de evaluaciones de coalición
+requeridas por el cálculo de valores de Shapley.
+
+\textbf{Este trabajo.}
+FO reduce el conteo de inferencias a un único batch de
+$T{\times}V{+}1{=}301$ ventanas por instancia, sin muestreo de
+coaliciones, sin permutaciones, resultado determinista. Bajo el mismo
+dominio (S\&P~500, $T{=}20$, CPU), FO alcanza \textbf{17{,}6\,ms/muestra}
+(LSTM), una reducción de ${\times}159{,}8$ respecto a TimeSHAP y
+${\times}67{,}8$ respecto a GS-SHAP. La Figura~\ref{fig:timing}
+visualiza esta comparación directamente; la escala logarítmica hace
+la brecha inequívoca.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{results/timing_comparison.png}
+\caption{Tiempo de ejecución por muestra en S\&P~500, $T{=}20$
+(CPU, menor es mejor). Tiempos de TimeSHAP y GS-SHAP tomados de
+Kim y Park~\cite{gsshap2026}, Tabla~C3 ($M{=}50$ permutaciones).
+SVS y FO medidos en este trabajo. FO requiere exactamente
+$T{\times}V{+}1{=}301$ pasadas hacia adelante, reemplazando miles
+de evaluaciones de coalición.}
+\label{fig:timing}
+\end{figure}
+
+\subsection{Resumen de Avances frente al Estado del Arte}
+\label{sec:resumen_avances}
+
+La Tabla~\ref{tab:advances} resume los tres avances concretos
+establecidos en las subsecciones anteriores sobre trabajos previos.
+La fila de DynaMask compara contra un número publicado en un
+artículo arbitrado (\cite{crabbe2021}, ICML 2021). Las filas de
+TimeSHAP y GS-SHAP dependen de la Tabla~C3 de un preprint sin
+arbitrar, según la salvedad indicada en la
+Sección~\ref{sec:avance2}, y deben leerse como comparación
+provisional, no como evidencia definitiva.
+
+\begin{table*}[ht]
+\centering
+\caption{Avances concretos sobre trabajos previos.
+  $\dagger$ reportado por Kim y Park~\cite{gsshap2026}, Tabla~C3
+  (S\&P~500, $T{=}20$, $M{=}50$, CPU); cifra provisional, tomada de
+  un preprint de arXiv sin versión arbitrada al momento de escribir
+  este trabajo.
+  $\ddagger$ medido en este trabajo, mismo dominio y $T$.
+  $\star$ configuración sintética distinta ($T{=}50$, $V{=}4$) vs.\
+  la nuestra ($T{=}20$, $V{=}15$); misma familia de funciones.}
+\label{tab:advances}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lp{2.8cm}cc}
+\toprule
+\textbf{Trabajo previo} & \textbf{Brecha abierta} &
+\textbf{Su resultado} & \textbf{Este trabajo} \\
+\midrule
+DynaMask~\cite{crabbe2021}
+  & Requiere gradientes; sin soporte RF
+  & AUP $0{,}97^{\star}$, sin RF
+  & AUP $\mathbf{0{,}9960}$, RF \cmark \\[2pt]
+TimeSHAP~\cite{bento2021}
+  & Solo modelos secuenciales; lento
+  & $2{.}813$\,ms/muestra$^{\dagger}$
+  & $\mathbf{17{,}6}$\,ms/muestra$^{\ddagger}$ (${\times}159{,}8$) \\[2pt]
+GS-SHAP~\cite{gsshap2026}
+  & Salida agrupada ($K{\times}J$); modelo único
+  & $1{.}194$\,ms/muestra$^{\dagger}$; solo $K{\times}J$
+  & $\mathbf{17{,}6}$\,ms/muestra$^{\ddagger}$; $T{\times}V$ \cmark \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+% =======================================================
+\section{Conclusiones}
+\label{sec:conclusiones}
+
+Este trabajo presentó un framework de explicabilidad temporal
+agnóstico al modelo para la predicción de series temporales
+financieras. Su contribución central es un patrón adaptador de dos
+niveles que desacopla el motor de perturbaciones temporales de
+cualquier backend de modelo específico, permitiendo que cualquier
+modelo que exponga una función de predicción con firma
+$(N, T, V) \rightarrow (N,)$ pueda conectarse sin modificar ningún
+componente del framework.
+
+Bajo condiciones experimentales idénticas (mismo conjunto de prueba
+S\&P~500, mismo vector de referencia, los mismos tres modelos), el
+método propuesto (FO) se compara contra SVS (Muestreo de Valores de
+Shapley), el único otro método agnóstico al modelo que produce una
+matriz de importancia $T{\times}V$ y puede ejecutarse sobre los tres
+modelos. Sobre datos sintéticos con ground truth conocido, FO y SVS
+alcanzan precisión de identificación idéntica (AUP\,$=0{,}9960$) con
+recall equivalente (diferencia en AUR $< 0{,}008$, dentro de una
+desviación estándar). Sobre datos reales del S\&P~500, FO supera a
+SVS en fidelidad sobre arquitecturas neuronales ($\Delta_{0{,}3}$:
+$+0{,}014$ LSTM, $+0{,}017$ Transformer) mientras se ejecuta
+$22$--$30{\times}$ más rápido, requiriendo exactamente
+$T{\times}V{+}1{=}301$ pasadas hacia adelante frente a ${\sim}9{.}000$
+para SVS a 15 permutaciones. SVS supera a FO en Random Forest
+($+0{,}017$), donde el muestreo de coaliciones captura mejor las
+interacciones combinatorias.
+
+El framework también produce atribuciones estadísticamente no
+triviales ($p < 10^{-300}$) y consistencia inter-modelo coherente
+con las familias arquitectónicas ($\rho = 0{,}748$ entre modelos
+neuronales vs.\ $\rho < 0{,}40$ frente a Random Forest).
+
+\subsection{Limitaciones}
+\label{sec:limitaciones}
+
+Este trabajo tiene limitaciones metodológicas que deben tenerse en
+cuenta al interpretar sus resultados.
+
+\textbf{Variable objetivo y autocorrelación.} La variable objetivo
+evaluada es el precio de cierre normalizado del día siguiente, una
+cantidad con alta autocorrelación respecto al precio actual. Como
+se discute en la Sección~\ref{sec:verificacion_agnosticidad}, esto
+implica que la alta importancia observada en Close, High, Low y las
+medias móviles es consistente tanto con razonamiento financiero
+genuino como con la simple reproducción del nivel de precio actual.
+Un baseline de persistencia ingenua $f(x) = x_{t,\text{Close}}$
+obtiene MSE\,$=0{,}00016$, MAE\,$=0{,}00953$, RMSE\,$=0{,}01270$
+sobre el mismo conjunto de prueba (Sección~\ref{sec:desempeno_predictivo}),
+un orden de magnitud mejor que LSTM y Transformer (Tabla~\ref{tab:metricas}),
+lo que confirma cuantitativamente la sospecha de autocorrelación
+trivial, ya que ninguno de los tres modelos entrenados supera la hipótesis
+de camino aleatorio en la tarea de predicción de precio nominal.
+La Sección~\ref{sec:logreturn} repite la evaluación completa sobre
+el retorno logarítmico del día siguiente, una variable objetivo que
+rompe esta autocorrelación trivial por construcción.
+
+\textbf{Escalado y comparabilidad entre modelos.} El escalador
+MinMax se ajustó sobre el período de desarrollo completo (80\%),
+lo que evita fuga de información hacia el conjunto de prueba, pero
+si el conjunto de validación usado para \textit{early stopping} se
+extrae de ese mismo período de desarrollo, los límites del
+escalador quedan influidos por observaciones que también se usan
+para decidir cuándo detener el entrenamiento. Adicionalmente, como
+se señala en la Sección~\ref{sec:desempeno_predictivo} sobre
+desempeño predictivo, el carácter no estacionario del S\&P~500 hace
+que el escalador ajustado en 2010--2021 no cubra el rango completo
+de precios de 2022--2024, lo que perjudica específicamente a Random
+Forest y limita la comparabilidad directa de la
+Tabla~\ref{tab:metricas} entre modelos neuronales y de ensamble.
+
+\textbf{Validación sintética no discriminativa.} El experimento de
+caja blanca de la Sección~\ref{sec:avance1} usa una función objetivo
+determinista sin ruido, por lo que los cuatro métodos comparados
+(FO, FP, IG, SVS) alcanzan la misma precisión de identificación casi
+perfecta y el experimento no permite diferenciarlos en dificultad
+creciente. Repitiendo el mismo benchmark con ruido aditivo
+$f(X)+\varepsilon$, $\varepsilon\sim\mathcal{N}(0,\sigma_\varepsilon^2)$,
+con $\sigma_\varepsilon$ expresado como fracción del desvío estándar de
+$f(X)$ limpia, los métodos sí se diferencian. Al 10\% de ruido
+relativo, AUP cae a $0{,}51$ (FO) y $0{,}59$ (FO, escenario
+\textit{rare time}) frente a $0{,}78$--$0{,}87$ para SVS, y ambos
+convergen hacia $0{,}20$--$0{,}29$ al 50\% de ruido. SVS resulta más
+robusto que FO porque promedia sobre múltiples permutaciones de
+coaliciones, lo que atenúa el ruido por muestreo; FO ocluye cada
+celda una única vez y no se beneficia de ese promediado, exhibiendo
+el mismo patrón de fragilidad frente a variabilidad ya observado en
+Random Forest (Sección~\ref{sec:benchmark_fo_svs}). IG se mantiene en
+AUP\,$=0{,}9960$ en todos los niveles de ruido, pero esto es un
+artefacto de la implementación del experimento y no evidencia de
+robustez real: el ruido se añadió como término aditivo independiente
+de la entrada ($\partial\varepsilon/\partial x = 0$), por lo que el
+gradiente que IG integra nunca lo percibe. Un modelo real cuya
+función aprendida sea intrínsecamente ruidosa (no un ruido aditivo
+post-hoc) no ofrecería a IG esta ventaja artificial.
+
+\textbf{Alcance de la evaluación.} La limitación adicional principal
+es la evaluación sobre un único índice financiero. El uso de una
+referencia fija basada en la media y el escalado MinMax sobre datos
+no estacionarios, señalados arriba, ya no son puntos ciegos del
+trabajo. La Sección~\ref{sec:robustez_adicional} evalúa la
+sensibilidad del framework a referencias alternativas (mediana,
+cero) y su estabilidad frente a distintos regímenes de mercado
+dentro del período de prueba, y la Sección~\ref{sec:logreturn}
+evalúa un target naturalmente acotado como alternativa al escalado
+MinMax sobre el nivel de precio. El trabajo futuro pendiente, planificado
+para el siguiente semestre, es replicar el mismo pipeline
+(las mismas $V{=}15$ variables, el mismo split temporal 80/20, los mismos
+tres modelos e hiperparámetros) sobre otro índice bursátil, cambiando
+únicamente el parámetro \texttt{TICKER} de \texttt{config.py} que
+selecciona la serie descargada vía \textit{yfinance}. Un candidato
+concreto es el NASDAQ Composite (\texttt{\^{}IXIC}), por tener una
+composición sectorial distinta a la del S\&P~500 con mayor peso
+tecnológico, lo que permite separar si el patrón de consistencia
+neuronal frente a ensamble observado en este trabajo es una propiedad
+general del framework o un artefacto específico de la dinámica del
+S\&P~500. El código de descarga y entrenamiento ya soporta este cambio
+sin modificaciones adicionales, por lo que la extensión es factible
+dentro de un semestre.
+
+\subsection{Disponibilidad de código}
+
+El código del framework, los scripts de entrenamiento de los tres
+modelos y los notebooks utilizados para generar las tablas y
+figuras de este trabajo están disponibles en un repositorio público
+para fines de reproducibilidad.\footnote{Enlace omitido en esta
+versión del manuscrito; se incluirá la URL del repositorio en la
+versión final enviada al venue de publicación.}
+
+\subsection{Declaración de uso de inteligencia artificial}
+
+Durante la elaboración de este trabajo se utilizaron asistentes de
+inteligencia artificial generativa basados en modelos de lenguaje
+como apoyo en tareas puntuales de edición de redacción, verificación
+de referencias bibliográficas y generación de código auxiliar para
+experimentos adicionales de robustez, siempre bajo supervisión
+directa de la autora. Todas las cifras reportadas en este trabajo
+provienen de la ejecución real del código correspondiente sobre los
+datos descritos en la Sección~\ref{sec:datos_entrada}, ninguna fue
+generada ni estimada por un modelo de lenguaje. El diseño del
+framework propuesto, la formulación matemática del motor de
+perturbaciones, la interpretación de los resultados y las
+conclusiones son responsabilidad exclusiva de la autora.
+
+\bibliographystyle{ieeetr} % O 'ieee' si estás usando la plantilla oficial de la IEEE
+\bibliography{biblio}
+% that's all folks
+\end{document}

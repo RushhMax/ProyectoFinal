@@ -1,0 +1,26 @@
+\chapter{Conclusiones y trabajo futuro}
+\hrule \bigskip \vspace*{1cm}
+%------------------------------------------------------------------------
+
+\section{Conclusiones}
+
+Este trabajo presenta un framework de explicabilidad temporal agnóstico al modelo para la predicción de series temporales financieras. Su contribución central es un patrón adaptador de dos niveles que desacopla el motor de perturbaciones temporales de cualquier backend de modelo específico, permitiendo que cualquier modelo con firma $(N,T,V) \rightarrow (N,)$ se conecte sin modificar ningún componente del framework, incluyendo modelos no diferenciables como Random Forest, algo que el linaje completo de DynaMask no logra cinco años después de su propuesta original.
+
+El framework produce atribuciones estadísticamente no triviales ($p<10^{-300}$) y consistencia inter-modelo coherente con las familias arquitectónicas ($\rho=0{,}748$ entre modelos neuronales frente a $\rho<0{,}40$ con Random Forest), robusta al target evaluado, al vector de referencia y al régimen de mercado.
+
+\subsection{Limitaciones}
+
+La variable objetivo evaluada (precio de cierre normalizado) tiene alta autocorrelación con el precio actual, lo que se aborda repitiendo la evaluación sobre retorno logarítmico. El escalador MinMax ajustado sobre 2010--2021 no cubre el rango completo de precios de 2022--2024, lo que perjudica en particular a Random Forest. El benchmark sintético usa una función determinista sin ruido, con ruido aditivo los métodos sí se diferencian. La evaluación se limita a un único índice financiero (S\&P~500). La investigación de una referencia condicionada a la hoja para Random Forest no confirmó la hipótesis inicial, un resultado que se reporta con la misma rigurosidad que los resultados positivos.
+
+\section{Contribuciones}
+
+\begin{itemize}
+    \item Un framework de explicabilidad temporal agnóstico al modelo, mediante un patrón adaptador de dos niveles, que funciona sobre LSTM, Transformer y Random Forest sin modificar ningún componente del framework.
+    \item Un motor de perturbaciones sin gradientes ni optimización por instancia, que atribuye importancia a nivel de celda $(t,v)$ en una sola pasada de $T{\cdot}V{+}1$ evaluaciones del modelo.
+    \item Verificación empírica de agnosticismo mediante consistencia inter-modelo estadísticamente significativa y coherente con la familia arquitectónica de cada modelo.
+    \item Una investigación honesta de una consideración específica para Random Forest (referencia condicionada a la hoja), reportando tanto la motivación teórica como el resultado real, incluso cuando ese resultado no confirma la hipótesis inicial.
+\end{itemize}
+
+\section{Trabajos futuros}
+
+El trabajo futuro planificado incluye replicar el mismo pipeline sobre otro índice bursátil (candidato concreto, NASDAQ Composite \texttt{\^{}IXIC}), cambiando únicamente el parámetro \texttt{TICKER} de la configuración, para separar si el patrón de consistencia neuronal frente a ensamble observado en este trabajo es una propiedad general del framework o un artefacto específico de la dinámica del S\&P~500. Se plantea además incorporar perturbación bidireccional para recuperar el signo de la atribución, no solo su magnitud, y correlacionar la volatilidad realizada por ventana con la concordancia inter-modelo de $\hat{\alpha}$, instancia por instancia, en vez de solo por régimen agregado.

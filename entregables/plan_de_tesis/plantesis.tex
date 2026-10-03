@@ -1,0 +1,221 @@
+\chapter{Introducción}
+\hrule \bigskip \vspace*{1cm}
+
+\label{sec:introduccion}
+
+\section{Motivación y contexto}
+
+La predicción de series temporales es una tarea central en la gestión de riesgos financieros, donde cada decisión basada en una predicción incorrecta puede tener consecuencias cuantificables sobre portafolios e instituciones \cite{arsenault2025}. Estas consecuencias no son solo teóricas. Cohen et al.\ \cite{cohen2023blackbox} documentan que la opacidad de los modelos de aprendizaje automático usados en el mercado financiero constituye una fuente de riesgo distinta del error de predicción, porque impide validar si el modelo aprendió una relación económica real o solo una coincidencia sin significado presente en los datos de entrenamiento.
+
+En los últimos años, los modelos de aprendizaje profundo han reducido el error de predicción sobre este tipo de datos frente a métodos estadísticos clásicos \cite{bhandari2022, abdulquadir2023}. Sin embargo, estos modelos no explican por qué llegan a cada resultado, y esa falta de explicación ya tiene consecuencias regulatorias concretas. El SR 11-7 de la Reserva Federal estadounidense \cite{sr117} obliga a los bancos a demostrar que entienden las capacidades y los límites de cada modelo antes de usarlo. El Reglamento de Inteligencia Artificial de la Unión Europea \cite{euaiact2024} exige, para ciertos usos financieros como la evaluación crediticia, que el modelo sea lo bastante transparente para que quien lo usa pueda interpretar sus resultados. Pese a estas exigencias, Sovrano et al.\ \cite{sovrano2026} muestran que los métodos de explicabilidad actuales todavía no las cumplen de forma sistemática.
+
+Construir un framework de explicabilidad para este dominio conlleva responsabilidades éticas concretas, no solo declarativas. Un modelo entrenado sobre datos financieros históricos hereda los sesgos de ese historial, un régimen de mercado específico, la composición cambiante del índice, la autocorrelación trivial del precio, y una explicación poco fiel puede ocultar esos sesgos en vez de exponerlos. Por esta razón, este trabajo reporta también los resultados que no favorecen a la propuesta, que ningún modelo entrenado supera el baseline de persistencia ingenua y que una consideración específica investigada para Random Forest no confirmó la hipótesis inicial (Capítulo~\ref{chap:resultados_previos}), en vez de omitirlos. Además, al no requerir gradientes ni una optimización costosa por instancia, el framework reduce la barrera computacional y de infraestructura para auditar modelos financieros, una consideración de acceso equitativo relevante para instituciones o reguladores sin la capacidad de cómputo que exigen métodos como Shapley Value Sampling o las máscaras aprendidas por gradiente, y reduce a la vez el costo energético asociado a esa auditoría.
+
+\section{Definición del Problema}
+
+El problema que aborda esta tesis puede formularse como un problema de cómputo con dos requisitos que ningún método previo satisface a la vez. Primero, que el mecanismo de explicación funcione sobre arquitecturas de naturaleza computacional distinta sin acceder a su implementación interna. Segundo, que ese mecanismo tenga un costo fijo por instancia, evaluable en una sola pasada, sin resolver una optimización propia cada vez que se explica una predicción.
+
+Los métodos con acceso a la estructura interna del modelo, como los basados en gradientes o en atención, logran coherencia temporal en la atribución pero quedan acoplados a una arquitectura específica. Los pesos de atención de un Transformer, por ejemplo, no tienen equivalente en un modelo de ensamble como Random Forest \cite{arsenault2025}. Los métodos de perturbación agnósticos, como SHAP y LIME, sí funcionan sobre cualquier modelo, pero fueron formulados asumiendo variables independientes entre sí. Al aplicarse sobre series temporales, tratan cada paso de tiempo como una variable aislada, generando perturbaciones que rompen la dependencia estructural entre observaciones consecutivas \cite{tonekaboni2020, huang2025}.
+
+Existen métodos que sí respetan el orden temporal y son agnósticos a la estructura interna del modelo, como las máscaras dinámicas de Crabbé y Van Der Schaar \cite{crabbe2021}, pero ajustan la perturbación resolviendo, para cada instancia, un problema de optimización no convexo mediante descenso de gradiente, lo que además de un costo computacional considerable les impide operar sobre modelos no diferenciables como Random Forest. Dos extensiones directas de este método, publicadas en ICML \cite{enguehard2023} e ICLR \cite{liu2024contralsp}, corrigen la calidad de la perturbación pero mantienen la misma dependencia del gradiente. Cinco años después de la propuesta original, ningún método de esta línea de trabajo funciona sin gradientes, y ninguno se ha validado sobre series financieras pese a mencionarlas como motivación. Random Forest es, en este sentido, el caso concreto que hace tangible el problema, sigue siendo estado del arte en datos tabulares \cite{grinsztajn2022}, y es precisamente el tipo de modelo que esta línea de trabajo excluye por diseño.
+
+\section{Objetivos}
+
+\subsection{Objetivo General}
+Desarrollar un framework de explicabilidad temporal agnóstico al modelo para la predicción de series temporales financieras, que atribuya importancia por variable y paso de tiempo sin depender de la estructura interna del modelo explicado ni requerir acceso a sus gradientes.
+
+\subsection{Objetivos Específicos}
+\begin{enumerate}
+    \item Diseñar una interfaz uniforme de predicción, mediante un patrón adaptador de dos niveles, que desacople el motor de perturbaciones de la estructura interna de cualquier modelo.
+    \item Formular un motor de perturbaciones temporales que atribuya importancia a nivel de celda $(t,v)$, preservando el orden y la coherencia temporal del resto de la ventana.
+    \item Entrenar modelos de distinta naturaleza computacional (LSTM, Transformer, Random Forest) sobre el S\&P~500 como banco de pruebas del framework.
+    \item Verificar que las explicaciones generadas reflejan el comportamiento específico de cada modelo, y no son independientes del modelo explicado ni artefacto del procedimiento.
+    \item Evaluar el framework frente al estado del arte agnóstico en precisión de identificación, consistencia entre modelos y velocidad de cómputo.
+    \item Investigar si existe una consideración anclada en la estructura particular de Random Forest que reduzca su mayor sensibilidad observada al vector de referencia, y documentar el resultado con la misma rigurosidad tanto si confirma como si descarta la hipótesis.
+\end{enumerate}
+
+\section{Hipótesis y Preguntas de Investigación}
+
+\subsection{Preguntas de Investigación}
+\begin{itemize}
+    \item[\textbf{P1:}] ¿Es posible atribuir la importancia de cada variable y cada paso de tiempo dentro de una ventana de entrada, de forma agnóstica al modelo, capturando el comportamiento real de arquitecturas de distinta naturaleza computacional, sin depender de gradientes ni de una optimización por instancia?
+    \item[\textbf{P2:}] ¿Qué variables financieras y qué momentos del historial reciente resultan más relevantes para la predicción sobre el S\&P~500 según el framework propuesto, y ese patrón es consistente entre modelos entrenados con los mismos datos?
+    \item[\textbf{P3:}] ¿Existe una consideración específica para Random Forest, anclada en su estructura de árboles, que reduzca su mayor sensibilidad al vector de referencia observada frente a los modelos neuronales?
+\end{itemize}
+
+\subsection{Hipótesis}
+Es posible construir un método de perturbación temporalmente ordenado, agnóstico al modelo, de costo fijo por instancia y sin acceso a gradientes, que produzca explicaciones consistentes con el comportamiento de arquitecturas de distinta naturaleza computacional, incluyendo modelos no diferenciables como Random Forest.
+
+\section{Contribuciones}
+
+Las contribuciones principales de esta investigación son las siguientes.
+
+\begin{itemize}
+    \item \textbf{Un framework de explicabilidad temporal agnóstico al modelo}, mediante un patrón adaptador de dos niveles que desacopla el motor de perturbaciones de cualquier backend de modelo específico, funcionando sobre LSTM, Transformer y Random Forest sin modificar ningún componente del framework.
+    \item \textbf{Un motor de perturbaciones sin gradientes ni optimización por instancia}, que atribuye importancia a nivel de celda $(t,v)$ en una sola pasada de $T{\cdot}V{+}1$ evaluaciones del modelo, evitando el costo de las máscaras aprendidas por descenso de gradiente.
+    \item \textbf{Verificación empírica de agnosticismo}, mediante consistencia inter-modelo estadísticamente significativa y coherente con la familia arquitectónica de cada modelo (mayor entre modelos neuronales que frente a Random Forest), en vez de asumir la propiedad solo por el diseño del método.
+    \item \textbf{Una investigación honesta de una consideración específica para Random Forest} (referencia condicionada a la hoja), reportando tanto la motivación teórica como el resultado real, incluso cuando ese resultado no confirma la hipótesis inicial.
+\end{itemize}
+
+\section{Cronograma de Actividades}
+
+\begin{table}[h!]
+\centering
+\caption{Cronograma de actividades planificadas.}
+\label{tab:cronograma}
+\begin{tabular}{|p{6.5cm}|c|c|c|c|c|c|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Actividad / Fase}} & \multicolumn{2}{c|}{\textbf{Mes 1}} & \multicolumn{2}{c|}{\textbf{Mes 2}} & \multicolumn{2}{c|}{\textbf{Mes 3}} \\ \cline{2-7}
+\multicolumn{1}{|c|}{} & \textbf{S1-2} & \textbf{S3-4} & \textbf{S1-2} & \textbf{S3-4} & \textbf{S1-2} & \textbf{S3-4} \\ \hline
+Fase 1. Recolección de datos, indicadores técnicos e implementación del motor de perturbaciones temporales. & X & X & & & & \\ \hline
+Fase 2. Entrenamiento de los tres modelos (LSTM, Transformer, Random Forest) y verificación de agnosticismo cruzado. & & & X & X & & \\ \hline
+Fase 3. Evaluación frente al estado del arte agnóstico (benchmark sintético, comparación con SVS, velocidad frente a TimeSHAP y GS-SHAP). & & & & X & X & \\ \hline
+Fase 4. Pruebas de robustez (retorno logarítmico, sensibilidad al vector de referencia, régimen de mercado) e investigación de la consideración específica para Random Forest. & & & & & X & \\ \hline
+Fase 5. Redacción, revisión de la sustentación de la propuesta y defensa. & & & & & X & X \\ \hline
+\end{tabular}
+\end{table}
+
+
+\chapter{Estado del Arte}
+\hrule \bigskip \vspace*{1cm}
+
+\label{sec:estadoarte}
+
+Este capítulo examina los trabajos que sustentan y delimitan la presente investigación, organizados en dos ejes. El primero cubre los métodos de perturbación agnósticos al modelo que incorporan de algún modo la dimensión temporal, y sus limitaciones al hacerlo. El segundo cubre los frameworks explícitamente diseñados para ser temporalmente conscientes y agnósticos a la vez, incluyendo el linaje directo de DynaMask, el antecedente más cercano a esta propuesta.
+
+\section{Métodos de perturbación agnósticos y el supuesto de independencia}
+
+SHAP formaliza la atribución de importancia con valores de Shapley de la teoría de juegos cooperativos, calculando la contribución promedio de cada variable sobre todas las combinaciones posibles de variables presentes y ausentes. LIME sigue una estrategia distinta, genera perturbaciones alrededor de la instancia a explicar y ajusta un modelo lineal local sobre ellas \cite{arsenault2025}. Ambos métodos asumen independencia entre variables de entrada, un supuesto razonable en datos tabulares pero no en series temporales, donde las observaciones consecutivas están correlacionadas por construcción.
+
+Yadav y Subbian \cite{yadav2025} diagnostican por qué los métodos de gradiente, oclusión y permutación fallan específicamente en escenarios de predicción dinámica, donde el modelo genera una predicción nueva en cada instante y romper la dependencia temporal corrompe la cadena de predicciones sucesivas. Huang et al.\ \cite{huang2025} proponen ShapeX, que aplica valores de Shapley sobre \emph{shapelets} en vez de puntos individuales para capturar coherencia temporal, pero está diseñado para clasificación, no para regresión continua. Un conjunto de trabajos de aplicación financiera \cite{gupta2025, sathyampeth2025, manikrao2026, jagannathan2025, kumar2024, singh2025, muhammad2024} usa SHAP o LIME directamente sobre ventanas temporales sin ninguna adaptación, sin verificar si las atribuciones resultantes respetan el orden causal de la serie.
+
+\section{Frameworks temporalmente conscientes y el linaje de DynaMask}
+
+Tonekaboni et al.\ \cite{tonekaboni2020} proponen FIT, que estima la importancia de una observación por el cambio que produce en la distribución predictiva al removerla, y Leung et al.\ \cite{leung2023winit} extienden esa idea con WinIT para capturar efectos retrasados. Ambos mecanismos son agnósticos por construcción (no requieren gradientes), pero fueron evaluados únicamente sobre arquitecturas recurrentes, sin verificar consistencia cruzada entre modelos de distinta naturaleza computacional.
+
+Crabbé y Van Der Schaar \cite{crabbe2021} propusieron DynaMask, el antecedente más directo de esta propuesta, produce una matriz de importancia $T \times V$ ajustando una máscara de perturbación que penaliza saltos abruptos para garantizar coherencia temporal. Sin embargo, requiere acceso a los gradientes del modelo para optimizar la máscara, lo que lo restringe a redes neuronales y le impide operar sobre Random Forest. Dos trabajos posteriores extendieron directamente este mecanismo. Enguehard \cite{enguehard2023} reemplaza la perturbación fija por una perturbación aprendida mediante una red recurrente adicional. Liu et al.\ \cite{liu2024contralsp} incorporan aprendizaje contrastivo para evitar que la perturbación saque a la entrada de su distribución original. Ambos mejoran la calidad de la atribución sobre DynaMask, pero ninguno relaja el requisito de gradientes ni evalúa sobre series financieras.
+
+Bento et al.\ \cite{bento2021} proponen TimeSHAP, limitado a modelos secuenciales. Raykar et al.\ \cite{raykar2023} proponen TsSHAP, que opera sobre características predefinidas sin atribuir importancia por celda individual. Roshinta et al.\ \cite{roshinta2026} proponen un framework de ventanas de perturbación dinámicas que reduce variables correlacionadas mediante PCA antes de perturbar, evaluado solo sobre arquitecturas recurrentes. Kim y Park \cite{gsshap2026} proponen GS-SHAP, que agrupa variables y segmentos temporales para preservar interacciones conjuntas, perdiendo resolución por variable individual.
+
+\section{Matriz de Síntesis y Brecha de Investigación}
+
+La Tabla~\ref{tab:gaps} resume los trabajos revisados y la brecha que motiva esta propuesta.
+
+\begin{table}[h!]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{2.4cm}|>{\raggedright\arraybackslash}p{2.0cm}|>{\raggedright\arraybackslash}p{4.2cm}|}
+\hline
+\textbf{Referencia} & \textbf{Mecanismo} & \textbf{Dominio} & \textbf{Brecha respecto a la propuesta} \\ \hline
+SHAP, LIME \cite{arsenault2025} & Perturbación agnóstica genérica & Datos tabulares & Asumen independencia entre pasos de tiempo. \\ \hline
+FIT \cite{tonekaboni2020}, WinIT \cite{leung2023winit} & Remoción de observaciones, sin gradientes & Clínico secuencial & Evaluados solo en modelos recurrentes, sin verificar consistencia cruzada. \\ \hline
+DynaMask \cite{crabbe2021} & Máscara aprendida por gradiente & Sintético, MIMIC-III & Requiere gradientes, no corre sobre Random Forest. \\ \hline
+ExtrMask \cite{enguehard2023}, ContraLSP \cite{liu2024contralsp} & Perturbación aprendida, contrastiva & Sintético, MIMIC-III & Corrigen la perturbación de DynaMask pero mantienen la dependencia del gradiente. \\ \hline
+TimeSHAP \cite{bento2021} & Shapley sobre eventos, recurrente & Secuencial & Limitado a modelos secuenciales. \\ \hline
+Roshinta et al.\ \cite{roshinta2026}, GS-SHAP \cite{gsshap2026} & Ventanas dinámicas, agrupación de variables & Financiero, un solo modelo & Pierden resolución por variable individual o evalúan un único tipo de modelo. \\ \hline
+\textbf{Propuesta} & \textbf{Oclusión celda a celda, sin gradientes} & \textbf{S\&P 500, 3 modelos} & \textbf{Agnóstica, costo fijo, resolución por celda, validada sobre series financieras reales.} \\ \hline
+\end{tabular}
+\caption{Matriz de síntesis y brecha de investigación.}
+\label{tab:gaps}
+\end{table}
+
+
+\chapter{Marco Teórico}
+\hrule \bigskip \vspace*{1cm}
+
+\label{chap:marco_teorico}
+
+\section{Explicabilidad Post-hoc}
+
+Un método de explicabilidad es post-hoc cuando opera sobre un modelo ya entrenado, sin modificar su estructura ni su proceso de entrenamiento \cite{arsenault2025}. A diferencia de los modelos interpretables por diseño, los métodos post-hoc pueden aplicarse sobre cualquier modelo independientemente de su complejidad interna. Dado un modelo entrenado y una predicción específica, el método post-hoc produce una atribución de importancia sobre las variables de entrada, indicando cuánto contribuyó cada una a esa predicción.
+
+\section{Agnóstico al Modelo}
+
+Un método post-hoc es agnóstico al modelo cuando no requiere acceso a la estructura interna del modelo para generar una explicación, puede aplicarse sobre redes neuronales, modelos de ensamble o modelos estadísticos sin conocer sus pesos, gradientes ni arquitectura \cite{arsenault2025}. En contraste, métodos como DeepLIFT o los mecanismos de atención están ligados a una arquitectura específica y no transfieren a modelos de distinta naturaleza \cite{schlegel2019}. Que un método sea agnóstico por diseño no garantiza que sus atribuciones reflejen el comportamiento real del modelo explicado. Adebayo et al.\ \cite{adebayo2018} mostraron que varios métodos de saliency producen explicaciones casi idénticas incluso cuando los pesos del modelo se aleatorizan por completo, atribuciones que no reflejan ni el modelo ni los datos con los que se entrenó. La agnosticidad mecánica de un método debe verificarse empíricamente, no puede darse por probada solo a partir de su diseño.
+
+\section{Métodos de Perturbación}
+
+Los métodos de perturbación estiman la importancia de una variable observando cómo cambia la predicción del modelo cuando esa variable es modificada o eliminada de la entrada \cite{arsenault2025}. SHAP calcula la contribución promedio de cada variable sobre todas las combinaciones posibles de variables presentes y ausentes. LIME genera perturbaciones alrededor de la instancia a explicar y ajusta un modelo lineal local sobre ellas. Ambos asumen independencia entre variables de entrada, supuesto que no se sostiene en series temporales.
+
+\section{Explicabilidad Temporal}
+
+La explicabilidad temporal extiende la atribución de importancia a la dimensión del tiempo, reconociendo que una misma variable puede ser determinante en un momento del historial e irrelevante en otro \cite{tonekaboni2020}. Formalmente, dado un modelo entrenado y una ventana de entrada de $T$ pasos de tiempo y $V$ variables, produce una matriz $\hat{\alpha} \in \mathbb{R}^{T \times V}$, donde cada celda $\hat{\alpha}(t,v)$ representa la relevancia de la variable $v$ en el paso de tiempo $t$ para la predicción analizada. Para que una explicación temporal sea válida, las perturbaciones sobre la serie deben respetar el orden temporal, no puede modificarse información futura para explicar un instante pasado, ya que esto introduce situaciones que no ocurren en los datos reales \cite{tonekaboni2020, crabbe2021}.
+
+
+\chapter{Propuesta}
+\hrule \bigskip \vspace*{1cm}
+
+\label{chap:propuesta}
+
+Este trabajo propone un framework de explicabilidad temporal agnóstico al modelo que produce la matriz de importancia $\hat{\alpha} \in \mathbb{R}^{T \times V}$ definida en el Capítulo~\ref{chap:marco_teorico}. El flujo completo comprende seis etapas: (1)~los datos de entrada, la serie temporal financiera multivariada; (2)~la preparación de los datos, derivación de variables, normalización y construcción de ventanas deslizantes; (3)~el modelo predictivo, cualquiera de los tres modelos de distinta naturaleza computacional entrenados sobre esas ventanas; (4)~la interfaz uniforme de predicción que desacopla el motor de perturbaciones de cualquier modelo concreto; (5)~el motor de perturbaciones temporales, la contribución principal de este trabajo; y (6)~la matriz de importancia temporal resultante.
+
+\section{Datos de Entrada}
+
+Se usa el índice S\&P~500 (\texttt{\^{}GSPC}, 2010--2024), con $V=15$ variables por paso de tiempo, cinco variables de precio y volumen base (Open, High, Low, Close, Volume) y diez indicadores técnicos derivados (medias móviles SMA\_5/10/20, MACD y su señal, RSI\_14, BB\_width, ATR\_14, Log\_Return, Volume\_ratio). Las ventanas de entrada tienen $T=20$ pasos de tiempo, con horizonte de predicción $H=1$. El split respeta el orden temporal, 80\% para desarrollo y 20\% para prueba, sin mezclar información del futuro hacia el pasado.
+
+\section{Interfaz Uniforme de Predicción}
+
+La agnosticidad del framework se implementa mediante un patrón adaptador de dos niveles. El motor de perturbaciones recibe como único punto de contacto con el modelo una función de predicción $f: \mathbb{R}^{N \times T \times V} \rightarrow \mathbb{R}^N$ inyectada en su constructor, nunca accede al modelo directamente. En el primer nivel, cada modelo implementa un \emph{wrapper} que estandariza su firma de entrada y salida, Random Forest aplana cada ventana $(T,V) \rightarrow (T{\cdot}V)$ antes de invocar al regresor de scikit-learn, mientras que LSTM y Transformer convierten el array a tensor de PyTorch y ejecutan inferencia sin gradientes. En el segundo nivel, el explicador construye ese callable y lo inyecta en el motor, de modo que cualquier modelo externo puede conectarse sin modificar ningún componente existente.
+
+\section{Modelos de Distinta Naturaleza Computacional}
+
+Se entrenan tres modelos bajo la misma interfaz $(N,T,V) \rightarrow (N,)$, sin que el motor acceda a sus pesos, gradientes ni arquitectura interna. LSTM, dos capas recurrentes con \texttt{hidden}=128 y dropout 0.2. Transformer, dos capas de \texttt{TransformerEncoder} con 4 cabezas de atención y \emph{attention pooling} aprendido, en vez del esquema de último token, que concentraba artificialmente la importancia en el paso final. Random Forest, ensamble de 200 árboles de decisión de scikit-learn, incluido como baseline tabular no secuencial. Los tres se entrenan con AdamW o su equivalente de scikit-learn, sobre los mismos datos y el mismo split temporal.
+
+\section{Motor de Perturbaciones Temporales}
+
+Para cada celda $(t,v)$ de la ventana de entrada, el motor reemplaza el valor por una referencia $r_v$ (media del conjunto de entrenamiento por variable) y mide el cambio en la predicción,
+\begin{equation}
+    \alpha(t,v) = \left| f(x) - f(x_{-(t,v)}) \right|.
+\end{equation}
+Perturbar una sola celda a la vez preserva el orden y la coherencia temporal del resto de la ventana, y no requiere gradientes, lo que permite ejecutar el mismo mecanismo sobre Random Forest. En vez de $T \times V$ inferencias individuales, se construye un único batch de $T{\cdot}V{+}1$ ventanas evaluado en una sola llamada al modelo. La matriz resultante se normaliza con norma $L_1$ para que cada celda represente la proporción del cambio total en la predicción atribuible a esa variable en ese paso de tiempo.
+
+\section{Consideración Específica para Random Forest}
+
+La verificación de agnosticismo (Capítulo~\ref{chap:resultados_previos}) muestra que Random Forest es notablemente más sensible que LSTM y Transformer al vector de referencia usado para ocluir una celda. Motivado por Hooker, Mentch y Zhou \cite{hooker2021}, quienes muestran que los métodos de tipo permutar-y-predecir fuerzan al modelo a extrapolar cuando la perturbación rompe la dependencia entre variables, se investigó si una referencia condicionada a la hoja de cada árbol, calculada por instancia a partir de los ejemplos de entrenamiento que comparten esa hoja, reducía esa sensibilidad. El resultado, reportado en el Capítulo~\ref{chap:resultados_previos}, es negativo, y esa investigación honesta es en sí misma la consideración específica que este trabajo aporta para Random Forest.
+
+\section{Validación del Framework}
+
+El framework se valida en dos etapas. Primero, sobre un banco de pruebas sintético con ground truth conocido, una función de caja blanca cuya predicción depende únicamente de un subconjunto de celdas salientes, lo que permite medir precisión y recall de identificación exactos. Segundo, sobre el S\&P~500 real, comparando las explicaciones que produce el framework entre los tres modelos entrenados, y verificando mediante significancia estadística que las atribuciones no son producto del azar.
+
+
+\chapter{Resultados Previos}
+\label{chap:resultados_previos}
+\hrule \bigskip \vspace*{1cm}
+
+Este capítulo presenta los resultados obtenidos tras implementar el framework y entrenar los tres modelos sobre el S\&P~500.
+
+\section{Desempeño Predictivo de los Modelos}
+
+Los tres modelos se entrenan sobre el mismo conjunto de datos y el mismo split temporal (2010--2024, 80\% desarrollo, 20\% prueba, 731 ventanas de prueba). El desempeño predictivo no es el objeto de esta tesis, se reporta solo como contexto necesario para interpretar las explicaciones producidas, y se contrasta contra un baseline de persistencia ingenua ($f(x) = x_{t,\text{Close}}$) para descartar que las métricas midan únicamente autocorrelación trivial del precio.
+
+\section{Validación con Ground Truth Sintético}
+
+Sobre el banco de pruebas sintético (entradas AR(1), $T{=}20$, $V{=}15$, escenarios \emph{rare feature} y \emph{rare time}), el método propuesto (FO) alcanza $AUP=0{,}9960$, igualando a Shapley Value Sampling (SVS), Integrated Gradients (IG) y Feature Permutation (FP), y superando el $AUP=0{,}97$ reportado por DynaMask en su propio benchmark, sin requerir gradientes y ejecutándose también sobre Random Forest.
+
+\section{Verificación de Agnosticidad sobre el S\&P 500}
+
+Sobre 100 instancias reales del conjunto de prueba, la consistencia de Spearman entre las matrices $\hat{\alpha}$ es $\rho=0{,}748$ entre LSTM y Transformer, frente a $\rho=0{,}255$ (LSTM-RF) y $\rho=0{,}382$ (Transformer-RF). El patrón neuronal-neuronal mayor que neuronal-ensamble es estadísticamente significativo frente a un baseline aleatorio ($p<10^{-300}$ en los tres modelos), lo que indica que las explicaciones capturan el comportamiento específico de cada modelo y no un artefacto del procedimiento.
+
+\section{Robustez del Framework}
+
+El framework se somete a pruebas adicionales sin reentrenar ningún modelo. Bajo retorno logarítmico como target alternativo (que rompe la autocorrelación trivial del precio), el patrón de consistencia se reproduce ($\rho=0{,}541$ LSTM-Transformer frente a $\rho=0{,}187$ y $\rho=0{,}311$ con Random Forest). Frente a referencias alternativas (mediana, cero), LSTM y Transformer son altamente estables ($\rho>0{,}88$), mientras Random Forest es notablemente más sensible ($\rho$ entre 0{,}666 y 0{,}813), aunque el patrón cualitativo se mantiene en todos los casos. La investigación de una referencia condicionada a la hoja para mitigar esa sensibilidad, motivada por la literatura sobre extrapolación forzada en métodos de permutación \cite{hooker2021}, no mejora la identificación en el banco sintético y empeora la consistencia con los modelos neuronales sobre datos reales ($\rho$ cae a valores negativos), lo que sugiere que la sensibilidad de Random Forest no se debe a la elección de una referencia externa insuficientemente sofisticada, sino a cómo el modelo evalúa la oclusión de una celda a la vez.
+
+\section{Comparación con el Estado del Arte}
+
+Bajo condiciones idénticas, el método propuesto (FO) se compara contra SVS, el único otro método agnóstico que produce una matriz $T \times V$ ejecutable sobre los tres modelos. FO supera a SVS en fidelidad sobre los modelos neuronales, mientras se ejecuta entre $22$ y $30$ veces más rápido, requiriendo exactamente $T{\cdot}V{+}1=301$ pasadas hacia adelante frente a miles de evaluaciones para SVS. SVS supera a FO específicamente en Random Forest, donde el muestreo de coaliciones captura mejor las interacciones combinatorias entre árboles.
+
+
+\chapter{Conclusiones}
+\hrule \bigskip \vspace*{1cm}
+
+Este trabajo presenta un framework de explicabilidad temporal agnóstico al modelo para la predicción de series temporales financieras. Su contribución central es un patrón adaptador de dos niveles que desacopla el motor de perturbaciones temporales de cualquier backend de modelo específico, permitiendo que cualquier modelo con firma $(N,T,V) \rightarrow (N,)$ se conecte sin modificar ningún componente del framework, incluyendo modelos no diferenciables como Random Forest, algo que el linaje completo de DynaMask no logra cinco años después de su propuesta original.
+
+\section{Limitaciones}
+
+La variable objetivo evaluada (precio de cierre normalizado) tiene alta autocorrelación con el precio actual, lo que se aborda repitiendo la evaluación sobre retorno logarítmico. El escalador MinMax ajustado sobre 2010--2021 no cubre el rango completo de precios de 2022--2024, lo que perjudica en particular a Random Forest. El benchmark sintético usa una función determinista sin ruido, con ruido aditivo los métodos sí se diferencian. La evaluación se limita a un único índice financiero (S\&P~500).
+
+\section{Trabajo Futuro}
+
+El trabajo futuro planificado incluye replicar el mismo pipeline sobre otro índice bursátil (candidato concreto, NASDAQ Composite), cambiando únicamente el parámetro \texttt{TICKER} de la configuración; incorporar perturbación bidireccional para recuperar el signo de la atribución, no solo su magnitud; y correlacionar la volatilidad realizada por ventana con la concordancia inter-modelo de $\hat{\alpha}$, instancia por instancia.

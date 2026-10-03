@@ -1,0 +1,78 @@
+{
+  "LSTM": {
+    "FO": {
+      "total_ms": 880.2477,
+      "std_ms": 46.8366,
+      "per_sample_ms": 17.605,
+      "per_sample_std": 0.9367
+    },
+    "FP": {
+      "total_ms": 924.5333,
+      "std_ms": 11.0913,
+      "per_sample_ms": 18.4907,
+      "per_sample_std": 0.2218
+    },
+    "IG": {
+      "total_ms": 8862.5547,
+      "std_ms": 264.9271,
+      "per_sample_ms": 177.2511,
+      "per_sample_std": 5.2985
+    },
+    "SVS": {
+      "total_ms": 4690.787,
+      "std_ms": 30.7896,
+      "per_sample_ms": 469.0787,
+      "per_sample_std": 3.079,
+      "n_samples": 10
+    }
+  },
+  "Transformer": {
+    "FO": {
+      "total_ms": 688.3159,
+      "std_ms": 16.7294,
+      "per_sample_ms": 13.7663,
+      "per_sample_std": 0.3346
+    },
+    "FP": {
+      "total_ms": 756.0157,
+      "std_ms": 17.5056,
+      "per_sample_ms": 15.1203,
+      "per_sample_std": 0.3501
+    },
+    "IG": {
+      "total_ms": 11698.3454,
+      "std_ms": 191.1743,
+      "per_sample_ms": 233.9669,
+      "per_sample_std": 3.8235
+    },
+    "SVS": {
+      "total_ms": 4134.6159,
+      "std_ms": 159.062,
+      "per_sample_ms": 413.4616,
+      "per_sample_std": 15.9062,
+      "n_samples": 10
+    }
+  },
+  "RandomForest": {
+    "FO": {
+      "total_ms": 5599.1946,
+      "std_ms": 195.3947,
+      "per_sample_ms": 111.9839,
+      "per_sample_std": 3.9079
+    },
+    "FP": {
+      "total_ms": 5286.6903,
+      "std_ms": 138.4315,
+      "per_sample_ms": 105.7338,
+      "per_sample_std": 2.7686
+    },
+    "IG": null,
+    "SVS": {
+      "total_ms": 25194.4212,
+      "std_ms": 823.8298,
+      "per_sample_ms": 2519.4421,
+      "per_sample_std": 82.383,
+      "n_samples": 10
+    }
+  }
+}

@@ -1,0 +1,13 @@
+% Thesis Abstract --------------------------------------------
+
+\begin{abstract}
+\hrule \bigskip \vspace*{1cm}
+
+Los modelos de aprendizaje profundo para predicción de series temporales financieras logran alta precisión pero no revelan qué información del historial determinó cada predicción. Los métodos de explicabilidad existentes, como SHAP y LIME, fueron formulados para variables independientes y producen explicaciones inconsistentes al ignorar la dependencia temporal de la serie. Este trabajo propone un framework de explicabilidad temporal agnóstico al modelo que, dada una ventana de entrada $x \in \mathbb{R}^{T \times V}$, produce una matriz de importancia $\hat{\alpha} \in \mathbb{R}^{T \times V}$ indicando cuánto contribuyó cada variable en cada momento del historial a la predicción analizada. El framework opera mediante perturbaciones temporalmente ordenadas y se comunica con cualquier modelo únicamente a través de su función de predicción, sin acceder a pesos, gradientes ni arquitectura interna.
+
+Se evalúa sobre tres modelos de distinta naturaleza computacional (LSTM, Transformer y Random Forest), entrenados sobre datos históricos del índice S\&P~500. Los resultados muestran que el framework identifica correctamente las entradas relevantes cuando el ground truth es conocido (AUP\,$=0{,}9960$), ejecuta cada explicación en 17{,}6\,ms, entre $22{\times}$ y $30{\times}$ más rápido que Shapley Value Sampling bajo las mismas condiciones experimentales, y produce atribuciones estadísticamente no triviales ($p<10^{-300}$) con diferenciación apropiada entre tipos de modelo (Spearman $\rho=0{,}748$ entre modelos neuronales frente a $\rho<0{,}40$ con el modelo de ensamble), confirmando que el framework captura el comportamiento específico de cada modelo y no artefactos del procedimiento de explicación. Se investiga además, de forma honesta, una consideración específica anclada en la estructura de árboles de Random Forest para reducir su mayor sensibilidad al vector de referencia, reportando el resultado obtenido incluso cuando no confirma la hipótesis inicial.
+
+\bigskip
+\noindent\textbf{Palabras clave:} series temporales financieras, explicabilidad post-hoc, agnóstico al modelo, perturbaciones temporales, importancia de variables, LSTM, Transformer, Random Forest.
+
+\end{abstract}

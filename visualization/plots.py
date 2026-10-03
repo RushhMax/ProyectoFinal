@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from config import FEATURES, RESULTS_DIR
 
-PALETTE = {"LSTM": "#4C72B0", "Transformer": "#DD8452", "RandomForest": "#55A868"}
+PALETTE = {"LSTM": "#6C5CE7", "Transformer": "#00B894", "RandomForest": "#E17055"}
 
 
 def plot_importance_heatmap(alpha: np.ndarray,
@@ -80,6 +80,46 @@ def plot_temporal_importance(alphas_dict: Dict[str, np.ndarray],
     if save_path:
         fig.savefig(save_path, dpi=150)
     plt.show()
+
+
+def plot_exp1_barplot(results: dict,
+                      scenario: str = "rare_feature",
+                      metrics: List[str] = None,
+                      save_path: Optional[Path] = None) -> None:
+    """
+    Barras agrupadas de AUP / AUR / IM(A) / SM(A) para el Experimento 1.
+    Compatible con el formato de las Tablas 1 y 2 de Dynamask.
+    """
+    if metrics is None:
+        metrics = ["AUP", "AUR", "IM_A", "SM_A"]
+
+    methods = list(results[scenario].keys())
+    n_metrics = len(metrics)
+    n_methods = len(methods)
+
+    fig, axes = plt.subplots(1, n_metrics, figsize=(4 * n_metrics, 4))
+    if n_metrics == 1:
+        axes = [axes]
+
+    palette = plt.cm.tab10.colors
+    for ax, metric in zip(axes, metrics):
+        means = [results[scenario][m][metric]["mean"] for m in methods]
+        stds  = [results[scenario][m][metric]["std"]  for m in methods]
+        bars = ax.bar(methods, means, yerr=stds, capsize=4,
+                      color=palette[:n_methods], alpha=0.85)
+        ax.set_title(metric.replace("_", "(") + (")" if "_" in metric else ""),
+                     fontsize=11)
+        ax.set_ylabel("Score", fontsize=9)
+        ax.set_ylim(bottom=0)
+        ax.tick_params(axis="x", rotation=20)
+
+    fig.suptitle(f"Experimento 1 — {scenario.replace('_', ' ').title()}\n"
+                 "(AUP/AUR: ↑ mejor; IM_A: ↑ mejor; SM_A: ↓ mejor)",
+                 fontsize=10)
+    plt.tight_layout()
+    if save_path:
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
 
 
 def plot_heatmaps_comparison(alphas_dict: Dict[str, np.ndarray],

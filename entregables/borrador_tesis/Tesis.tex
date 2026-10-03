@@ -1,0 +1,41 @@
+\documentclass[11pt,openright,final]{unsa}
+\title{Framework de explicabilidad agnóstica al modelo para la predicción de series temporales financieras}
+\author{Rushell Vanessa Zavalaga Orozco}%
+\advisor{Juan Carlos Gutiérrez Cáceres}{Asesor}%
+% PENDIENTE: nombres reales del jurado. Reemplazar los placeholders entre
+% corchetes antes de compilar la versión final.
+\examinerone{[Nombre del presidente del jurado]}{Presidente}%
+\examinertwo{[Nombre del secretario del jurado]}{Secretario}%
+\examinerthree{[Nombre del integrante del jurado]}{Integrante}%
+
+\date{\today}
+\dedicate{A mi familia, por su apoyo constante en cada etapa de este
+camino; y a mis profesores, por la formación recibida a lo largo de
+la carrera.}
+
+\begin{document}%%%%%%%%-------------------------------------------------------
+\makeFirstCover
+\makeSecondCover %
+\begin{frontmatter}
+\approved{\tres}% {\tres} si son 3 jurados, {\cuatro} si hay un jurado adicional
+\dedicatory
+\begin{singlespace}
+\tableofcontents \listoftables \pagebreak
+\end{singlespace}
+\myAcknowledgements{Agradecimientos}%
+\myResumen{Resumen}%
+\myAbstrac{Abstract}%
+\end{frontmatter}%
+\pagestyle{fancyplain}
+\include{Cap1}
+\include{Cap2}
+\include{Cap3}
+\include{Cap4}
+\include{Cap5}
+\include{Cap6}
+\myappendix{Apendice}
+\begin{singlespace}
+\bibliographystyle{apalike}%plain
+\mybibliography{biblio}
+\end{singlespace}
+\end{document}%%%%%%%%--------------------------------------------------------

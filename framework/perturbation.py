@@ -17,19 +17,23 @@ class TemporalPerturbationEngine:
         Función que acepta un array (N, T, V) y devuelve (N,).
         Debe funcionar con numpy arrays (el motor convierte modelos
         PyTorch externamente si es necesario).
-    reference : np.ndarray, shape (V,)
-        Valor de referencia para enmascarar cada celda.
-        Por defecto se usa la media de entrenamiento por variable.
+    reference : np.ndarray, shape (V,) o (T, V)
+        Valor de referencia para enmascarar cada celda. Si es 1D, se
+        usa el mismo valor r_v para cualquier paso de tiempo (caso
+        estándar, p.\ ej.\ la media de entrenamiento por variable). Si
+        es 2D, permite un valor de referencia distinto por celda
+        (t, v), como el vector condicionado a la hoja para Random
+        Forest.
     """
 
     def __init__(self,
                  predict_fn: Callable[[np.ndarray], np.ndarray],
                  reference: np.ndarray):
         reference = np.asarray(reference, dtype=np.float32)
-        assert reference.ndim == 1, f"reference debe ser 1D, recibido shape={reference.shape}"
+        assert reference.ndim in (1, 2), f"reference debe ser 1D (V,) o 2D (T,V), recibido shape={reference.shape}"
         assert np.all(np.isfinite(reference)), "reference contiene NaN o inf"
         self.predict_fn = predict_fn
-        self.reference = reference  # (V,)
+        self.reference = reference  # (V,) o (T, V)
 
     def explain(self, x: np.ndarray, normalize: bool = True) -> np.ndarray:
         """
@@ -50,8 +54,9 @@ class TemporalPerturbationEngine:
         # Construye batch: [original, pert(0,0), pert(0,1), ..., pert(T-1,V-1)]
         # Una sola llamada a predict_fn en vez de T*V+1 llamadas individuales.
         batch = np.tile(x, (T * V + 1, 1, 1))  # (T*V+1, T, V)
+        ref_is_2d = self.reference.ndim == 2
         for idx, (t, v) in enumerate(np.ndindex(T, V)):
-            batch[idx + 1, t, v] = self.reference[v]
+            batch[idx + 1, t, v] = self.reference[t, v] if ref_is_2d else self.reference[v]
 
         preds = self.predict_fn(batch)  # (T*V+1,)
         f_original = float(preds[0])
